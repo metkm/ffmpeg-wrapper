@@ -12,7 +12,24 @@
     "fs:default",
     {
       "identifier": "fs:scope",
-      "allow": [{ "path": "$HOME" }, { "path": "$HOME/**" }]
-    }
+      "allow": [
+        {
+          "path": "$HOME"
+        },
+        {
+          "path": "$HOME/**"
+        }
+      ]
+    },
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "binaries/ffmpeg",
+          "sidecar": true
+        }
+      ]
+    },
+    "shell:allow-open"
   ]
 }

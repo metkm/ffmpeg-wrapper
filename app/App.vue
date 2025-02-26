@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { open } from '@tauri-apps/plugin-dialog'
 import { convertFileSrc } from '@tauri-apps/api/core'
+import { Command } from '@tauri-apps/plugin-shell'
 import { ref, useTemplateRef } from 'vue'
 
 const videoUrl = ref('')
@@ -10,8 +11,9 @@ const videoCurrentTime = ref(0)
 const crf = ref(21)
 
 const playing = ref(false)
-
 const videoRef = useTemplateRef('videoRef')
+
+let videoPath: string | null = null
 
 const handleVideoLoad = () => {
   if (!videoRef.value) return
@@ -26,14 +28,14 @@ const handleVideoTimeUpdate = () => {
 }
 
 const selectFile = async () => {
-  const path = await open({
+  videoPath = await open({
     multiple: false,
     directory: false,
   })
 
-  if (!path) return
+  if (!videoPath) return
 
-  const fileSource = await convertFileSrc(path)
+  const fileSource = await convertFileSrc(videoPath)
   videoUrl.value = fileSource
   videoRef.value?.load()
 }
@@ -60,6 +62,19 @@ watch(videoRange, (value, prevValue) => {
     videoRef.value.currentTime = end
   }
 })
+
+const exportVideo = async () => {
+  if (!videoPath) return
+
+  const command = Command.sidecar('binaries/ffmpeg', [
+    '-i',
+    videoPath,
+  ])
+
+  const output = await command.execute()
+
+  console.log(output)
+}
 </script>
 
 <template>
@@ -86,20 +101,26 @@ watch(videoRange, (value, prevValue) => {
           @click="toggleVideo"
         />
 
-        <div class="grow relative">
-          <div
-            class="w-2 bg-(--ui-bg-inverted) rounded-full absolute inset-y-0 z-10"
-            :style="{
-              left: `${videoCurrentTime * 100 / videoDuration}%`,
-              transform: 'translateX(-50%)',
-            }"
-          />
+        <div class="flex items-center gap-4 grow">
+          <p>{{ formatSeconds(videoCurrentTime) }}</p>
 
-          <USlider
-            v-model="videoRange"
-            :min="0"
-            :max="videoDuration"
-          />
+          <div class="relative grow">
+            <div
+              class="w-2 bg-(--ui-bg-inverted) rounded-full absolute inset-y-0 z-10 pointer-events-none"
+              :style="{
+                left: `${videoCurrentTime * 100 / videoDuration}%`,
+                transform: 'translateX(-50%)',
+              }"
+            />
+
+            <USlider
+              v-model="videoRange"
+              :min="0"
+              :max="videoDuration"
+            />
+          </div>
+
+          <p>{{ formatSeconds(videoDuration) }}</p>
         </div>
       </div>
 
@@ -115,7 +136,10 @@ watch(videoRange, (value, prevValue) => {
           />
         </UFormField>
 
-        <UButton icon="i-heroicons-film">
+        <UButton
+          icon="i-heroicons-film"
+          @click="exportVideo"
+        >
           Export
         </UButton>
       </div>
