@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { open } from '@tauri-apps/plugin-dialog'
+import { open, save } from '@tauri-apps/plugin-dialog'
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { Command } from '@tauri-apps/plugin-shell'
 import { ref, useTemplateRef } from 'vue'
@@ -8,12 +8,18 @@ const videoUrl = ref('')
 const videoRange = ref<[number, number]>([0, 1])
 const videoDuration = ref(0)
 const videoCurrentTime = ref(0)
-const crf = ref(21)
+const videoCrf = ref(21)
+
+const loading = ref(false)
+const stdoutLine = ref('')
 
 const playing = ref(false)
 const videoRef = useTemplateRef('videoRef')
 
 let videoPath: string | null = null
+
+const videoStartFormatted = computed(() => formatSeconds(videoRange.value[0]))
+const videoEndFormatted = computed(() => formatSeconds(videoRange.value[1]))
 
 const handleVideoLoad = () => {
   if (!videoRef.value) return
@@ -65,15 +71,52 @@ watch(videoRange, (value, prevValue) => {
 
 const exportVideo = async () => {
   if (!videoPath) return
+  loading.value = true
 
-  const command = Command.sidecar('binaries/ffmpeg', [
+  const savePath = await save({
+    filters: [
+      {
+        name: 'output',
+        extensions: ['mp4'],
+      },
+    ],
+  })
+
+  if (!savePath) {
+    loading.value = false
+    return
+  }
+
+  const args = [
+    '-y',
     '-i',
     videoPath,
-  ])
+    '-crf',
+    videoCrf.value.toString(),
+    '-ss',
+    videoStartFormatted.value,
+    '-to',
+    videoEndFormatted.value,
+    savePath,
+  ]
 
-  const output = await command.execute()
+  const command = Command.sidecar('binaries/ffmpeg', args)
 
-  console.log(output)
+  command.stdout.on('data', (line) => {
+    stdoutLine.value = line
+  })
+
+  command.stderr.on('data', (line) => {
+    stdoutLine.value = line
+  })
+
+  command.once('close', () => {
+    command.removeAllListeners()
+    loading.value = false
+  })
+
+  loading.value = true
+  await command.spawn()
 }
 </script>
 
@@ -102,7 +145,7 @@ const exportVideo = async () => {
         />
 
         <div class="flex items-center gap-4 grow">
-          <p>{{ formatSeconds(videoCurrentTime) }}</p>
+          <p>{{ videoStartFormatted }}</p>
 
           <div class="relative grow">
             <div
@@ -120,29 +163,36 @@ const exportVideo = async () => {
             />
           </div>
 
-          <p>{{ formatSeconds(videoDuration) }}</p>
+          <p>{{ videoEndFormatted }} / {{ formatSeconds(videoDuration) }}</p>
         </div>
       </div>
 
       <div class="flex gap-4 justify-between items-center">
-        <UFormField
-          label="Crf"
-          help="How lossless video should be"
-        >
-          <UInputNumber
-            v-model="crf"
-            :min="0"
-            :max="51"
-          />
-        </UFormField>
+        <div class="flex items-center gap-4">
+          <UFormField
+            label="Crf"
+            help="How lossless video should be"
+          >
+            <UInputNumber
+              v-model="videoCrf"
+              :min="0"
+              :max="51"
+            />
+          </UFormField>
+        </div>
 
         <UButton
           icon="i-heroicons-film"
+          :loading="loading"
           @click="exportVideo"
         >
           Export
         </UButton>
       </div>
+
+      <p class="p-2 bg-(--ui-bg-elevated) rounded-lg truncate">
+        {{ stdoutLine }}
+      </p>
     </template>
   </main>
 </template>

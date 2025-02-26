@@ -22,11 +22,12 @@
       ]
     },
     {
-      "identifier": "shell:allow-execute",
+      "identifier": "shell:allow-spawn",
       "allow": [
         {
           "name": "binaries/ffmpeg",
-          "sidecar": true
+          "sidecar": true,
+          "args": true
         }
       ]
     },
