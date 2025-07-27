@@ -19,8 +19,6 @@ const stdoutLine = ref('')
 const playing = ref(false)
 const videoRef = useTemplateRef('videoRef')
 
-// const videoPath: string | null = null
-
 const videoStartFormatted = computed(() => formatSeconds(video.range[0]!))
 const videoEndFormatted = computed(() => formatSeconds(video.range[1]!))
 
@@ -127,17 +125,6 @@ watch(() => video.path, async () => {
   video.url = convertFileSrc(video.path)
   videoRef.value?.load()
 })
-
-// watch(videoFile, async () => {
-//   if (!videoFile.value) return
-//   const buffer = await videoFile.value.arrayBuffer()
-//   const blob = new Blob([buffer])
-
-//   const objectUrl = URL.createObjectURL(blob)
-//   videoUrl.value = objectUrl
-
-//   console.log(videoFile.value)
-// })
 </script>
 
 <template>
