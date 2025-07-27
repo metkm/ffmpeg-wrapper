@@ -11,15 +11,15 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@nuxt/eslint": "^1.1.0",
-    "@nuxt/ui": "^3.0.0-alpha.13",
+    "@nuxt/eslint": "^1.7.1",
+    "@nuxt/ui": "^3.3.0",
     "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-dialog": "^2.2.0",
-    "@tauri-apps/plugin-fs": "^2.2.0",
+    "@tauri-apps/plugin-dialog": "^2.3.1",
+    "@tauri-apps/plugin-fs": "^2.4.1",
     "@tauri-apps/plugin-opener": "^2",
-    "@tauri-apps/plugin-shell": "^2.2.0",
-    "eslint": "^9.21.0",
-    "nuxt": "^3.15.4",
+    "@tauri-apps/plugin-shell": "^2.3.0",
+    "eslint": "^9.32.0",
+    "nuxt": "^4.0.1",
     "vue": "latest",
     "vue-router": "latest"
   },

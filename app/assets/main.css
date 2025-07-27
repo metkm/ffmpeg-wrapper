@@ -2,5 +2,7 @@
 @import "@nuxt/ui";
 
 @layer base {
-  
+  html, body {
+    background: transparent;
+  }
 }

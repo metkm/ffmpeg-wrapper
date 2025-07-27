@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { open, save } from '@tauri-apps/plugin-dialog'
+import { save } from '@tauri-apps/plugin-dialog'
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { Command } from '@tauri-apps/plugin-shell'
 import { ref, useTemplateRef } from 'vue'
 
-const videoUrl = ref('')
-const videoRange = ref<[number, number]>([0, 1])
-const videoDuration = ref(0)
-const videoCurrentTime = ref(0)
-const videoCrf = ref(21)
+const video = reactive({
+  range: [0, 1],
+  duration: 0,
+  seek: 0,
+  crf: 21,
+  url: '',
+  path: '',
+})
 
 const loading = ref(false)
 const stdoutLine = ref('')
@@ -16,35 +19,36 @@ const stdoutLine = ref('')
 const playing = ref(false)
 const videoRef = useTemplateRef('videoRef')
 
-let videoPath: string | null = null
+// const videoPath: string | null = null
 
-const videoStartFormatted = computed(() => formatSeconds(videoRange.value[0]))
-const videoEndFormatted = computed(() => formatSeconds(videoRange.value[1]))
+const videoStartFormatted = computed(() => formatSeconds(video.range[0]!))
+const videoEndFormatted = computed(() => formatSeconds(video.range[1]!))
 
 const handleVideoLoad = () => {
   if (!videoRef.value) return
 
-  videoRange.value = [0, videoRef.value.duration]
-  videoDuration.value = videoRef.value.duration
+  video.range = [0, videoRef.value.duration]
+  video.duration = videoRef.value.duration
 }
 
 const handleVideoTimeUpdate = () => {
   if (!videoRef.value) return
-  videoCurrentTime.value = videoRef.value.currentTime
+  video.seek = videoRef.value.currentTime
 }
 
-const selectFile = async () => {
-  videoPath = await open({
-    multiple: false,
-    directory: false,
-  })
+// const selectFile = async () => {
+//   videoPath = await open({
+//     multiple: false,
+//     directory: false,
+//   })
 
-  if (!videoPath) return
+//   console.log(videoPath)
+//   if (!videoPath) return
 
-  const fileSource = await convertFileSrc(videoPath)
-  videoUrl.value = fileSource
-  videoRef.value?.load()
-}
+//   const fileSource = await convertFileSrc(videoPath)
+//   videoUrl.value = fileSource
+//   videoRef.value?.load()
+// }
 
 const toggleVideo = () => {
   if (playing.value) {
@@ -56,21 +60,21 @@ const toggleVideo = () => {
   playing.value = !playing.value
 }
 
-watch(videoRange, (value, prevValue) => {
+watch(video.range, (value, prevValue) => {
   if (!videoRef.value) return
 
   const [start, end] = value
   const [oldStart, oldEnd] = prevValue
 
-  if (start !== oldStart) {
+  if (start !== oldStart && start) {
     videoRef.value.currentTime = start
-  } else if (end !== oldEnd) {
+  } else if (end !== oldEnd && end) {
     videoRef.value.currentTime = end
   }
 })
 
 const exportVideo = async () => {
-  if (!videoPath) return
+  if (!video.path) return
   loading.value = true
 
   const savePath = await save({
@@ -90,9 +94,9 @@ const exportVideo = async () => {
   const args = [
     '-y',
     '-i',
-    videoPath,
+    video.path,
     '-crf',
-    videoCrf.value.toString(),
+    video.crf.toString(),
     '-ss',
     videoStartFormatted.value,
     '-to',
@@ -118,26 +122,45 @@ const exportVideo = async () => {
   loading.value = true
   await command.spawn()
 }
+
+watch(() => video.path, async () => {
+  video.url = convertFileSrc(video.path)
+  videoRef.value?.load()
+})
+
+// watch(videoFile, async () => {
+//   if (!videoFile.value) return
+//   const buffer = await videoFile.value.arrayBuffer()
+//   const blob = new Blob([buffer])
+
+//   const objectUrl = URL.createObjectURL(blob)
+//   videoUrl.value = objectUrl
+
+//   console.log(videoFile.value)
+// })
 </script>
 
 <template>
   <main class="p-4 overflow-hidden h-screen flex flex-col gap-8">
-    <UButton @click="selectFile">
-      Select video file
-    </UButton>
+    <FileDrop
+      v-if="!video.path"
+      v-model="video.path"
+    />
 
-    <div class="flex overflow-hidden">
+    <div
+      v-if="video.url"
+      class="flex overflow-hidden"
+    >
       <video
-        v-if="videoUrl"
         ref="videoRef"
-        :src="videoUrl"
+        :src="video.url"
         class="h-full grow flex-1 max-h-full w-full"
         @loadeddata="handleVideoLoad"
         @timeupdate="handleVideoTimeUpdate"
       />
     </div>
 
-    <template v-if="videoUrl">
+    <template v-if="video.url">
       <div class="flex gap-4 items-center">
         <UButton
           :icon="playing ? 'i-heroicons-pause' : 'i-heroicons-play'"
@@ -151,19 +174,19 @@ const exportVideo = async () => {
             <div
               class="w-2 bg-(--ui-bg-inverted) rounded-full absolute inset-y-0 z-10 pointer-events-none"
               :style="{
-                left: `${videoCurrentTime * 100 / videoDuration}%`,
+                left: `${video.seek * 100 / video.duration}%`,
                 transform: 'translateX(-50%)',
               }"
             />
 
             <USlider
-              v-model="videoRange"
+              v-model="video.range"
               :min="0"
-              :max="videoDuration"
+              :max="video.duration"
             />
           </div>
 
-          <p>{{ videoEndFormatted }} / {{ formatSeconds(videoDuration) }}</p>
+          <p>{{ videoEndFormatted }} / {{ formatSeconds(video.duration) }}</p>
         </div>
       </div>
 
@@ -174,7 +197,7 @@ const exportVideo = async () => {
             help="How lossless video should be"
           >
             <UInputNumber
-              v-model="videoCrf"
+              v-model="video.crf"
               :min="0"
               :max="51"
             />
