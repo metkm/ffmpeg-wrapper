@@ -34,20 +34,6 @@ const handleVideoTimeUpdate = () => {
   video.seek = videoRef.value.currentTime
 }
 
-// const selectFile = async () => {
-//   videoPath = await open({
-//     multiple: false,
-//     directory: false,
-//   })
-
-//   console.log(videoPath)
-//   if (!videoPath) return
-
-//   const fileSource = await convertFileSrc(videoPath)
-//   videoUrl.value = fileSource
-//   videoRef.value?.load()
-// }
-
 const toggleVideo = () => {
   if (playing.value) {
     videoRef.value?.pause()
@@ -128,13 +114,19 @@ watch(() => video.path, async () => {
 </script>
 
 <template>
-  <main class="p-4 overflow-hidden h-screen flex flex-col gap-8">
-    <FileDrop
-      v-if="!video.path"
-      v-model="video.path"
-    />
+  <UApp>
+    <main class="p-4 min-h-screen flex flex-col gap-8">
+      <FileDrop
+        v-if="!video.path"
+        v-model="video.path"
+      />
 
-    <div
+      <VideoPreview
+        v-else
+        :url="video.url"
+      />
+
+    <!-- <div
       v-if="video.url"
       class="flex overflow-hidden"
     >
@@ -145,9 +137,9 @@ watch(() => video.path, async () => {
         @loadeddata="handleVideoLoad"
         @timeupdate="handleVideoTimeUpdate"
       />
-    </div>
+    </div> -->
 
-    <template v-if="video.url">
+    <!-- <template v-if="video.url">
       <div class="flex gap-4 items-center">
         <UButton
           :icon="playing ? 'i-heroicons-pause' : 'i-heroicons-play'"
@@ -203,6 +195,7 @@ watch(() => video.path, async () => {
       <p class="p-2 bg-(--ui-bg-elevated) rounded-lg truncate">
         {{ stdoutLine }}
       </p>
-    </template>
-  </main>
+    </template> -->
+    </main>
+  </UApp>
 </template>
