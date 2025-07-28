@@ -1,66 +1,47 @@
 <script setup lang="ts">
 import { save } from '@tauri-apps/plugin-dialog'
 import { convertFileSrc } from '@tauri-apps/api/core'
+import type { Child } from '@tauri-apps/plugin-shell'
 import { Command } from '@tauri-apps/plugin-shell'
-import { ref, useTemplateRef } from 'vue'
+import { ref } from 'vue'
+import type { VideoValues } from './types/video'
+import { defaultVideoValues } from './constants'
 
-const video = reactive({
-  range: [0, 1],
-  duration: 0,
-  seek: 0,
-  crf: 21,
-  url: '',
-  path: '',
-})
+const videoPath = ref<string>('')
+const videoRange = ref<[number, number]>([0, 1])
+const stdoutLines = ref<string[]>([])
+const exporting = ref(false)
 
-const loading = ref(false)
-const stdoutLine = ref('')
+const video = ref<VideoValues>(defaultVideoValues)
 
-const playing = ref(false)
-const videoRef = useTemplateRef('videoRef')
+const prestdoutElement = useTemplateRef('stdoutElement')
 
-const videoStartFormatted = computed(() => formatSeconds(video.range[0]!))
-const videoEndFormatted = computed(() => formatSeconds(video.range[1]!))
+let command: Command<string> | undefined
+let commandChild: Child | undefined
 
-const handleVideoLoad = () => {
-  if (!videoRef.value) return
+const onCommandStdoutData = (arg: string) => {
+  const line = arg.trim()
+  stdoutLines.value.push(line)
 
-  video.range = [0, videoRef.value.duration]
-  video.duration = videoRef.value.duration
+  prestdoutElement.value?.scrollTo({ top: prestdoutElement.value.scrollHeight, behavior: 'smooth' })
 }
 
-const handleVideoTimeUpdate = () => {
-  if (!videoRef.value) return
-  video.seek = videoRef.value.currentTime
+const onCommandClose = () => {
+  videoPath.value = ''
+  videoRange.value = [0, 1]
+  stdoutLines.value = []
+  exporting.value = false
+
+  video.value = defaultVideoValues
+
+  command?.removeAllListeners()
+  commandChild?.kill()
+
+  command = undefined
+  commandChild = undefined
 }
-
-const toggleVideo = () => {
-  if (playing.value) {
-    videoRef.value?.pause()
-  } else {
-    videoRef.value?.play()
-  }
-
-  playing.value = !playing.value
-}
-
-watch(video.range, (value, prevValue) => {
-  if (!videoRef.value) return
-
-  const [start, end] = value
-  const [oldStart, oldEnd] = prevValue
-
-  if (start !== oldStart && start) {
-    videoRef.value.currentTime = start
-  } else if (end !== oldEnd && end) {
-    videoRef.value.currentTime = end
-  }
-})
 
 const exportVideo = async () => {
-  if (!video.path) return
-  loading.value = true
-
   const savePath = await save({
     filters: [
       {
@@ -70,132 +51,68 @@ const exportVideo = async () => {
     ],
   })
 
-  if (!savePath) {
-    loading.value = false
-    return
-  }
+  if (!savePath) return
 
-  const args = [
+  exporting.value = true
+  command = Command.sidecar('binaries/ffmpeg', [
     '-y',
     '-i',
-    video.path,
+    videoPath.value,
     '-crf',
-    video.crf.toString(),
+    video.value.crf.toString(),
     '-ss',
-    videoStartFormatted.value,
+    formatSeconds(video.value.range[0] || 0),
     '-to',
-    videoEndFormatted.value,
+    formatSeconds(video.value.range[1] || 1),
     savePath,
-  ]
+  ])
 
-  const command = Command.sidecar('binaries/ffmpeg', args)
+  command.stdout.on('data', onCommandStdoutData)
+  command.stderr.on('data', onCommandStdoutData)
 
-  command.stdout.on('data', (line) => {
-    stdoutLine.value = line
-  })
+  command.once('close', onCommandClose)
 
-  command.stderr.on('data', (line) => {
-    stdoutLine.value = line
-  })
-
-  command.once('close', () => {
-    command.removeAllListeners()
-    loading.value = false
-  })
-
-  loading.value = true
-  await command.spawn()
+  commandChild = await command.spawn()
 }
 
-watch(() => video.path, async () => {
-  video.url = convertFileSrc(video.path)
-  videoRef.value?.load()
-})
+const videoUrl = computed(() => videoPath.value ? convertFileSrc(videoPath.value) : undefined)
+
+onUnmounted(() => onCommandClose())
 </script>
 
 <template>
   <UApp>
-    <main class="p-4 min-h-screen flex flex-col gap-8">
+    <main class="p-4 min-h-screen space-y-8">
       <FileDrop
-        v-if="!video.path"
-        v-model="video.path"
+        v-if="!videoPath"
+        v-model="videoPath"
       />
 
-      <VideoPreview
+      <div
         v-else
-        :url="video.url"
-      />
-
-    <!-- <div
-      v-if="video.url"
-      class="flex overflow-hidden"
-    >
-      <video
-        ref="videoRef"
-        :src="video.url"
-        class="h-full grow flex-1 max-h-full w-full"
-        @loadeddata="handleVideoLoad"
-        @timeupdate="handleVideoTimeUpdate"
-      />
-    </div> -->
-
-    <!-- <template v-if="video.url">
-      <div class="flex gap-4 items-center">
-        <UButton
-          :icon="playing ? 'i-heroicons-pause' : 'i-heroicons-play'"
-          @click="toggleVideo"
+        class="flex flex-col gap-8 max-w-4xl mx-auto"
+      >
+        <VideoPreview
+          v-if="videoUrl"
+          v-model="video"
+          v-model:range="videoRange"
+          :url="videoUrl"
         />
 
-        <div class="flex items-center gap-4 grow">
-          <p>{{ videoStartFormatted }}</p>
+        <VideoOptions
+          :loading="exporting"
+          @cancel="videoPath = ''"
+          @export="exportVideo"
+        />
 
-          <div class="relative grow">
-            <div
-              class="w-2 bg-(--ui-bg-inverted) rounded-full absolute inset-y-0 z-10 pointer-events-none"
-              :style="{
-                left: `${video.seek * 100 / video.duration}%`,
-                transform: 'translateX(-50%)',
-              }"
-            />
-
-            <USlider
-              v-model="video.range"
-              :min="0"
-              :max="video.duration"
-            />
-          </div>
-
-          <p>{{ videoEndFormatted }} / {{ formatSeconds(video.duration) }}</p>
-        </div>
-      </div>
-
-      <div class="flex gap-4 justify-between items-center">
-        <div class="flex items-center gap-4">
-          <UFormField
-            label="Crf"
-            help="How lossless video should be"
-          >
-            <UInputNumber
-              v-model="video.crf"
-              :min="0"
-              :max="51"
-            />
-          </UFormField>
-        </div>
-
-        <UButton
-          icon="i-heroicons-film"
-          :loading="loading"
-          @click="exportVideo"
+        <pre
+          ref="stdoutElement"
+          class="text-xs overflow-auto max-h-96 max-w-full border border-dashed border-muted p-4 rounded-(--ui-radius)"
+          style="overflow-wrap: break-word;"
         >
-          Export
-        </UButton>
+          {{ stdoutLines.join('\n') }}
+        </pre>
       </div>
-
-      <p class="p-2 bg-(--ui-bg-elevated) rounded-lg truncate">
-        {{ stdoutLine }}
-      </p>
-    </template> -->
     </main>
   </UApp>
 </template>

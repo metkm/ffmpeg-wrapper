@@ -4,6 +4,7 @@ import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { open } from '@tauri-apps/plugin-dialog'
 
 const path = defineModel<string>()
+
 const hovering = ref(false)
 
 const openFile = async () => {
@@ -13,7 +14,7 @@ const openFile = async () => {
   }) ?? undefined
 }
 
-let unlistenFn: UnlistenFn
+let unlistenFn: UnlistenFn | undefined
 
 onMounted(async () => {
   unlistenFn = await getCurrentWebview()
@@ -28,27 +29,24 @@ onMounted(async () => {
     })
 })
 
-onUnmounted(() => unlistenFn())
+onUnmounted(() => unlistenFn?.())
 </script>
 
 <template>
   <div
-    class="flex-1 flex flex-col items-center justify-center gap-2 rounded-(--ui-radius) transition-colors"
+    class="flex flex-col flex-1 gap-2 rounded-(--ui-radius) transition-colors overflow-hidden"
     :class="{ 'bg-elevated/50': hovering }"
   >
-    <span class="bg-elevated size-10 shrink-0 flex items-center justify-center rounded-full">
-      <UIcon
-        name="i-lucide-upload"
-        class="text-muted"
-      />
-    </span>
-
-    <UButton
-      variant="soft"
-      color="neutral"
+    <button
+      class="flex-1 flex items-center justify-center h-full w-full hover:bg-elevated/50"
       @click="openFile"
     >
-      Select File
-    </UButton>
+      <span class="bg-elevated size-10 shrink-0 flex items-center justify-center rounded-full">
+        <UIcon
+          name="i-lucide-upload"
+          class="text-muted"
+        />
+      </span>
+    </button>
   </div>
 </template>
