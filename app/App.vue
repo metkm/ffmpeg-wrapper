@@ -119,7 +119,7 @@ onMounted(() => {
         <WindowOverlay />
       </Suspense>
 
-      <main class="flex flex-col grow p-4 pt-2 overflow-auto space-y-4">
+      <main class="flex flex-col grow p-4 pt-2 overflow-auto space-y-4 scrollbar">
         <Transition
           enter-active-class="transition-all"
           leave-active-class="transition-all"
@@ -163,7 +163,7 @@ onMounted(() => {
 
               <pre
                 ref="stdoutElement"
-                class="text-xs max-h-96 w-full overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius)"
+                class="text-xs max-h-96 w-full overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
                 style="overflow-wrap: break-word;"
               >
               {{ stdoutLines.join('\n') }}
@@ -175,3 +175,21 @@ onMounted(() => {
     </div>
   </UApp>
 </template>
+
+<style>
+.scrollbar::-webkit-scrollbar {
+  display: block;
+  width: calc(var(--spacing) * 3.5);
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--ui-bg-accented);
+  border-radius: var(--radius-4xl);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+}
+
+.scrollbar::-webkit-scrollbar-corner {
+  display: none;
+}
+</style>
