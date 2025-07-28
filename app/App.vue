@@ -82,10 +82,11 @@ onUnmounted(() => onCommandClose())
 
 <template>
   <UApp>
-    <main class="p-4 min-h-screen space-y-8">
+    <main class="flex p-4 min-h-screen space-y-8">
       <FileDrop
         v-if="!videoPath"
         v-model="videoPath"
+        class="grow"
       />
 
       <div
