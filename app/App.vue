@@ -9,9 +9,10 @@ import { defaultVideoValues } from './constants'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 
 const videoPath = ref<string>('')
-const videoRange = ref<[number, number]>([0, 1])
 const stdoutLines = ref<string[]>([])
+
 const exporting = ref(false)
+const exportEta = ref(0)
 
 const video = ref<VideoValues>(defaultVideoValues)
 
@@ -24,13 +25,38 @@ const onCommandStdoutData = (arg: string) => {
   const line = arg.trim()
   stdoutLines.value.push(line)
 
+  if (line.includes('speed')) {
+    const speed = line.split('speed=').at(1)?.slice(0, -1)
+    if (!speed) return
+
+    const speedParsed = parseFloat(speed)
+
+    let durationLeft = (video.value.range[1] || 0) - (video.value.range[0] || 1)
+
+    if (line.includes('time')) {
+      const time = line.split('time=').at(1)?.slice(0, 8).split(':')
+      if (!time) return
+
+      const [hours, minutes, seconds] = time
+      const hoursParsed = hours ? parseInt(hours) : 0
+      const minutesParsed = minutes ? parseInt(minutes) : 0
+      const secondsParsed = seconds ? parseInt(seconds) : 0
+
+      const elapsed = hoursParsed * 3600 + minutesParsed * 60 + secondsParsed
+      durationLeft -= elapsed
+    }
+
+    exportEta.value = durationLeft / speedParsed
+  }
+
   prestdoutElement.value?.scrollTo({ top: prestdoutElement.value.scrollHeight, behavior: 'smooth' })
 }
 
 const onCommandClose = () => {
   videoPath.value = ''
-  videoRange.value = [0, 1]
   stdoutLines.value = []
+
+  exportEta.value = 0
   exporting.value = false
 
   video.value = defaultVideoValues
@@ -88,7 +114,7 @@ onMounted(() => {
 
 <template>
   <UApp>
-    <main class="flex p-4 min-h-screen space-y-8">
+    <main class="flex p-4 min-h-screen overflow-x-hidden space-y-8">
       <FileDrop
         v-if="!videoPath"
         v-model="videoPath"
@@ -97,12 +123,11 @@ onMounted(() => {
 
       <div
         v-else
-        class="flex flex-col gap-8 max-w-4xl mx-auto"
+        class="flex flex-col gap-8 max-w-4xl h-full w-full mx-auto"
       >
         <VideoPreview
           v-if="videoUrl"
           v-model="video"
-          v-model:range="videoRange"
           :url="videoUrl"
         />
 
@@ -112,13 +137,22 @@ onMounted(() => {
           @export="exportVideo"
         />
 
-        <pre
-          ref="stdoutElement"
-          class="text-xs overflow-auto max-h-96 max-w-full border border-dashed border-muted p-4 rounded-(--ui-radius)"
-          style="overflow-wrap: break-word;"
-        >
+        <div class="w-full">
+          <p
+            v-if="exportEta > 0"
+            class="font-medium text-sm text-muted p-2 pt-0 px-1"
+          >
+            {{ exportEta.toFixed(0) }} seconds left
+          </p>
+
+          <pre
+            ref="stdoutElement"
+            class="text-xs max-h-96 w-full overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius)"
+            style="overflow-wrap: break-word;"
+          >
           {{ stdoutLines.join('\n') }}
         </pre>
+        </div>
       </div>
     </main>
   </UApp>
