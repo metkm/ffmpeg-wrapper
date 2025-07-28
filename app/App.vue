@@ -120,49 +120,57 @@ onMounted(() => {
       </Suspense>
 
       <main class="flex flex-col grow p-4 pt-2 overflow-auto space-y-4">
-        <FileDrop
-          v-if="!videoPath"
-          v-model="videoPath"
-          class="grow"
-        />
-
-        <div
-          v-else
-          class="max-w-4xl mx-auto space-y-4"
+        <Transition
+          enter-active-class="transition-all"
+          leave-active-class="transition-all"
+          leave-to-class="opacity-0"
+          enter-from-class="opacity-0"
+          mode="out-in"
         >
-          <VideoPreview
-            v-if="videoUrl"
-            v-model="video"
-            :url="videoUrl"
-            @close="onCommandClose"
-          />
-
-          <VideoOptions
-            v-model="video"
-            :loading="exporting"
-            @export="exportVideo"
+          <FileDrop
+            v-if="!videoPath"
+            v-model="videoPath"
+            class="grow"
           />
 
           <div
-            v-if="stdoutLines.length > 0"
-            class="w-full"
+            v-else
+            class="w-full max-w-4xl mx-auto space-y-4"
           >
-            <p
-              v-if="exportEta > 0"
-              class="font-medium text-sm text-muted p-2 pt-0 px-1"
-            >
-              {{ exportEta.toFixed(0) }} seconds left
-            </p>
+            <VideoPreview
+              v-if="videoUrl"
+              v-model="video"
+              :url="videoUrl"
+              @close="onCommandClose"
+            />
 
-            <pre
-              ref="stdoutElement"
-              class="text-xs max-h-96 w-full overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius)"
-              style="overflow-wrap: break-word;"
+            <VideoOptions
+              v-model="video"
+              :loading="exporting"
+              @export="exportVideo"
+            />
+
+            <div
+              v-if="stdoutLines.length > 0"
+              class="w-full"
             >
+              <p
+                v-if="exportEta > 0"
+                class="font-medium text-sm text-muted p-2 pt-0 px-1"
+              >
+                {{ exportEta.toFixed(0) }} seconds left
+              </p>
+
+              <pre
+                ref="stdoutElement"
+                class="text-xs max-h-96 w-full overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius)"
+                style="overflow-wrap: break-word;"
+              >
               {{ stdoutLines.join('\n') }}
             </pre>
+            </div>
           </div>
-        </div>
+        </Transition>
       </main>
     </div>
   </UApp>

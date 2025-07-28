@@ -70,7 +70,7 @@ watch(
       <video
         ref="videoElement"
         :src="url"
-        class="aspect-video rounded-(--ui-radius)"
+        class="aspect-video rounded-(--ui-radius) w-full"
         @loadeddata="handleLoad"
         @timeupdate="handleTimeUpdate"
       />
