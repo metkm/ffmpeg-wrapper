@@ -115,19 +115,18 @@ onMounted(() => {
 <template>
   <UApp>
     <div class="flex flex-col h-screen">
-      <WindowOverlay />
+      <Suspense>
+        <WindowOverlay />
+      </Suspense>
 
-      <main class="flex grow p-4 overflow-hidden mt-[30px] space-y-8">
+      <main class="flex flex-col grow p-4 pt-2 overflow-auto space-y-8">
         <FileDrop
           v-if="!videoPath"
           v-model="videoPath"
           class="grow"
         />
 
-        <div
-          v-else
-          class="flex flex-col gap-8 max-w-4xl h-full w-full mx-auto"
-        >
+        <template v-else>
           <VideoPreview
             v-if="videoUrl"
             v-model="video"
@@ -156,7 +155,7 @@ onMounted(() => {
           {{ stdoutLines.join('\n') }}
         </pre>
           </div>
-        </div>
+        </template>
       </main>
     </div>
   </UApp>
