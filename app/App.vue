@@ -108,7 +108,7 @@ onMounted(() => {
 
         <VideoOptions
           :loading="exporting"
-          @cancel="videoPath = ''"
+          @cancel="onCommandClose"
           @export="exportVideo"
         />
 
