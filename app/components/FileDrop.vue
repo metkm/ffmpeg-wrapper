@@ -33,18 +33,15 @@ onUnmounted(() => unlistenFn?.())
 </script>
 
 <template>
-  <div
-    class="flex flex-col flex-1 gap-2 rounded-(--ui-radius) transition-colors overflow-hidden"
-    :class="{ 'bg-elevated/50': hovering }"
-  >
+  <div class="flex flex-col flex-1 gap-2 rounded-(--ui-radius) overflow-hidden">
     <button
-      class="flex-1 flex items-center justify-center h-full w-full hover:bg-elevated/50"
+      class="flex-1 flex items-center justify-center h-full w-full hover:bg-muted/50 transition-colors"
       @click="openFile"
     >
-      <span class="bg-elevated size-10 shrink-0 flex items-center justify-center rounded-full">
+      <span class="bg-muted p-4 shrink-0 flex items-center justify-center rounded-full border border-dashed border-muted">
         <UIcon
           name="i-lucide-upload"
-          class="text-muted"
+          class="text-muted size-8"
         />
       </span>
     </button>
