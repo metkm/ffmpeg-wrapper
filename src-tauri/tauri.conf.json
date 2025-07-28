@@ -19,7 +19,11 @@
         "windowEffects": {
           "effects": ["mica"]
         },
-        "visible": false
+        "visible": false,
+        "minHeight": 200,
+        "minWidth": 300,
+        "decorations": false,
+        "titleBarStyle": "Transparent"
       }
     ],
     "security": {

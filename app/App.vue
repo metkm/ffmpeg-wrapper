@@ -114,46 +114,50 @@ onMounted(() => {
 
 <template>
   <UApp>
-    <main class="flex p-4 min-h-screen overflow-x-hidden space-y-8">
-      <FileDrop
-        v-if="!videoPath"
-        v-model="videoPath"
-        class="grow"
-      />
+    <div class="flex flex-col h-screen">
+      <WindowOverlay />
 
-      <div
-        v-else
-        class="flex flex-col gap-8 max-w-4xl h-full w-full mx-auto"
-      >
-        <VideoPreview
-          v-if="videoUrl"
-          v-model="video"
-          :url="videoUrl"
+      <main class="flex grow p-4 overflow-hidden mt-[30px] space-y-8">
+        <FileDrop
+          v-if="!videoPath"
+          v-model="videoPath"
+          class="grow"
         />
 
-        <VideoOptions
-          :loading="exporting"
-          @cancel="onCommandClose"
-          @export="exportVideo"
-        />
+        <div
+          v-else
+          class="flex flex-col gap-8 max-w-4xl h-full w-full mx-auto"
+        >
+          <VideoPreview
+            v-if="videoUrl"
+            v-model="video"
+            :url="videoUrl"
+          />
 
-        <div class="w-full">
-          <p
-            v-if="exportEta > 0"
-            class="font-medium text-sm text-muted p-2 pt-0 px-1"
-          >
-            {{ exportEta.toFixed(0) }} seconds left
-          </p>
+          <VideoOptions
+            :loading="exporting"
+            @cancel="onCommandClose"
+            @export="exportVideo"
+          />
 
-          <pre
-            ref="stdoutElement"
-            class="text-xs max-h-96 w-full overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius)"
-            style="overflow-wrap: break-word;"
-          >
+          <div class="w-full">
+            <p
+              v-if="exportEta > 0"
+              class="font-medium text-sm text-muted p-2 pt-0 px-1"
+            >
+              {{ exportEta.toFixed(0) }} seconds left
+            </p>
+
+            <pre
+              ref="stdoutElement"
+              class="text-xs max-h-96 w-full overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius)"
+              style="overflow-wrap: break-word;"
+            >
           {{ stdoutLines.join('\n') }}
         </pre>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   </UApp>
 </template>

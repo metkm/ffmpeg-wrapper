@@ -33,6 +33,7 @@
     },
     "shell:allow-open",
     "shell:allow-kill",
-    "core:window:allow-show"
+    "core:window:allow-show",
+    "core:window:allow-start-dragging"
   ]
 }
