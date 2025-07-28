@@ -93,6 +93,8 @@ const exportVideo = async () => {
     formatSeconds(video.value.range[0] || 0),
     '-to',
     formatSeconds(video.value.range[1] || 1),
+    '-vcodec',
+    'av1_nvenc',
     savePath,
   ])
 
