@@ -85,6 +85,8 @@ const exportVideo = async () => {
     '-y',
     '-i',
     videoPath.value,
+    '-vcodec',
+    'av1_nvenc',
     '-crf',
     video.value.crf.toString(),
     '-ss',
