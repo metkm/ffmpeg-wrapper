@@ -6,6 +6,7 @@ import { Command } from '@tauri-apps/plugin-shell'
 import { ref } from 'vue'
 import type { VideoValues } from './types/video'
 import { defaultVideoValues } from './constants'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 
 const videoPath = ref<string>('')
 const videoRange = ref<[number, number]>([0, 1])
@@ -78,6 +79,11 @@ const exportVideo = async () => {
 const videoUrl = computed(() => videoPath.value ? convertFileSrc(videoPath.value) : undefined)
 
 onUnmounted(() => onCommandClose())
+
+onMounted(() => {
+  getCurrentWindow()
+    .show()
+})
 </script>
 
 <template>
