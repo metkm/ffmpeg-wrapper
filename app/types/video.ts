@@ -1,4 +1,4 @@
-export interface VideoValues {
+export interface Video {
   cqv: number
   duration: number
   currentTime: number

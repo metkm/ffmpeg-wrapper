@@ -8,7 +8,7 @@ import { save } from '@tauri-apps/plugin-dialog'
 import { Command } from '@tauri-apps/plugin-shell'
 
 import type { Child } from '@tauri-apps/plugin-shell'
-import type { VideoValues } from './types/video'
+import type { Video } from './types/video'
 import type { Encoder } from './types/parameters'
 
 const videoPath = ref<string>('')
@@ -17,7 +17,7 @@ const stdoutLines = ref<string[]>([])
 const exporting = ref(false)
 const exportEta = ref(0)
 
-const video = ref<VideoValues>(defaultVideoValues)
+const video = ref<Video>(defaultVideoValues)
 const args = ref<string[]>([])
 const encoder = ref<Encoder>('av1_nvenc')
 
@@ -166,9 +166,9 @@ onMounted(() => {
 
               <VideoOptions
                 v-model="args"
-                :loading="exporting"
                 :encoder="encoder"
-                :duration="video.range[1] - video.range[0]"
+                :video="video"
+                :video-path="videoPath"
                 @export="exportVideo"
               />
             </div>
