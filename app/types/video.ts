@@ -1,5 +1,5 @@
 export interface VideoValues {
-  crf: number
+  cqv: number
   duration: number
   currentTime: number
   range: [number, number]

@@ -38,7 +38,7 @@ onUnmounted(() => unlistenFn?.())
       class="flex-1 flex items-center justify-center h-full w-full hover:bg-muted/50 transition-colors"
       @click="openFile"
     >
-      <span class="bg-muted p-4 shrink-0 flex items-center justify-center rounded-full border border-dashed border-muted">
+      <span class="p-4 shrink-0 flex items-center justify-center rounded-full border border-dashed border-muted">
         <UIcon
           name="i-lucide-upload"
           class="text-muted size-8"

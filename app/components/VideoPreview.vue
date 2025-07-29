@@ -6,6 +6,10 @@ defineProps<{
   url: string
 }>()
 
+const emit = defineEmits<{
+  close: []
+}>()
+
 const videoModel = defineModel<VideoValues>({
   default: defaultVideoValues,
 })
@@ -48,15 +52,25 @@ watch(
 
 <template>
   <section class="space-y-4 rounded-(--ui-radius)">
-    <p class="font-medium">
-      {{ decodeURI(url).split('\\').at(-1) }}
-    </p>
+    <div class="flex items-center gap-4">
+      <UButton
+        icon="i-lucide-x"
+        square
+        variant="ghost"
+        color="neutral"
+        @click="emit('close')"
+      />
+
+      <p class="font-medium">
+        {{ decodeURI(url).split('\\').at(-1) }}
+      </p>
+    </div>
 
     <div class="relative flex items-center gap-4">
       <video
         ref="videoElement"
         :src="url"
-        class="aspect-video rounded-(--ui-radius)"
+        class="aspect-video rounded-(--ui-radius) w-full"
         @loadeddata="handleLoad"
         @timeupdate="handleTimeUpdate"
       />
@@ -94,18 +108,5 @@ watch(
         </div>
       </div>
     </div>
-
-    <UFormField
-      label="CRF"
-      help="How much lossless video should be"
-    >
-      <UInputNumber
-        v-model="videoModel.crf"
-        :min="0"
-        :max="51"
-        variant="soft"
-        color="neutral"
-      />
-    </UFormField>
   </section>
 </template>

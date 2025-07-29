@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "ffmpeg-wrapper",
-  "version": "0.2.0",
-  "identifier": "com.ffmpeg-wrapper.app",
+  "version": "1.0.0",
+  "identifier": "com.ffmpeg-wrapper",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:3000",
@@ -19,7 +19,11 @@
         "windowEffects": {
           "effects": ["mica"]
         },
-        "visible": false
+        "visible": false,
+        "minHeight": 200,
+        "minWidth": 300,
+        "decorations": false,
+        "titleBarStyle": "Transparent"
       }
     ],
     "security": {
