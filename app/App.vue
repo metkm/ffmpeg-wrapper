@@ -168,6 +168,7 @@ onMounted(() => {
                 v-model="args"
                 :loading="exporting"
                 :encoder="encoder"
+                :duration="video.range[1] - video.range[0]"
                 @export="exportVideo"
               />
             </div>
