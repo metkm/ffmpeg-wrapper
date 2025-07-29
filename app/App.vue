@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { save } from '@tauri-apps/plugin-dialog'
-import { convertFileSrc } from '@tauri-apps/api/core'
-import type { Child } from '@tauri-apps/plugin-shell'
-import { Command } from '@tauri-apps/plugin-shell'
 import { ref } from 'vue'
-import type { VideoValues } from './types/video'
 import { defaultVideoValues, parametersPerEncoders } from './constants'
+
 import { getCurrentWindow } from '@tauri-apps/api/window'
+import { convertFileSrc } from '@tauri-apps/api/core'
+import { save } from '@tauri-apps/plugin-dialog'
+import { Command } from '@tauri-apps/plugin-shell'
+
+import type { Child } from '@tauri-apps/plugin-shell'
+import type { VideoValues } from './types/video'
 import type { Encoder } from './types/parameters'
 
 const videoPath = ref<string>('')
@@ -131,11 +133,17 @@ onMounted(() => {
           enter-from-class="opacity-0"
           mode="out-in"
         >
-          <FileDrop
+          <div
             v-if="!videoPath"
-            v-model="videoPath"
-            class="grow"
-          />
+            class="flex flex-col grow"
+          >
+            <FileDrop
+              v-model="videoPath"
+              class="grow"
+            />
+
+            <AppVersion />
+          </div>
 
           <div
             v-else
