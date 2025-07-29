@@ -5,8 +5,9 @@ import type { Child } from '@tauri-apps/plugin-shell'
 import { Command } from '@tauri-apps/plugin-shell'
 import { ref } from 'vue'
 import type { VideoValues } from './types/video'
-import { defaultVideoValues } from './constants'
+import { defaultVideoValues, parametersPerEncoders } from './constants'
 import { getCurrentWindow } from '@tauri-apps/api/window'
+import type { Encoder } from './types/parameters'
 
 const videoPath = ref<string>('')
 const stdoutLines = ref<string[]>([])
@@ -15,6 +16,8 @@ const exporting = ref(false)
 const exportEta = ref(0)
 
 const video = ref<VideoValues>(defaultVideoValues)
+const args = ref<string[]>([])
+const encoder = ref<Encoder>('av1_nvenc')
 
 const prestdoutElement = useTemplateRef('stdoutElement')
 
@@ -86,15 +89,12 @@ const exportVideo = async () => {
     '-i',
     videoPath.value,
     '-vcodec',
-    'av1_nvenc',
-    '-cq:v',
-    video.value.cqv.toString(),
+    encoder.value,
+    ...args.value,
     '-ss',
     formatSeconds(video.value.range[0] || 0),
     '-to',
     formatSeconds(video.value.range[1] || 1),
-    '-vcodec',
-    'av1_nvenc',
     savePath,
   ])
 
@@ -148,11 +148,21 @@ onMounted(() => {
               @close="onCommandClose"
             />
 
-            <VideoOptions
-              v-model="video"
-              :loading="exporting"
-              @export="exportVideo"
-            />
+            <div class="space-y-2">
+              <UFormField label="Encoder">
+                <USelect
+                  v-model="encoder"
+                  :items="Object.keys(parametersPerEncoders)"
+                />
+              </UFormField>
+
+              <VideoOptions
+                v-model="args"
+                :loading="exporting"
+                :encoder="encoder"
+                @export="exportVideo"
+              />
+            </div>
 
             <div
               v-if="stdoutLines.length > 0"
