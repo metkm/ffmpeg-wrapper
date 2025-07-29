@@ -10,7 +10,6 @@ export const useFfmpeg = () => {
   const spawn = async (args: string[], listener?: (arg: string) => void) => {
     kill()
 
-    stdoutLines.value = []
     command.value = Command.sidecar('binaries/ffmpeg', args)
 
     command.value.stdout.on('data', (arg) => {
