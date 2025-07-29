@@ -23,11 +23,17 @@ export const useFfmpeg = () => {
       listener?.(line)
     })
 
-    command.value.on('close', kill)
-
     running.value = true
     commandChild.value = await command.value.spawn()
 
+    return new Promise<void>(
+      (resolve) => {
+        command.value?.once('close', () => {
+          resolve()
+          kill()
+        })
+      },
+    )
     return new Promise<void>(resolve => command.value?.once('close', () => resolve()))
   }
 
