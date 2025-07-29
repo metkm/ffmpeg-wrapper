@@ -35,8 +35,8 @@ watch(value, () => {
     >
       <UInputNumber
         v-model="value"
-        :min="0"
-        :max="63"
+        :min="parameter.min"
+        :max="parameter.max"
         variant="soft"
         color="neutral"
       />
