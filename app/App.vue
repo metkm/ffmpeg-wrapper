@@ -101,4 +101,8 @@ onMounted(() => {
 .scrollbar::-webkit-scrollbar-corner {
   display: none;
 }
+
+.scrollbar::-webkit-scrollbar:horizontal {
+  display: none;
+}
 </style>

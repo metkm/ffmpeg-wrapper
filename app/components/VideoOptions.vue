@@ -92,10 +92,8 @@ const exportVideo = async () => {
     <pre
       v-if="stdoutLines.length > 0"
       ref="stdoutElement"
-      class="flex flex-col-reverse text-xs max-h-96 w-full overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
+      class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
       style="overflow-wrap: break-word;"
-    >
-      {{ stdoutLines.join('\n') }}
-    </pre>
+    >{{ stdoutLines.join('\n') }}</pre>
   </div>
 </template>
