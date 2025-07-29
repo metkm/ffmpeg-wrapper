@@ -54,7 +54,7 @@ const exportVideo = async () => {
   }
 
   await spawn([...baseArgs, '-b:v', `${targetBitrate.value}k`, savePath])
-  console.log('process closed')
+
   emit('exportEnd')
 }
 </script>
