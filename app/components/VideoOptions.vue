@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { appLocalDataDir } from '@tauri-apps/api/path'
 import { save } from '@tauri-apps/plugin-dialog'
 import { useFfmpeg } from '~/hooks/useFfmpeg'
 import type { Encoder } from '~/types/parameters'
@@ -33,10 +34,14 @@ const exportVideo = async () => {
 
   if (!savePath) return
 
+  const appdataLocal = await appLocalDataDir()
+
   const baseArgs = [
     '-y',
     '-i',
     props.videoPath,
+    '-passlogfile',
+    `${appdataLocal}\\ffmpeg2pass.log`,
     '-vcodec',
     props.encoder,
     ...args.value,
