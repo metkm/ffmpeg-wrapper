@@ -10,6 +10,10 @@ const props = defineProps<{
   videoPath: string
 }>()
 
+const emit = defineEmits<{
+  exportEnd: []
+}>()
+
 const args = ref<string[]>([])
 
 const { spawn, stdoutLines, running } = useFfmpeg()
@@ -50,6 +54,7 @@ const exportVideo = async () => {
   }
 
   await spawn([...baseArgs, '-b:v', `${targetBitrate.value}k`, savePath])
+  emit('exportEnd')
 }
 </script>
 

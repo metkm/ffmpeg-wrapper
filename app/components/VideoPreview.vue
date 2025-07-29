@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { defaultVideoValues } from '~/constants'
-import type { VideoValues } from '~/types/video'
+import type { Video } from '~/types/video'
 
 defineProps<{
   url: string
@@ -10,7 +10,7 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const videoModel = defineModel<VideoValues>({
+const videoModel = defineModel<Video>({
   default: defaultVideoValues,
 })
 
@@ -103,6 +103,7 @@ watch(
               :max="videoModel.duration"
               size="xs"
               class="flex-1"
+              :min-steps-between-thumbs="1"
             />
           </div>
         </div>
