@@ -20,6 +20,7 @@ const args = ref<string[]>([])
 const { spawn, stdoutLines, running } = useFfmpeg()
 
 const targetFileSize = ref(10)
+
 const targetBitrate = computed(() => targetFileSize.value * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
 
 const exportVideo = async () => {
@@ -76,12 +77,14 @@ const exportVideo = async () => {
         <UFormField
           label="target file size"
           :description="`${targetBitrate.toFixed(0)} bitrate`"
+          class="capitalize"
         >
           <UInputNumber
             v-model="targetFileSize"
             :min="0"
             variant="soft"
             color="neutral"
+            class="after:content-['(MB)'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-18 after:font-medium after:text-muted after:pointer-events-none"
           />
         </UFormField>
       </div>

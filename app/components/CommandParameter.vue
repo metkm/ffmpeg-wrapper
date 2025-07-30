@@ -32,6 +32,7 @@ watch(value, () => {
       v-if="parameter.type === 'inputnumber'"
       :label="parameter.name"
       :description="parameter.description"
+      class="capitalize"
     >
       <UInputNumber
         v-model="value"

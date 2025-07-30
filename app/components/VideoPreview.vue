@@ -27,7 +27,7 @@ const handleLoad = () => {
 }
 
 const handleTimeUpdate = () => {
-  videoModel.value.currentTime = videoElement.value?.currentTime || videoModel.value.currentTime
+  videoModel.value.currentTime = videoElement.value ? videoElement.value.currentTime : videoModel.value.currentTime
 }
 
 const toggle = () => {
@@ -40,12 +40,26 @@ const toggle = () => {
   }
 }
 
+const currentTimePercent = computed(() => {
+  return videoModel.value.currentTime * 100 / videoModel.value.duration
+})
+
+const boundsOffset = computed(() => {
+  const indicatorWidthHalf = 12 / 2
+
+  if (currentTimePercent.value < 50) {
+    return indicatorWidthHalf - range(0, 50, 0, indicatorWidthHalf, currentTimePercent.value)
+  }
+
+  return -range(50, 100, 0, indicatorWidthHalf, currentTimePercent.value)
+})
+
 watch(
   () => videoModel.value.range,
   (range, oldRange) => {
     if (!videoElement.value) return
 
-    videoElement.value.currentTime = range[0]! !== oldRange[0]! ? oldRange[0]! : oldRange[1]!
+    videoElement.value.currentTime = range[0]! !== oldRange[0]! ? range[0]! : oldRange[1]!
   },
 )
 </script>
@@ -75,23 +89,26 @@ watch(
         @timeupdate="handleTimeUpdate"
       />
 
-      <div class="p-4 absolute bottom-0 inset-x-0  bg-gradient-to-t from-black">
-        <div class="flex items-center gap-4">
+      <div class="p-4 absolute bottom-0 inset-x-0  bg-gradient-to-t from-black/50">
+        <div class="flex items-center gap-2 rounded-full">
           <UButton
-            :icon="videoPlaying ? 'i-lucide-pause' : 'i-lucide-play'"
+            :icon="videoPlaying ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
             color="neutral"
             size="sm"
-            variant="soft"
+            variant="ghost"
+            :ui="{ leadingIcon: 'drop-shadow-lg shadow-black' }"
             @click="toggle"
           />
 
-          <p>{{ rangeStart }} / {{ rangeEnd }}</p>
+          <p class="text-sm font-medium text-white mr-2 text-shadow-lg">
+            {{ rangeStart }} / {{ rangeEnd }}
+          </p>
 
           <div class="flex-1 relative">
             <div
-              class="absolute w-1.5 h-4 mt-2 bg-primary rounded-full z-10 pointer-events-none"
+              class="absolute w-1 h-3 mt-3.5 bg-primary shadow rounded-full z-10 pointer-events-none transition-all"
               :style="{
-                left: `${videoModel.currentTime * 100 / videoModel.duration}%`,
+                left: `calc(${currentTimePercent}% + ${boundsOffset}px)`,
                 transform: 'translateX(-50%)',
               }"
             />
@@ -104,6 +121,9 @@ watch(
               size="xs"
               class="flex-1"
               :min-steps-between-thumbs="1"
+              :ui="{
+                track: 'shadow opacity-85',
+              }"
             />
           </div>
         </div>
