@@ -64,10 +64,15 @@ onMounted(() => {
             />
 
             <div class="space-y-2">
-              <UFormField label="Encoder">
+              <UFormField
+                label="Encoder"
+                class="w-full max-w-xs"
+              >
                 <USelect
                   v-model="encoder"
                   :items="Object.keys(parametersPerEncoders)"
+                  variant="soft"
+                  class="w-full"
                 />
               </UFormField>
 

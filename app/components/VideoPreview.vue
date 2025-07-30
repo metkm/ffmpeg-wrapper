@@ -75,7 +75,7 @@ watch(
         @click="emit('close')"
       />
 
-      <p class="font-medium">
+      <p class="font-medium truncate">
         {{ decodeURI(url).split('\\').at(-1) }}
       </p>
     </div>

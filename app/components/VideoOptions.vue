@@ -67,8 +67,8 @@ const exportVideo = async () => {
 
 <template>
   <div class="space-y-4 p-4 rounded-(--ui-radius) border border-dashed border-muted z-50">
-    <div class="flex justify-between w-full">
-      <div class="flex gap-4 items-end">
+    <div class="flex flex-wrap gap-4 justify-between w-full">
+      <div class="flex flex-wrap gap-4 items-end">
         <CommandParameters
           v-model="args"
           :encoder="encoder"
