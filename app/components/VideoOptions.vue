@@ -17,7 +17,7 @@ const emit = defineEmits<{
 
 const args = ref<string[]>([])
 
-const { spawn, stdoutLines, running } = useFfmpeg()
+const { spawn, stop, stdoutLines, running } = useFfmpeg()
 
 const targetFileSize = ref(10)
 
@@ -89,13 +89,25 @@ const exportVideo = async () => {
         </UFormField>
       </div>
 
-      <UButton
-        icon="i-lucide-folder-down"
-        :loading="running"
-        @click="exportVideo"
-      >
-        Export
-      </UButton>
+      <div class="flex items-center gap-4">
+        <UButton
+          v-if="running"
+          icon="i-lucide-circle-stop"
+          color="warning"
+          variant="subtle"
+          @click="stop"
+        >
+          Stop
+        </UButton>
+
+        <UButton
+          icon="i-lucide-folder-down"
+          :loading="running"
+          @click="exportVideo"
+        >
+          Export
+        </UButton>
+      </div>
     </div>
 
     <pre

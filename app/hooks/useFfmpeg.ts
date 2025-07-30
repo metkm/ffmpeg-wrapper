@@ -47,12 +47,18 @@ export const useFfmpeg = () => {
     running.value = false
   }
 
+  const stop = () => {
+    stdoutLines.value = []
+    kill()
+  }
+
   onUnmounted(() => kill())
 
   return {
     stdoutLines,
     spawn,
     kill,
+    stop,
     running,
   }
 }
