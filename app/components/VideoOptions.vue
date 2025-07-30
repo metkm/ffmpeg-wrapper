@@ -40,27 +40,25 @@ const exportVideo = async () => {
 
   const baseArgs = [
     '-y',
-    '-ss',
-    formatSeconds(props.video.range[0] || 0),
-    '-to',
-    formatSeconds(props.video.range[1] || 1),
-    '-i',
-    props.videoPath,
-    '-passlogfile',
-    `${appdataLocal}\\ffmpeg2pass.log`,
-    '-vcodec',
-    props.encoder,
+    '-ss', formatSeconds(props.video.range[0] || 0),
+    '-to', formatSeconds(props.video.range[1] || 1),
+    '-i', props.videoPath,
+    '-passlogfile', `${appdataLocal}\\ffmpeg2pass.log`,
+    '-vcodec', props.encoder,
+    '-b:v', `${targetBitrate.value}k`,
     ...args.value,
   ]
 
-  if (props.encoder === 'av1_nvenc' && twoPass.value) {
-    baseArgs.push('-rc', 'cbr')
+  if (props.encoder === 'av1_nvenc') {
+    baseArgs.push('-rc', 'vbr')
+  }
 
-    await spawn([...baseArgs, '-pass', '1', '-f', 'mp4', 'NUL'])
+  if (props.encoder === 'av1_nvenc' && twoPass.value) {
+    await spawn([...baseArgs, '-an', '-pass', '1', '-f', 'mp4', 'NUL'])
     baseArgs.push('-pass', '2')
   }
 
-  await spawn([...baseArgs, '-b:v', `${targetBitrate.value}k`, savePath])
+  await spawn([...baseArgs, savePath])
 
   emit('exportEnd')
 }
