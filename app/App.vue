@@ -64,24 +64,24 @@ onMounted(() => {
             />
 
             <div class="space-y-2">
-              <UFormField
-                label="Encoder"
-                class="w-full max-w-xs"
-              >
-                <USelect
-                  v-model="encoder"
-                  :items="Object.keys(parametersPerEncoders)"
-                  variant="soft"
-                  class="w-full"
-                />
-              </UFormField>
-
               <VideoOptions
                 :encoder="encoder"
                 :video="video"
                 :video-path="videoPath"
                 @export-end="onExportEnd"
-              />
+              >
+                <UFormField
+                  label="Encoder"
+                  description="encoder that will be used to re-encode"
+                >
+                  <USelect
+                    v-model="encoder"
+                    :items="Object.keys(parametersPerEncoders)"
+                    variant="soft"
+                    class="w-full"
+                  />
+                </UFormField>
+              </VideoOptions>
             </div>
           </div>
         </Transition>

@@ -29,15 +29,17 @@ watch(() => props.encoder, () => {
 </script>
 
 <template>
-  <ul>
+  <ul class="flex flex-wrap">
     <li
       v-for="(param, index) in parameters"
       :key="param.id"
+      class="flex-1"
     >
       <CommandParameter
         v-model="args"
         :index="index"
         :parameter="param"
+        class="flex-1"
       />
     </li>
   </ul>

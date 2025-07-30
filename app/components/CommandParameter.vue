@@ -27,20 +27,19 @@ watch(value, () => {
 </script>
 
 <template>
-  <div>
-    <UFormField
-      v-if="parameter.type === 'inputnumber'"
-      :label="parameter.name"
-      :description="parameter.description"
-      class="capitalize"
-    >
-      <UInputNumber
-        v-model="value"
-        :min="parameter.min"
-        :max="parameter.max"
-        variant="soft"
-        color="neutral"
-      />
-    </UFormField>
-  </div>
+  <UFormField
+    v-if="parameter.type === 'inputnumber'"
+    :label="parameter.name"
+    :description="parameter.description"
+    class="capitalize"
+  >
+    <UInputNumber
+      v-model="value"
+      :min="parameter.min"
+      :max="parameter.max"
+      variant="soft"
+      color="neutral"
+      class="w-full"
+    />
+  </UFormField>
 </template>

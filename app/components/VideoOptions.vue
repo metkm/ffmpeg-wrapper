@@ -67,8 +67,10 @@ const exportVideo = async () => {
 
 <template>
   <div class="space-y-4 p-4 rounded-(--ui-radius) border border-dashed border-muted z-50">
-    <div class="flex flex-wrap gap-4 justify-between w-full">
-      <div class="flex flex-wrap gap-4 items-end">
+    <div class="flex flex-col gap-4 justify-between w-full">
+      <div class="flex flex-wrap gap-4 *:grow">
+        <slot />
+
         <CommandParameters
           v-model="args"
           :encoder="encoder"
@@ -84,7 +86,7 @@ const exportVideo = async () => {
             :min="0"
             variant="soft"
             color="neutral"
-            class="after:content-['(MB)'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-18 after:font-medium after:text-muted after:pointer-events-none"
+            class="w-full after:content-['(MB)'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-18 after:font-medium after:text-muted after:pointer-events-none"
           />
         </UFormField>
       </div>

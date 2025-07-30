@@ -66,20 +66,6 @@ watch(
 
 <template>
   <section class="space-y-4 rounded-(--ui-radius)">
-    <div class="flex items-center gap-4">
-      <UButton
-        icon="i-lucide-x"
-        square
-        variant="ghost"
-        color="neutral"
-        @click="emit('close')"
-      />
-
-      <p class="font-medium truncate">
-        {{ decodeURI(url).split('\\').at(-1) }}
-      </p>
-    </div>
-
     <div class="relative flex items-center gap-4">
       <video
         ref="videoElement"
@@ -128,6 +114,20 @@ watch(
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <UButton
+        icon="i-lucide-x"
+        square
+        variant="ghost"
+        color="neutral"
+        @click="emit('close')"
+      />
+
+      <p class="font-medium truncate text-muted">
+        {{ decodeURI(url).split('\\').at(-1) }}
+      </p>
     </div>
   </section>
 </template>
