@@ -32,7 +32,7 @@ onMounted(() => {
         <WindowOverlay />
       </Suspense>
 
-      <main class="flex flex-col grow p-4 pt-2 overflow-auto space-y-4 scrollbar">
+      <main class="flex flex-col grow p-4 overflow-auto space-y-4 scrollbar">
         <Transition
           enter-active-class="transition-all"
           leave-active-class="transition-all"
