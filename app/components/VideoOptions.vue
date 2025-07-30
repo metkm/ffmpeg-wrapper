@@ -39,6 +39,10 @@ const exportVideo = async () => {
 
   const baseArgs = [
     '-y',
+    '-ss',
+    formatSeconds(props.video.range[0] || 0),
+    '-to',
+    formatSeconds(props.video.range[1] || 1),
     '-i',
     props.videoPath,
     '-passlogfile',
@@ -46,10 +50,6 @@ const exportVideo = async () => {
     '-vcodec',
     props.encoder,
     ...args.value,
-    '-ss',
-    formatSeconds(props.video.range[0] || 0),
-    '-to',
-    formatSeconds(props.video.range[1] || 1),
   ]
 
   if (props.encoder === 'av1_nvenc') {

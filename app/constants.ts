@@ -1,6 +1,6 @@
-import type { VideoValues } from './types/video'
+import type { Video } from './types/video'
 
-export const defaultVideoValues: VideoValues = {
+export const defaultVideoValues: Video = {
   cqv: 0,
   duration: 0,
   currentTime: 0,
