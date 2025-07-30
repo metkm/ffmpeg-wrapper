@@ -2,7 +2,7 @@
   "version": "1.1.2",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSeWVGT1YwSnRxU2lSc2pQS3Vtc2tnNSt6YTBEKzVDVWdDdG40dzhFT1d5QUFaeHNiSDc2SVA5dks2Y3p2aGg1d1lkb2ZNa2JtbjNvWGRobnlOVE5vVlNDQ3NtZlN1c3c4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzUzODk5NDU1CWZpbGU6ZmZtcGVnLXdyYXBwZXJfMS4xLjNfeDY0X2VuLVVTLm1zaQpka0VaUnpUZVdpY1Z1WlFGSmd0aWlqQ2NUK2E4ckZjUXV2ZlhvUnBlcWpLbG4wMDRwVUtXaUpHWVRFeERxdktUZmFXWTNlNUpaLzI4eThpQjV2UzhBdz09Cg==",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSeWVGT1YwSnRxU25obUVWTlpHSGx3WG5BbzBGaWRuR0Nxb3l5VytlNktPakpPNU93MkpuTmp5dnVHVlRqL2dZZ0lzczZZRkYxaWh3bklKUC80ZGZpbjZBOGJ2WXpoS0E4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzUzOTAyMzgzCWZpbGU6ZmZtcGVnLXdyYXBwZXJfMS4xLjJfeDY0X2VuLVVTLm1zaQpFVURGMklyM0VqblR1UEdqRnlQQVlWTGpoTXFZR3c5REFCUUYvT3J2UWxoREtkWFFSRTFZZE9PT1V1bmx1V1IrTGZmeFd1TGo1L0JzYStYYlVpemlCQT09Cg==",
       "url": "https://github.com/metkm/ffmpeg-wrapper/releases/latest/download/ffmpeg-wrapper_1.1.2_x64_en-US.msi"
     }
   }
