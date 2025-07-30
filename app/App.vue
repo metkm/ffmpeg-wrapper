@@ -7,6 +7,9 @@ import { convertFileSrc } from '@tauri-apps/api/core'
 
 import type { Video } from './types/video'
 import type { Encoder } from './types/parameters'
+import { check } from '@tauri-apps/plugin-updater'
+
+const toast = useToast()
 
 const videoPath = ref<string>('')
 
@@ -22,6 +25,20 @@ const onExportEnd = () => {
 onMounted(() => {
   getCurrentWindow()
     .show()
+})
+
+onMounted(async () => {
+  const update = await check()
+  if (!update) return
+
+  await update.downloadAndInstall(({ event }) => {
+    if (event === 'Started') {
+      toast.add({
+        title: 'Update found',
+        description: 'App will be automatically restarted when upload is completed',
+      })
+    }
+  })
 })
 </script>
 
