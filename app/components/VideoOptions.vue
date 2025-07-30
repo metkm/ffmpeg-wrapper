@@ -20,6 +20,7 @@ const args = ref<string[]>([])
 const { spawn, stop, stdoutLines, running } = useFfmpeg()
 
 const targetFileSize = ref(10)
+const twoPass = ref(true)
 
 const targetBitrate = computed(() => targetFileSize.value * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
 
@@ -52,7 +53,7 @@ const exportVideo = async () => {
     ...args.value,
   ]
 
-  if (props.encoder === 'av1_nvenc') {
+  if (props.encoder === 'av1_nvenc' && twoPass.value) {
     baseArgs.push('-rc', 'cbr')
 
     await spawn([...baseArgs, '-pass', '1', '-f', 'mp4', 'NUL'])
@@ -89,6 +90,13 @@ const exportVideo = async () => {
             class="w-full after:content-['(MB)'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-18 after:font-medium after:text-muted after:pointer-events-none"
           />
         </UFormField>
+
+        <UCheckbox
+          v-model="twoPass"
+          label="Two pass"
+          variant="card"
+          description="analyze video twice for better compression"
+        />
       </div>
 
       <div class="flex items-center gap-4">
