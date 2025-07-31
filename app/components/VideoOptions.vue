@@ -50,40 +50,6 @@ const onLine = () => {
       status: ProgressBarStatus.Normal,
       progress: progressPercent.value,
     })
-
-  // if (!line.startsWith('frame')) return
-
-  // const matches: Record<string, string> = {}
-  // let match: RegExpExecArray | null = null
-
-  // while ((match = regex.exec(line)) !== null) {
-  //   if (!match.groups) break
-
-  //   const { name, value } = match.groups
-  //   if (!name || !value) break
-
-  //   matches[name] = value
-  // }
-
-  // const time = matches['time']
-  // const speed = matches['speed']?.slice(0, -1)
-
-  // if (time) {
-  //   const seconds = formatTimeToSeconds(time)
-
-  //   if (speed) {
-  //     const secondsElapsed = duration.value - seconds
-  //     eta.value = secondsElapsed / parseFloat(speed)
-  //   }
-
-  //   progress.value = parseInt((seconds * 100 / duration.value).toFixed(0))
-
-  //   getCurrentWindow()
-  //     .setProgressBar({
-  //       status: ProgressBarStatus.Normal,
-  //       progress: progress.value,
-  //     })
-  // }
 }
 
 const exportVideo = async () => {
