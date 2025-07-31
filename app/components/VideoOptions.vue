@@ -97,7 +97,7 @@ const exportVideo = async () => {
 <template>
   <div class="space-y-4">
     <div class="flex flex-col gap-4 justify-between w-full">
-      <div class="flex flex-wrap gap-4 *:grow">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-min gap-4 *:grow">
         <slot />
 
         <CommandParameters

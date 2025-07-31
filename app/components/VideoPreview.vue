@@ -79,7 +79,7 @@ watch(
       <UButton
         icon="i-lucide-x"
         square
-        color="neutral"
+        color="warning"
         variant="soft"
         @click="emit('close')"
       >
@@ -114,11 +114,11 @@ watch(
             @click="toggle"
           />
 
-          <p class="text-sm font-medium text-white text-shadow-lg">
+          <p class="hidden sm:block text-sm font-medium text-center">
             {{ rangeStart }} / {{ rangeEnd }}
           </p>
 
-          <div class="flex-1 relative mx-4">
+          <div class="flex-1 relative mx-2">
             <div
               class="absolute w-1 h-3 mt-3.5 bg-primary shadow rounded-full z-10 pointer-events-none transition-all"
               :style="{
