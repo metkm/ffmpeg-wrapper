@@ -18,7 +18,7 @@ const onDrop = () => {
 <template>
   <FileDrop
     v-model="videoPath"
-    class="grow"
+    class="grow -mx-4"
     @drop="onDrop"
   />
 </template>

@@ -31,7 +31,7 @@ onMounted(async () => {
         <WindowOverlay />
       </Suspense>
 
-      <main class="overflow-x-hidden overflow-y-auto scrollbar">
+      <main class="flex flex-col grow overflow-x-hidden overflow-y-auto scrollbar">
         <NuxtPage />
       </main>
     </div>
