@@ -91,7 +91,6 @@ onMounted(async () => {
                 <USelect
                   v-model="encoder"
                   :items="Object.keys(parametersPerEncoders)"
-                  variant="soft"
                   class="w-full"
                 />
               </UFormField>

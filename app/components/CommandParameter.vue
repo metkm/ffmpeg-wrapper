@@ -37,7 +37,6 @@ watch(value, () => {
       v-model="value"
       :min="parameter.min"
       :max="parameter.max"
-      variant="soft"
       color="neutral"
       class="w-full"
     />
