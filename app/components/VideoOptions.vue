@@ -24,9 +24,12 @@ const targetFileSize = ref(10)
 const twoPass = ref(false)
 
 const savePath = ref<string | null>()
+
 const progress = ref(0)
+const eta = ref(0)
 
 const targetBitrate = computed(() => targetFileSize.value * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
+const duration = computed(() => props.video.range[1] - props.video.range[0])
 
 const regex = /(?<name>\w+)=\s*(?<value>.*?)\s/gm
 const onLine = (line: string) => {
@@ -45,12 +48,17 @@ const onLine = (line: string) => {
   }
 
   const time = matches['time']
+  const speed = matches['speed']?.slice(0, -1)
 
   if (time) {
     const seconds = formatTimeToSeconds(time)
-    const duration = props.video.range[1] - props.video.range[0]
 
-    progress.value = parseInt((seconds * 100 / duration).toFixed(0))
+    if (speed) {
+      const secondsElapsed = duration.value - seconds
+      eta.value = secondsElapsed / parseFloat(speed)
+    }
+
+    progress.value = parseInt((seconds * 100 / duration.value).toFixed(0))
 
     getCurrentWindow()
       .setProgressBar({
@@ -173,10 +181,19 @@ const exportVideo = async () => {
         style="overflow-wrap: break-word;"
       >{{ stdoutLines.join('\n') }}</pre>
 
-      <UProgress
-        v-model="progress"
-        status
-      />
+      <div>
+        <UProgress
+          v-model="progress"
+          status
+        />
+
+        <p
+          v-if="eta > 0"
+          class="text-muted text-sm mt-1 font-medium"
+        >
+          {{ eta.toFixed(0) }}s left
+        </p>
+      </div>
     </template>
   </div>
 </template>

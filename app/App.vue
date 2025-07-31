@@ -78,26 +78,24 @@ onMounted(async () => {
               @close="onExportEnd"
             />
 
-            <div class="space-y-2">
-              <VideoOptions
-                :encoder="encoder"
-                :video="video"
-                :video-path="videoPath"
-                @export-end="onExportEnd"
+            <VideoOptions
+              :encoder="encoder"
+              :video="video"
+              :video-path="videoPath"
+              @export-end="onExportEnd"
+            >
+              <UFormField
+                label="Encoder"
+                description="encoder that will be used to re-encode"
               >
-                <UFormField
-                  label="Encoder"
-                  description="encoder that will be used to re-encode"
-                >
-                  <USelect
-                    v-model="encoder"
-                    :items="Object.keys(parametersPerEncoders)"
-                    variant="soft"
-                    class="w-full"
-                  />
-                </UFormField>
-              </VideoOptions>
-            </div>
+                <USelect
+                  v-model="encoder"
+                  :items="Object.keys(parametersPerEncoders)"
+                  variant="soft"
+                  class="w-full"
+                />
+              </UFormField>
+            </VideoOptions>
           </div>
         </Transition>
       </main>
