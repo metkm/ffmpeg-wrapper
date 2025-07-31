@@ -35,7 +35,7 @@ onMounted(async () => {
     if (event === 'Started') {
       toast.add({
         title: 'Update found',
-        description: 'App will be automatically restarted when upload is completed',
+        description: 'App will be automatically restarted when update is completed',
       })
     }
   })
