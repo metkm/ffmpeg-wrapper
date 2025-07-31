@@ -133,4 +133,8 @@ onMounted(async () => {
 .scrollbar::-webkit-scrollbar:horizontal {
   display: none;
 }
+
+.scrollbar {
+  scrollbar-gutter: stable both-edges;
+}
 </style>
