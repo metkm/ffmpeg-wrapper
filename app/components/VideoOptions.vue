@@ -3,7 +3,7 @@ import { appLocalDataDir } from '@tauri-apps/api/path'
 import { getCurrentWindow, ProgressBarStatus } from '@tauri-apps/api/window'
 import { save } from '@tauri-apps/plugin-dialog'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
-import { useFfmpeg } from '~/hooks/useFfmpeg'
+import { useFFmpeg } from '~/hooks/useFFmpeg'
 import type { Encoder } from '~/types/parameters'
 import type { Video } from '~/types/video'
 
@@ -17,7 +17,7 @@ const emit = defineEmits<{
   exportEnd: []
 }>()
 
-const { spawn, stop, stdoutLines, running } = useFfmpeg()
+const { spawn, stop, stdoutLines, running, progress } = useFFmpeg()
 
 const args = ref<string[]>([])
 const targetFileSize = ref(10)
@@ -25,47 +25,65 @@ const twoPass = ref(false)
 
 const savePath = ref<string | null>()
 
-const progress = ref(0)
+const progressPercent = ref(0)
 const eta = ref(0)
 
 const targetBitrate = computed(() => targetFileSize.value * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
 const duration = computed(() => props.video.range[1] - props.video.range[0])
 
-const regex = /(?<name>\w+)=\s*(?<value>.*?)\s/gm
-const onLine = (line: string) => {
-  if (!line.startsWith('frame')) return
+const onLine = () => {
+  const time = progress.value?.time
+  const speed = progress.value?.speed
 
-  const matches: Record<string, string> = {}
-  let match: RegExpExecArray | null = null
+  if (!time) return
 
-  while ((match = regex.exec(line)) !== null) {
-    if (!match.groups) break
+  const seconds = formatTimeToSeconds(time)
 
-    const { name, value } = match.groups
-    if (!name || !value) break
-
-    matches[name] = value
+  if (speed) {
+    eta.value = (duration.value - seconds) / speed
   }
 
-  const time = matches['time']
-  const speed = matches['speed']?.slice(0, -1)
+  progressPercent.value = parseInt((seconds * 100 / duration.value).toFixed(0))
 
-  if (time) {
-    const seconds = formatTimeToSeconds(time)
+  getCurrentWindow()
+    .setProgressBar({
+      status: ProgressBarStatus.Normal,
+      progress: progressPercent.value,
+    })
 
-    if (speed) {
-      const secondsElapsed = duration.value - seconds
-      eta.value = secondsElapsed / parseFloat(speed)
-    }
+  // if (!line.startsWith('frame')) return
 
-    progress.value = parseInt((seconds * 100 / duration.value).toFixed(0))
+  // const matches: Record<string, string> = {}
+  // let match: RegExpExecArray | null = null
 
-    getCurrentWindow()
-      .setProgressBar({
-        status: ProgressBarStatus.Normal,
-        progress: progress.value,
-      })
-  }
+  // while ((match = regex.exec(line)) !== null) {
+  //   if (!match.groups) break
+
+  //   const { name, value } = match.groups
+  //   if (!name || !value) break
+
+  //   matches[name] = value
+  // }
+
+  // const time = matches['time']
+  // const speed = matches['speed']?.slice(0, -1)
+
+  // if (time) {
+  //   const seconds = formatTimeToSeconds(time)
+
+  //   if (speed) {
+  //     const secondsElapsed = duration.value - seconds
+  //     eta.value = secondsElapsed / parseFloat(speed)
+  //   }
+
+  //   progress.value = parseInt((seconds * 100 / duration.value).toFixed(0))
+
+  //   getCurrentWindow()
+  //     .setProgressBar({
+  //       status: ProgressBarStatus.Normal,
+  //       progress: progress.value,
+  //     })
+  // }
 }
 
 const exportVideo = async () => {
@@ -183,7 +201,7 @@ const exportVideo = async () => {
 
       <div>
         <UProgress
-          v-model="progress"
+          v-model="progressPercent"
           status
         />
 

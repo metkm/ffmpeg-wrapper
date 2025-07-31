@@ -1,8 +1,36 @@
 import { Command, type Child } from '@tauri-apps/plugin-shell'
+import type { FFmpegProgress } from '~/types/ffmpeg'
 
-export const useFfmpeg = () => {
+const regex = /(?<name>\w+)=\s*(?<value>.*?)\s/gm
+
+const parseProgress = (line: string): FFmpegProgress => {
+  const progress: FFmpegProgress = {}
+
+  let match: RegExpExecArray | null = null
+
+  while ((match = regex.exec(line)) !== null) {
+    if (!match.groups) break
+
+    const { name, value } = match.groups
+    if (!name) break
+
+    const key = name as keyof FFmpegProgress
+    progress[key] = value as Exclude<undefined, FFmpegProgress[typeof key]>
+  }
+
+  return {
+    ...progress,
+    frame: progress.frame ? parseInt(progress.frame.toString()) : 0,
+    fps: progress.fps ? parseInt(progress.fps.toString()) : 0,
+    q: progress.q ? parseFloat(progress.q.toString()) : 0,
+    speed: progress.speed ? parseFloat(progress.speed?.toString().slice(0, -1)) : 0,
+  }
+}
+
+export const useFFmpeg = () => {
   const stdoutLines = ref<string[]>([])
   const running = ref(false)
+  const progress = ref<FFmpegProgress>()
 
   const command = shallowRef<Command<string>>()
   const commandChild = shallowRef<Child>()
@@ -12,16 +40,16 @@ export const useFfmpeg = () => {
 
     command.value = Command.sidecar('binaries/ffmpeg', args)
 
-    command.value.stdout.on('data', (arg) => {
-      const line = arg.trim()
+    const onData = (_line: string) => {
+      const line = _line.trim()
       stdoutLines.value.push(line)
+
       listener?.(line)
-    })
-    command.value.stderr.on('data', (arg) => {
-      const line = arg.trim()
-      stdoutLines.value.push(line)
-      listener?.(line)
-    })
+      progress.value = parseProgress(line)
+    }
+
+    command.value.stdout.on('data', onData)
+    command.value.stderr.on('data', onData)
 
     const promise = new Promise<void>(
       (resolve) => {
@@ -60,5 +88,6 @@ export const useFfmpeg = () => {
     kill,
     stop,
     running,
+    progress,
   }
 }
