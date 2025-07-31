@@ -12,6 +12,8 @@ const toggleMaximize = () => {
 
 <template>
   <div class="flex justify-between h-8 border-b border-b-muted/25">
+    <AppVersion class="flex items-center pl-2" />
+
     <div
       data-tauri-drag-region
       class="flex-1"

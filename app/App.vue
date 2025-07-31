@@ -65,8 +65,6 @@ onMounted(async () => {
               v-model="videoPath"
               class="grow"
             />
-
-            <AppVersion />
           </div>
 
           <div
