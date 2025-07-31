@@ -68,7 +68,11 @@ watch(
   (range, oldRange) => {
     if (!videoElement.value) return
 
-    videoElement.value.currentTime = range[0]! !== oldRange[0]! ? range[0]! : oldRange[1]!
+    if (range[0] !== oldRange[0]) {
+      videoElement.value.currentTime = range[0]
+    } else {
+      videoElement.value.currentTime = range[1]
+    }
   },
 )
 </script>

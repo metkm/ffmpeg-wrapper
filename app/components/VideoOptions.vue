@@ -167,14 +167,13 @@ const exportVideo = async () => {
       <div>
         <UProgress
           v-model="progressPercent"
-          status
         />
 
         <p
           v-if="eta > 0"
           class="text-muted text-sm mt-1 font-medium"
         >
-          {{ eta.toFixed(0) }}s left
+          {{ progressPercent }}% - {{ eta.toFixed(0) }}s left
         </p>
       </div>
     </template>
