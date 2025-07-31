@@ -7,4 +7,5 @@ export interface FFmpegProgress {
   bitrate?: string
   speed?: number
   elapsed?: string
+  percent?: number
 }

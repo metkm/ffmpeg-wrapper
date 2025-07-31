@@ -44,12 +44,12 @@ onMounted(async () => {
 
 <template>
   <UApp>
-    <div class="flex flex-col h-screen">
+    <div class="flex flex-col h-screen w-screen overflow-x-hidden">
       <Suspense>
         <WindowOverlay />
       </Suspense>
 
-      <main class="flex flex-col grow p-4 overflow-auto space-y-4 scrollbar">
+      <main class="flex flex-col grow p-4 overflow-x-hidden overflow-y-auto space-y-4 scrollbar">
         <Transition
           enter-active-class="transition-all"
           leave-active-class="transition-all"
@@ -76,13 +76,24 @@ onMounted(async () => {
               v-model="video"
               :url="videoUrl"
               @close="onExportEnd"
-            />
+            >
+              <template #leading-title>
+                <UButton
+                  icon="i-lucide-x"
+                  square
+                  color="warning"
+                  variant="soft"
+                  @click="onExportEnd"
+                >
+                  Close
+                </UButton>
+              </template>
+            </VideoPreview>
 
-            <VideoOptions
+            <VideoExport
               :encoder="encoder"
               :video="video"
               :video-path="videoPath"
-              @export-end="onExportEnd"
             >
               <UFormField
                 label="Encoder"
@@ -94,7 +105,7 @@ onMounted(async () => {
                   class="w-full"
                 />
               </UFormField>
-            </VideoOptions>
+            </VideoExport>
           </div>
         </Transition>
       </main>

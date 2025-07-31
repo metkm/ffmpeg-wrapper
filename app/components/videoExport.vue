@@ -17,7 +17,7 @@ const emit = defineEmits<{
   exportEnd: []
 }>()
 
-const { spawn, stop, stdoutLines, running, progress } = useFFmpeg()
+const { spawn, clear, stdoutLines, running, progress } = useFFmpeg()
 
 const args = ref<string[]>([])
 const targetFileSize = ref(10)
@@ -90,6 +90,7 @@ const exportVideo = async () => {
 
   await spawn([...baseArgs, savePath.value], onLine)
 
+  clear()
   emit('exportEnd')
 }
 </script>
@@ -97,7 +98,7 @@ const exportVideo = async () => {
 <template>
   <div class="space-y-4">
     <div class="flex flex-col gap-4 justify-between w-full">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-min gap-4 *:grow">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 auto-rows-min gap-4 *:grow">
         <slot />
 
         <CommandParameters
@@ -126,13 +127,23 @@ const exportVideo = async () => {
         />
       </div>
 
-      <div class="flex items-center gap-4">
+      <div class="flex items-center justify-end gap-4">
+        <UButton
+          v-if="savePath"
+          icon="i-lucide-folder-symlink"
+          variant="link"
+          color="neutral"
+          @click="revealItemInDir(savePath)"
+        >
+          {{ savePath }}
+        </UButton>
+
         <UButton
           v-if="running"
           icon="i-lucide-circle-stop"
           color="warning"
           variant="subtle"
-          @click="stop"
+          @click="clear"
         >
           Stop
         </UButton>
@@ -143,16 +154,6 @@ const exportVideo = async () => {
           @click="exportVideo"
         >
           Export
-        </UButton>
-
-        <UButton
-          v-if="savePath"
-          icon="i-lucide-folder-symlink"
-          variant="link"
-          color="neutral"
-          @click="revealItemInDir(savePath)"
-        >
-          {{ savePath }}
         </UButton>
       </div>
     </div>

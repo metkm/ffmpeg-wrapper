@@ -75,7 +75,7 @@ export const useFFmpeg = () => {
     running.value = false
   }
 
-  const stop = () => {
+  const clear = () => {
     stdoutLines.value = []
     kill()
   }
@@ -86,7 +86,7 @@ export const useFFmpeg = () => {
     stdoutLines,
     spawn,
     kill,
-    stop,
+    clear,
     running,
     progress,
   }

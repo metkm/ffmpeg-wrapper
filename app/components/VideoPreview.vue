@@ -6,10 +6,6 @@ defineProps<{
   url: string
 }>()
 
-const emit = defineEmits<{
-  close: []
-}>()
-
 const videoModel = defineModel<Video>({
   default: defaultVideoValues,
 })
@@ -80,15 +76,7 @@ watch(
 <template>
   <section class="space-y-4 rounded-(--ui-radius)">
     <div class="flex items-center gap-4">
-      <UButton
-        icon="i-lucide-x"
-        square
-        color="warning"
-        variant="soft"
-        @click="emit('close')"
-      >
-        Close
-      </UButton>
+      <slot name="leading-title" />
 
       <p class="font-medium truncate text-muted">
         {{ decodeURI(url).split('\\').at(-1) }}
