@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { appLocalDataDir } from '@tauri-apps/api/path'
+import { getCurrentWindow, ProgressBarStatus } from '@tauri-apps/api/window'
 import { save } from '@tauri-apps/plugin-dialog'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { useFfmpeg } from '~/hooks/useFfmpeg'
@@ -21,9 +22,43 @@ const { spawn, stop, stdoutLines, running } = useFfmpeg()
 const args = ref<string[]>([])
 const targetFileSize = ref(10)
 const twoPass = ref(false)
+
 const savePath = ref<string | null>()
+const progress = ref(0)
 
 const targetBitrate = computed(() => targetFileSize.value * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
+
+const regex = /(?<name>\w+)=\s*(?<value>.*?)\s/gm
+const onLine = (line: string) => {
+  if (!line.startsWith('frame')) return
+
+  const matches: Record<string, string> = {}
+  let match: RegExpExecArray | null = null
+
+  while ((match = regex.exec(line)) !== null) {
+    if (!match.groups) break
+
+    const { name, value } = match.groups
+    if (!name || !value) break
+
+    matches[name] = value
+  }
+
+  const time = matches['time']
+
+  if (time) {
+    const seconds = formatTimeToSeconds(time)
+    const duration = props.video.range[1] - props.video.range[0]
+
+    progress.value = parseInt((seconds * 100 / duration).toFixed(0))
+
+    getCurrentWindow()
+      .setProgressBar({
+        status: ProgressBarStatus.Normal,
+        progress: progress.value,
+      })
+  }
+}
 
 const exportVideo = async () => {
   savePath.value = await save({
@@ -57,11 +92,11 @@ const exportVideo = async () => {
   }
 
   if (props.encoder === 'av1_nvenc' && twoPass.value) {
-    await spawn([...baseArgs, '-an', '-pass', '1', '-f', 'mp4', 'NUL'])
+    await spawn([...baseArgs, '-an', '-pass', '1', '-f', 'mp4', 'NUL'], onLine)
     baseArgs.push('-pass', '2')
   }
 
-  await spawn([...baseArgs, savePath.value])
+  await spawn([...baseArgs, savePath.value], onLine)
 
   emit('exportEnd')
 }
@@ -131,11 +166,17 @@ const exportVideo = async () => {
       </div>
     </div>
 
-    <pre
-      v-if="stdoutLines.length > 0"
-      ref="stdoutElement"
-      class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
-      style="overflow-wrap: break-word;"
-    >{{ stdoutLines.join('\n') }}</pre>
+    <template v-if="stdoutLines.length > 0">
+      <pre
+        ref="stdoutElement"
+        class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
+        style="overflow-wrap: break-word;"
+      >{{ stdoutLines.join('\n') }}</pre>
+
+      <UProgress
+        v-model="progress"
+        status
+      />
+    </template>
   </div>
 </template>

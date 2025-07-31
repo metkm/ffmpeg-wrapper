@@ -39,6 +39,7 @@
         }
       ]
     },
+    "core:window:allow-set-progress-bar",
     "shell:allow-open",
     "shell:allow-kill",
     "core:window:allow-show",
