@@ -87,7 +87,7 @@ watch(
         @timeupdate="handleTimeUpdate"
       />
 
-      <div class="p-4 absolute bottom-0 inset-x-0  bg-gradient-to-t from-black/50">
+      <div class="p-4 absolute bottom-0 inset-x-0  bg-gradient-to-t from-black">
         <div class="flex items-center gap-2 rounded-full">
           <UButton
             :icon="videoPlaying ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
