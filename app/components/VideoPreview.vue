@@ -14,6 +14,7 @@ const videoModel = defineModel<Video>({
   default: defaultVideoValues,
 })
 
+const videoContainerElement = useTemplateRef('videoContainerElement')
 const videoElement = useTemplateRef('videoElement')
 const videoPlaying = ref(false)
 
@@ -37,6 +38,14 @@ const toggle = () => {
   } else {
     videoElement.value?.play()
     videoPlaying.value = true
+  }
+}
+
+const toggleFullscreen = () => {
+  if (document.fullscreenElement) {
+    document.exitFullscreen()
+  } else {
+    videoContainerElement.value?.requestFullscreen()
   }
 }
 
@@ -66,7 +75,10 @@ watch(
 
 <template>
   <section class="space-y-4 rounded-(--ui-radius)">
-    <div class="relative flex items-center gap-4">
+    <div
+      ref="videoContainerElement"
+      class="relative flex items-center gap-4"
+    >
       <video
         ref="videoElement"
         :src="url"
@@ -86,11 +98,11 @@ watch(
             @click="toggle"
           />
 
-          <p class="text-sm font-medium text-white mr-2 text-shadow-lg">
+          <p class="text-sm font-medium text-white text-shadow-lg">
             {{ rangeStart }} / {{ rangeEnd }}
           </p>
 
-          <div class="flex-1 relative">
+          <div class="flex-1 relative mx-4">
             <div
               class="absolute w-1 h-3 mt-3.5 bg-primary shadow rounded-full z-10 pointer-events-none transition-all"
               :style="{
@@ -112,6 +124,14 @@ watch(
               }"
             />
           </div>
+
+          <UButton
+            icon="i-lucide-fullscreen"
+            size="sm"
+            variant="ghost"
+            color="neutral"
+            @click="toggleFullscreen"
+          />
         </div>
       </div>
     </div>
