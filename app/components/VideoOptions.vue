@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { appLocalDataDir } from '@tauri-apps/api/path'
 import { save } from '@tauri-apps/plugin-dialog'
+import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { useFfmpeg } from '~/hooks/useFfmpeg'
 import type { Encoder } from '~/types/parameters'
 import type { Video } from '~/types/video'
@@ -15,17 +16,17 @@ const emit = defineEmits<{
   exportEnd: []
 }>()
 
-const args = ref<string[]>([])
-
 const { spawn, stop, stdoutLines, running } = useFfmpeg()
 
+const args = ref<string[]>([])
 const targetFileSize = ref(10)
 const twoPass = ref(false)
+const savePath = ref<string | null>()
 
 const targetBitrate = computed(() => targetFileSize.value * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
 
 const exportVideo = async () => {
-  const savePath = await save({
+  savePath.value = await save({
     filters: [
       {
         name: 'output',
@@ -34,7 +35,7 @@ const exportVideo = async () => {
     ],
   })
 
-  if (!savePath) return
+  if (!savePath.value) return
 
   const appdataLocal = await appLocalDataDir()
 
@@ -60,7 +61,7 @@ const exportVideo = async () => {
     baseArgs.push('-pass', '2')
   }
 
-  await spawn([...baseArgs, savePath])
+  await spawn([...baseArgs, savePath.value])
 
   emit('exportEnd')
 }
@@ -95,7 +96,7 @@ const exportVideo = async () => {
           v-model="twoPass"
           label="Two pass"
           variant="card"
-          description="analyze video twice for better compression"
+          description="analyze video twice for better compression (might be useful for av1 encoders)"
         />
       </div>
 
@@ -116,6 +117,16 @@ const exportVideo = async () => {
           @click="exportVideo"
         >
           Export
+        </UButton>
+
+        <UButton
+          v-if="savePath"
+          icon="i-lucide-folder-symlink"
+          variant="link"
+          color="neutral"
+          @click="revealItemInDir(savePath)"
+        >
+          {{ savePath }}
         </UButton>
       </div>
     </div>

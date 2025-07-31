@@ -31,6 +31,14 @@
         }
       ]
     },
+    {
+      "identifier": "opener:allow-reveal-item-in-dir",
+      "allow": [
+        {
+          "path": "**/*"
+        }
+      ]
+    },
     "shell:allow-open",
     "shell:allow-kill",
     "core:window:allow-show",
