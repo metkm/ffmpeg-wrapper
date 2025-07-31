@@ -14,7 +14,7 @@ const toast = useToast()
 const videoPath = ref<string>('')
 
 const video = ref<Video>(defaultVideoValues)
-const encoder = ref<Encoder>('av1_nvenc')
+const encoder = ref<Encoder>('h264_nvenc')
 
 const videoUrl = computed(() => videoPath.value ? convertFileSrc(videoPath.value) : undefined)
 

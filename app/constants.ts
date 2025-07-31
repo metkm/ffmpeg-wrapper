@@ -29,4 +29,15 @@ export const parametersPerEncoders = {
       description: '0 = auto',
     },
   ],
+  h264_nvenc: [
+    {
+      id: 3,
+      name: 'cq:v',
+      min: 0,
+      max: 63,
+      default: 0,
+      type: 'inputnumber',
+      description: '0 = auto',
+    },
+  ],
 } as const

@@ -20,7 +20,7 @@ const args = ref<string[]>([])
 const { spawn, stop, stdoutLines, running } = useFfmpeg()
 
 const targetFileSize = ref(10)
-const twoPass = ref(true)
+const twoPass = ref(false)
 
 const targetBitrate = computed(() => targetFileSize.value * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
 
@@ -45,7 +45,9 @@ const exportVideo = async () => {
     '-i', props.videoPath,
     '-passlogfile', `${appdataLocal}\\ffmpeg2pass.log`,
     '-vcodec', props.encoder,
-    '-b:v', `${targetBitrate.value}k`,
+    // '-b:v', `${targetBitrate.value}k`,
+    '-maxrate', `${targetBitrate.value}k`,
+    '-bufsize', `${targetBitrate.value / 2}k`,
     ...args.value,
   ]
 
