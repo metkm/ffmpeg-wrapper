@@ -29,7 +29,7 @@ const parseProgress = (line: string): FFmpegProgress => {
 
 export const useFFmpeg = () => {
   const stdoutLines = ref<string[]>([])
-  const running = ref(false)
+  const processing = ref(false)
   const progress = ref<FFmpegProgress>()
 
   const command = shallowRef<Command<string>>()
@@ -60,7 +60,7 @@ export const useFFmpeg = () => {
       },
     )
 
-    running.value = true
+    processing.value = true
     commandChild.value = await command.value.spawn()
 
     await promise
@@ -72,7 +72,7 @@ export const useFFmpeg = () => {
 
     command.value = undefined
     commandChild.value = undefined
-    running.value = false
+    processing.value = false
   }
 
   const clear = () => {
@@ -80,14 +80,19 @@ export const useFFmpeg = () => {
     kill()
   }
 
-  onUnmounted(() => kill())
+  const stop = () => {
+    clear()
+  }
+
+  onUnmounted(() => clear())
 
   return {
     stdoutLines,
     spawn,
     kill,
     clear,
-    running,
+    stop,
+    processing,
     progress,
   }
 }

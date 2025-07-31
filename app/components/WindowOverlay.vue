@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { getCurrentWindow } from '@tauri-apps/api/window'
 
+const route = useRoute()
+
 const window = getCurrentWindow()
 const isWindowMaximized = ref(await window.isMaximized())
 
@@ -11,13 +13,22 @@ const toggleMaximize = () => {
 </script>
 
 <template>
-  <div class="flex justify-between h-8 border-b border-b-muted/25">
-    <AppVersion class="flex items-center pl-2" />
+  <div class="flex h-8 border-b border-b-muted/25">
+    <div
+      data-tauri-drag-region
+      class="flex items-center w-[140px]"
+    >
+      <AppVersion class="flex items-center pl-2 pointer-events-none" />
+    </div>
 
     <div
       data-tauri-drag-region
-      class="flex-1"
-    />
+      class="flex items-center justify-center flex-1"
+    >
+      <p class="flex items-center text-xs font-medium text-muted capitalize mx-auto pointer-events-none">
+        {{ route.name }}
+      </p>
+    </div>
 
     <div class="flex items-center [&_button]:justify-center">
       <button

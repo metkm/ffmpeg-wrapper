@@ -3,35 +3,37 @@ import { appLocalDataDir } from '@tauri-apps/api/path'
 import { getCurrentWindow, ProgressBarStatus } from '@tauri-apps/api/window'
 import { save } from '@tauri-apps/plugin-dialog'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
+import { parametersPerEncoders } from '~/constants'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import type { Encoder } from '~/types/parameters'
 import type { Video } from '~/types/video'
 
 const props = defineProps<{
-  encoder: Encoder
   video: Video
-  videoPath: string
+  path: string
 }>()
 
 const emit = defineEmits<{
   exportEnd: []
 }>()
 
-const { spawn, clear, stdoutLines, running, progress } = useFFmpeg()
+const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg()
 
+const encoder = ref<Encoder>('h264_nvenc')
+const twoPass = ref<boolean>(false)
 const args = ref<string[]>([])
-const targetFileSize = ref(10)
-const twoPass = ref(false)
 
-const savePath = ref<string | null>()
+const output = reactive({
+  progressPercent: 0,
+  etaSeconds: 0,
+  savePath: null as string | null,
+  targetFileSize: 10,
+})
 
-const progressPercent = ref(0)
-const eta = ref(0)
-
-const targetBitrate = computed(() => targetFileSize.value * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
+const targetBitrate = computed(() => output.targetFileSize * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
 const duration = computed(() => props.video.range[1] - props.video.range[0])
 
-const onLine = () => {
+const updateProgress = () => {
   const time = progress.value?.time
   const speed = progress.value?.speed
 
@@ -40,122 +42,137 @@ const onLine = () => {
   const seconds = formatTimeToSeconds(time)
 
   if (speed) {
-    eta.value = (duration.value - seconds) / speed
+    output.etaSeconds = (duration.value - seconds) / speed
   }
 
-  progressPercent.value = parseInt((seconds * 100 / duration.value).toFixed(0))
+  output.progressPercent = parseInt((seconds * 100 / duration.value).toFixed(0))
 
   getCurrentWindow()
     .setProgressBar({
       status: ProgressBarStatus.Normal,
-      progress: progressPercent.value,
+      progress: output.progressPercent,
     })
 }
 
-const exportVideo = async () => {
-  savePath.value = await save({
+const process = async () => {
+  output.savePath = await save({
+    defaultPath: 'output.mp4',
     filters: [
       {
-        name: 'output',
+        name: 'video',
         extensions: ['mp4'],
       },
     ],
   })
 
-  if (!savePath.value) return
+  if (!output.savePath) return
 
-  const appdataLocal = await appLocalDataDir()
-
-  const baseArgs = [
+  const argsBase = [
     '-y',
     '-ss', formatSeconds(props.video.range[0] || 0),
     '-to', formatSeconds(props.video.range[1] || 1),
-    '-i', props.videoPath,
-    '-passlogfile', `${appdataLocal}\\ffmpeg2pass.log`,
-    '-vcodec', props.encoder,
+    '-i', props.path,
+    '-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`,
+    '-vcodec', encoder.value,
     // '-b:v', `${targetBitrate.value}k`,
     '-maxrate', `${targetBitrate.value}k`,
     '-bufsize', `${targetBitrate.value / 2}k`,
     ...args.value,
   ]
 
-  if (props.encoder === 'av1_nvenc') {
-    baseArgs.push('-rc', 'vbr')
+  if (encoder.value === 'av1_nvenc') {
+    argsBase.push('-rc', 'vbr')
+
+    if (twoPass.value) {
+      const args = [
+        ...argsBase,
+        '-an',
+        '-pass', '1',
+        '-f', 'mp4',
+        'NUL',
+      ]
+
+      await spawn(args, updateProgress)
+      argsBase.push('-pass', '2')
+    }
   }
 
-  if (props.encoder === 'av1_nvenc' && twoPass.value) {
-    await spawn([...baseArgs, '-an', '-pass', '1', '-f', 'mp4', 'NUL'], onLine)
-    baseArgs.push('-pass', '2')
-  }
+  argsBase.push(output.savePath)
+  await spawn(argsBase, updateProgress)
 
-  await spawn([...baseArgs, savePath.value], onLine)
-
-  clear()
+  kill()
   emit('exportEnd')
 }
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div class="flex flex-col gap-4 justify-between w-full">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 auto-rows-min gap-4 *:grow">
-        <slot />
-
-        <CommandParameters
-          v-model="args"
-          :encoder="encoder"
+  <section class="space-y-4">
+    <div class="grid grid-cols-3 gap-4 rounded-(--ui-radius)">
+      <UFormField
+        label="Encoder"
+        description="encoder that will be used to re-encode"
+      >
+        <USelect
+          v-model="encoder"
+          :items="Object.keys(parametersPerEncoders)"
+          class="w-full"
         />
+      </UFormField>
 
-        <UFormField
-          label="target file size"
-          :description="`${targetBitrate.toFixed(0)} bitrate`"
-          class="capitalize"
-        >
-          <UInputNumber
-            v-model="targetFileSize"
-            :min="0"
-            color="neutral"
-            class="w-full after:content-['(MB)'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-18 after:font-medium after:text-muted after:pointer-events-none"
-          />
-        </UFormField>
-
-        <UCheckbox
-          v-model="twoPass"
-          label="Two pass"
-          variant="card"
-          description="analyze video twice for better compression (might be useful for av1 encoders)"
-        />
-      </div>
-
-      <div class="flex items-center justify-end gap-4">
-        <UButton
-          v-if="savePath"
-          icon="i-lucide-folder-symlink"
-          variant="link"
+      <UFormField
+        label="target file size"
+        :description="`${targetBitrate.toFixed(0)} bitrate`"
+        class="capitalize"
+      >
+        <UInputNumber
+          v-model="output.targetFileSize"
+          :min="0"
           color="neutral"
-          @click="revealItemInDir(savePath)"
-        >
-          {{ savePath }}
-        </UButton>
+          class="w-full after:content-['(MB)'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-18 after:font-medium after:text-muted after:pointer-events-none"
+        />
+      </UFormField>
 
-        <UButton
-          v-if="running"
-          icon="i-lucide-circle-stop"
-          color="warning"
-          variant="subtle"
-          @click="clear"
-        >
-          Stop
-        </UButton>
+      <CommandParameters
+        v-model="args"
+        :encoder="encoder"
+      />
 
-        <UButton
-          icon="i-lucide-folder-down"
-          :loading="running"
-          @click="exportVideo"
-        >
-          Export
-        </UButton>
-      </div>
+      <UCheckbox
+        v-model="twoPass"
+        label="Two pass"
+        variant="card"
+        description="analyze video twice for better compression (might be useful for av1 encoders)"
+      />
+    </div>
+
+    <div class="flex items-center justify-end gap-4">
+      <UButton
+        v-if="output.savePath"
+        icon="i-lucide-folder-symlink"
+        variant="link"
+        color="neutral"
+        @click="revealItemInDir(output.savePath)"
+      >
+        {{ output.savePath }}
+      </UButton>
+
+      <UButton
+        v-if="processing"
+        icon="i-lucide-circle-stop"
+        color="warning"
+        variant="subtle"
+        @click="stop"
+      >
+        Stop
+      </UButton>
+
+      <UButton
+        icon="i-lucide-folder-down"
+        :loading="processing"
+        @click="process"
+      >
+        Export
+      </UButton>
     </div>
 
     <template v-if="stdoutLines.length > 0">
@@ -166,17 +183,15 @@ const exportVideo = async () => {
       >{{ stdoutLines.join('\n') }}</pre>
 
       <div>
-        <UProgress
-          v-model="progressPercent"
-        />
+        <UProgress v-model="output.progressPercent" />
 
         <p
-          v-if="eta > 0"
+          v-if="output.etaSeconds > 0"
           class="text-muted text-sm mt-1 font-medium"
         >
-          {{ progressPercent }}% - {{ eta.toFixed(0) }}s left
+          {{ output.progressPercent }}% - {{ output.etaSeconds.toFixed(0) }}s left
         </p>
       </div>
     </template>
-  </div>
+  </section>
 </template>

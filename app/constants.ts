@@ -8,16 +8,6 @@ export const defaultVideoValues: Video = {
 }
 
 export const parametersPerEncoders = {
-  libx264: [
-    {
-      id: 1,
-      name: 'crf',
-      min: 0,
-      max: 52,
-      default: 26,
-      type: 'inputnumber',
-    },
-  ],
   av1_nvenc: [
     {
       id: 2,

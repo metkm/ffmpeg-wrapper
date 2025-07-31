@@ -1,26 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { defaultVideoValues, parametersPerEncoders } from './constants'
-
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { convertFileSrc } from '@tauri-apps/api/core'
-
-import type { Video } from './types/video'
-import type { Encoder } from './types/parameters'
 import { check } from '@tauri-apps/plugin-updater'
 
 const toast = useToast()
-
-const videoPath = ref<string>('')
-
-const video = ref<Video>(defaultVideoValues)
-const encoder = ref<Encoder>('h264_nvenc')
-
-const videoUrl = computed(() => videoPath.value ? convertFileSrc(videoPath.value) : undefined)
-
-const onExportEnd = () => {
-  videoPath.value = ''
-}
 
 onMounted(() => {
   getCurrentWindow()
@@ -49,65 +31,8 @@ onMounted(async () => {
         <WindowOverlay />
       </Suspense>
 
-      <main class="flex flex-col grow p-4 overflow-x-hidden overflow-y-auto space-y-4 scrollbar">
-        <Transition
-          enter-active-class="transition-all"
-          leave-active-class="transition-all"
-          leave-to-class="opacity-0"
-          enter-from-class="opacity-0"
-          mode="out-in"
-        >
-          <div
-            v-if="!videoPath"
-            class="flex flex-col grow"
-          >
-            <FileDrop
-              v-model="videoPath"
-              class="grow"
-            />
-          </div>
-
-          <div
-            v-else
-            class="w-full max-w-4xl mx-auto space-y-4"
-          >
-            <VideoPreview
-              v-if="videoUrl"
-              v-model="video"
-              :url="videoUrl"
-              @close="onExportEnd"
-            >
-              <template #leading-title>
-                <UButton
-                  icon="i-lucide-x"
-                  square
-                  color="warning"
-                  variant="soft"
-                  @click="onExportEnd"
-                >
-                  Close
-                </UButton>
-              </template>
-            </VideoPreview>
-
-            <VideoExport
-              :encoder="encoder"
-              :video="video"
-              :video-path="videoPath"
-            >
-              <UFormField
-                label="Encoder"
-                description="encoder that will be used to re-encode"
-              >
-                <USelect
-                  v-model="encoder"
-                  :items="Object.keys(parametersPerEncoders)"
-                  class="w-full"
-                />
-              </UFormField>
-            </VideoExport>
-          </div>
-        </Transition>
+      <main class="overflow-x-hidden overflow-y-auto scrollbar">
+        <NuxtPage />
       </main>
     </div>
   </UApp>

@@ -4,5 +4,10 @@ export default defineAppConfig({
       primary: 'purple',
       neutral: 'zinc',
     },
+    formField: {
+      slots: {
+        root: 'border p-4 border-muted rounded-lg',
+      },
+    },
   },
 })

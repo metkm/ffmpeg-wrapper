@@ -3,6 +3,10 @@ import type { UnlistenFn } from '@tauri-apps/api/event'
 import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { open } from '@tauri-apps/plugin-dialog'
 
+const emit = defineEmits<{
+  drop: []
+}>()
+
 const path = defineModel<string>()
 
 const hovering = ref(false)
@@ -25,6 +29,7 @@ onMounted(async () => {
         hovering.value = false
       } else if (event.payload.type === 'drop') {
         path.value = event.payload.paths.at(0)
+        emit('drop')
       }
     })
 })

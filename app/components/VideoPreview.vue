@@ -3,7 +3,7 @@ import { defaultVideoValues } from '~/constants'
 import type { Video } from '~/types/video'
 
 defineProps<{
-  url: string
+  src: string
 }>()
 
 const videoModel = defineModel<Video>({
@@ -74,26 +74,28 @@ watch(
 </script>
 
 <template>
-  <section class="space-y-4 rounded-(--ui-radius)">
+  <section class="space-y-4">
     <div class="flex items-center gap-4">
       <slot name="leading-title" />
 
       <p class="font-medium truncate text-muted">
-        {{ decodeURI(url).split('\\').at(-1) }}
+        {{ decodeURI(src).split('\\').at(-1) }}
       </p>
     </div>
 
     <div
       ref="videoContainerElement"
-      class="relative flex items-center gap-4"
+      class="relative flex items-center gap-4 rounded-(--ui-radius) overflow-hidden w-full aspect-video"
     >
-      <video
-        ref="videoElement"
-        :src="url"
-        class="aspect-video rounded-(--ui-radius) w-full"
-        @loadeddata="handleLoad"
-        @timeupdate="handleTimeUpdate"
-      />
+      <div class="rounded-(--ui-radius) overflow-hidden">
+        <video
+          ref="videoElement"
+          :src="src"
+          class="aspect-video rounded-(--ui-radius) overflow-hidden w-full"
+          @loadeddata="handleLoad"
+          @timeupdate="handleTimeUpdate"
+        />
+      </div>
 
       <div class="p-4 absolute bottom-0 inset-x-0  bg-gradient-to-t from-black">
         <div class="flex items-center gap-2 rounded-full">
