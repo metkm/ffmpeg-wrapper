@@ -67,6 +67,7 @@ onUnmounted(() => unlistenFn?.())
             :initial="{ opacity: 0 }"
             :animate="{ opacity: 1 }"
             :exit="{ opacity: 0 }"
+            layout-id="hovering-path"
           >
             {{ hoveringPath.split('\\').at(-1) }}
           </motion.p>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { motion } from 'motion-v'
 import { defaultVideoValues } from '~/constants'
 import type { Video } from '~/types/video'
 
@@ -78,9 +79,12 @@ watch(
     <div class="flex items-center gap-4">
       <slot name="leading-title" />
 
-      <p class="font-medium truncate text-muted">
+      <motion.p
+        layout-id="hovering-path"
+        class="font-medium truncate text-muted z-10"
+      >
         {{ decodeURI(src).split('\\').at(-1) }}
-      </p>
+      </motion.p>
     </div>
 
     <div
