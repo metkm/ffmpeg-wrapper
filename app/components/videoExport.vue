@@ -17,6 +17,7 @@ const emit = defineEmits<{
   exportEnd: []
 }>()
 
+// TODO: move progress stuff to inside useFFmpeg
 const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg()
 
 const encoder = ref<Encoder>('h264_nvenc')
