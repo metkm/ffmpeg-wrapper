@@ -171,7 +171,7 @@ const process = async () => {
         style="overflow-wrap: break-word;"
       >{{ stdoutLines.join('\n') }}</pre>
 
-      <div v-if="progress">
+      <div v-if="progress && processing">
         <UProgress v-model="progress.percent" />
 
         <p
