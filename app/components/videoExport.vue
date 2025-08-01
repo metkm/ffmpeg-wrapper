@@ -145,26 +145,39 @@ const process = async () => {
       />
     </div>
 
-    <div class="flex items-center justify-end gap-4">
-      <UButton
-        v-if="output.savePath"
-        icon="i-lucide-folder-symlink"
-        variant="link"
-        color="neutral"
-        @click="revealItemInDir(output.savePath)"
-      >
-        {{ output.savePath }}
-      </UButton>
+    <div class="flex items-center justify-end gap-4 border border-dashed rounded-(--ui-radius) p-4 border-muted">
+      <LayoutGroup>
+        <AnimatePresence>
+          <Motion layout>
+            <UButton
+              v-if="output.savePath"
+              icon="i-lucide-folder-symlink"
+              variant="link"
+              color="neutral"
+              @click="revealItemInDir(output.savePath)"
+            >
+              {{ output.savePath }}
+            </UButton>
+          </Motion>
 
-      <UButton
-        v-if="processing"
-        icon="i-lucide-circle-stop"
-        color="warning"
-        variant="subtle"
-        @click="stop"
-      >
-        Stop
-      </UButton>
+          <Motion
+            v-if="processing"
+            layout
+            :exit="{ opacity: 0 }"
+            :animate="{ opacity: 1 }"
+            :initial="{ opacity: 0 }"
+          >
+            <UButton
+              icon="i-lucide-circle-stop"
+              color="warning"
+              variant="subtle"
+              @click="stop"
+            >
+              Stop
+            </UButton>
+          </Motion>
+        </AnimatePresence>
+      </LayoutGroup>
 
       <UButton
         icon="i-lucide-folder-down"
