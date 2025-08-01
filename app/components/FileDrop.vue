@@ -60,17 +60,18 @@ onUnmounted(() => unlistenFn?.())
             />
           </motion.span>
 
-          <motion.p
+          <motion.div
             v-if="hoveringPath"
             layout
-            class="font-medium text-muted mt-4"
-            :initial="{ opacity: 0 }"
-            :animate="{ opacity: 1 }"
-            :exit="{ opacity: 0 }"
-            layout-id="hovering-path"
           >
-            {{ hoveringPath.split('\\').at(-1) }}
-          </motion.p>
+            <motion.p
+              layout
+              class="font-medium text-muted mt-4"
+              layout-id="hovering-path"
+            >
+              {{ hoveringPath.split('\\').at(-1) }}
+            </motion.p>
+          </motion.div>
         </AnimatePresence>
       </LayoutGroup>
     </button>
