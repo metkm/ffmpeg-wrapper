@@ -104,7 +104,7 @@ watch(
           ref="videoElement"
           :src="src"
           class="aspect-video rounded-(--ui-radius) overflow-hidden w-full opacity-0"
-          @canplaythrough="handleLoad"
+          @loadeddata="handleLoad"
           @timeupdate="handleTimeUpdate"
         />
       </div>
