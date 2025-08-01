@@ -2,7 +2,7 @@
 import { appLocalDataDir } from '@tauri-apps/api/path'
 import { save } from '@tauri-apps/plugin-dialog'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
-import { parametersPerEncoders } from '~/constants'
+import { parametersPerEncoders, videoFilters } from '~/constants'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import type { Encoder } from '~/types/parameters'
 import type { Video } from '~/types/video'
@@ -33,12 +33,7 @@ const output = reactive({
 const process = async () => {
   output.savePath = await save({
     defaultPath: 'output.mp4',
-    filters: [
-      {
-        name: 'video',
-        extensions: ['mp4'],
-      },
-    ],
+    filters: videoFilters,
   })
 
   if (!output.savePath) return

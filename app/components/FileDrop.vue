@@ -3,6 +3,7 @@ import type { UnlistenFn } from '@tauri-apps/api/event'
 import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { open } from '@tauri-apps/plugin-dialog'
 import { motion } from 'motion-v'
+import { videoFilters } from '~/constants'
 
 const emit = defineEmits<{
   drop: []
@@ -17,10 +18,19 @@ const openFile = async () => {
   path.value = await open({
     multiple: false,
     directory: false,
+    filters: videoFilters,
   }) ?? undefined
 }
 
 let unlistenFn: UnlistenFn | undefined
+
+const correctFileType = computed(() => {
+  return videoFilters.find((filter) => {
+    return filter.extensions.find((extension) => {
+      return hoveringPath.value?.endsWith(extension)
+    })
+  })
+})
 
 onMounted(async () => {
   unlistenFn = await getCurrentWebview()
@@ -33,6 +43,10 @@ onMounted(async () => {
         hovering.value = false
         hoveringPath.value = undefined
       } else if (event.payload.type === 'drop') {
+        if (!correctFileType.value) {
+          return
+        }
+
         path.value = event.payload.paths.at(0)
         emit('drop')
       }
@@ -63,13 +77,23 @@ onUnmounted(() => unlistenFn?.())
           <motion.div
             v-if="hoveringPath"
             layout
+            :initial="{ opacity: 0 }"
+            :animate="{ opacity: 1 }"
+            :exit="{ opacity: 0 }"
           >
             <motion.p
-              layout
-              class="font-medium text-muted mt-4"
+              layout="position"
+              class="font-medium text-muted text-center mt-4"
               layout-id="hovering-path"
             >
               {{ hoveringPath.split('\\').at(-1) }}
+            </motion.p>
+
+            <motion.p
+              v-if="!correctFileType"
+              class="font-medium text-error text-sm mt-1 capitalize"
+            >
+              wrong file type
             </motion.p>
           </motion.div>
         </AnimatePresence>
