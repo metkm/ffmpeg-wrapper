@@ -33,7 +33,7 @@ const output = reactive({
 const targetBitrate = computed(() => output.targetFileSize * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
 const duration = computed(() => props.video.range[1] - props.video.range[0])
 
-const updateProgress = () => {
+const updateProgressBar = () => {
   const time = progress.value?.time
   const speed = progress.value?.speed
 
@@ -52,6 +52,18 @@ const updateProgress = () => {
       status: ProgressBarStatus.Normal,
       progress: output.progressPercent,
     })
+}
+
+const stopProcess = () => {
+  stop()
+
+  getCurrentWindow()
+    .setProgressBar({
+      status: ProgressBarStatus.None,
+    })
+
+  output.progressPercent = 0
+  output.etaSeconds = 0
 }
 
 const process = async () => {
@@ -92,13 +104,13 @@ const process = async () => {
         'NUL',
       ]
 
-      await spawn(args, updateProgress)
+      await spawn(args, updateProgressBar)
       argsBase.push('-pass', '2')
     }
   }
 
   argsBase.push(output.savePath)
-  await spawn(argsBase, updateProgress)
+  await spawn(argsBase, updateProgressBar)
 
   kill()
   emit('exportEnd')
@@ -171,7 +183,7 @@ const process = async () => {
               icon="i-lucide-circle-stop"
               color="warning"
               variant="subtle"
-              @click="stop"
+              @click="stopProcess"
             >
               Stop
             </UButton>
