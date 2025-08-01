@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { appLocalDataDir } from '@tauri-apps/api/path'
-import { getCurrentWindow, ProgressBarStatus } from '@tauri-apps/api/window'
 import { save } from '@tauri-apps/plugin-dialog'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { parametersPerEncoders } from '~/constants'
@@ -17,55 +16,19 @@ const emit = defineEmits<{
   exportEnd: []
 }>()
 
-// TODO: move progress stuff to inside useFFmpeg
-const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg()
+const targetBitrate = computed(() => output.targetFileSize * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
+const duration = computed(() => props.video.range[1] - props.video.range[0])
+
+const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg(duration)
 
 const encoder = ref<Encoder>('h264_nvenc')
 const twoPass = ref<boolean>(false)
 const args = ref<string[]>([])
 
 const output = reactive({
-  progressPercent: 0,
-  etaSeconds: 0,
   savePath: null as string | null,
   targetFileSize: 10,
 })
-
-const targetBitrate = computed(() => output.targetFileSize * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
-const duration = computed(() => props.video.range[1] - props.video.range[0])
-
-const updateProgressBar = () => {
-  const time = progress.value?.time
-  const speed = progress.value?.speed
-
-  if (!time) return
-
-  const seconds = formatTimeToSeconds(time)
-
-  if (speed) {
-    output.etaSeconds = (duration.value - seconds) / speed
-  }
-
-  output.progressPercent = parseInt((seconds * 100 / duration.value).toFixed(0))
-
-  getCurrentWindow()
-    .setProgressBar({
-      status: ProgressBarStatus.Normal,
-      progress: output.progressPercent,
-    })
-}
-
-const stopProcess = () => {
-  stop()
-
-  getCurrentWindow()
-    .setProgressBar({
-      status: ProgressBarStatus.None,
-    })
-
-  output.progressPercent = 0
-  output.etaSeconds = 0
-}
 
 const process = async () => {
   output.savePath = await save({
@@ -105,13 +68,13 @@ const process = async () => {
         'NUL',
       ]
 
-      await spawn(args, updateProgressBar)
+      await spawn(args)
       argsBase.push('-pass', '2')
     }
   }
 
   argsBase.push(output.savePath)
-  await spawn(argsBase, updateProgressBar)
+  await spawn(argsBase)
 
   kill()
   emit('exportEnd')
@@ -184,7 +147,7 @@ const process = async () => {
               icon="i-lucide-circle-stop"
               color="warning"
               variant="subtle"
-              @click="stopProcess"
+              @click="stop"
             >
               Stop
             </UButton>
@@ -208,14 +171,14 @@ const process = async () => {
         style="overflow-wrap: break-word;"
       >{{ stdoutLines.join('\n') }}</pre>
 
-      <div>
-        <UProgress v-model="output.progressPercent" />
+      <div v-if="progress">
+        <UProgress v-model="progress.percent" />
 
         <p
-          v-if="output.etaSeconds > 0"
+          v-if="(progress.eta ?? 0) > 0"
           class="text-muted text-sm mt-1 font-medium"
         >
-          {{ output.progressPercent }}% - {{ output.etaSeconds.toFixed(0) }}s left
+          {{ progress.percent }}% - {{ progress.eta?.toFixed(0) }}s left
         </p>
       </div>
     </template>

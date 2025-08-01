@@ -8,4 +8,5 @@ export interface FFmpegProgress {
   speed?: number
   elapsed?: string
   percent?: number
+  eta?: number
 }
