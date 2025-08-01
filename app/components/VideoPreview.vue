@@ -22,6 +22,14 @@ const handleLoad = () => {
   if (!videoElement.value) return
   videoModel.value.duration = videoElement.value.duration
   videoModel.value.range = [0, videoElement.value.duration]
+
+  if (videoContainerElement.value) {
+    videoContainerElement.value.classList.add('fade-in')
+    videoContainerElement.value.classList.remove('opacity-0')
+
+    videoElement.value.classList.add('fade-in')
+    videoElement.value.classList.remove('opacity-0')
+  }
 }
 
 const handleTimeUpdate = () => {
@@ -89,14 +97,14 @@ watch(
 
     <div
       ref="videoContainerElement"
-      class="relative flex items-center gap-4 rounded-(--ui-radius) overflow-hidden w-full aspect-video"
+      class="relative flex items-center gap-4 rounded-(--ui-radius) overflow-hidden w-full aspect-video opacity-0"
     >
       <div class="rounded-(--ui-radius) overflow-hidden">
         <video
           ref="videoElement"
           :src="src"
-          class="aspect-video rounded-(--ui-radius) overflow-hidden w-full"
-          @loadeddata="handleLoad"
+          class="aspect-video rounded-(--ui-radius) overflow-hidden w-full opacity-0"
+          @canplaythrough="handleLoad"
           @timeupdate="handleTimeUpdate"
         />
       </div>
@@ -151,3 +159,20 @@ watch(
     </div>
   </section>
 </template>
+
+<style>
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation-name: fade-in;
+  animation-timing-function: ease-out;
+  animation-duration: 500ms;
+}
+</style>
