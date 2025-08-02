@@ -56,7 +56,7 @@ const handleMouseMove = (event: MouseEvent) => {
 
   if (resizingSide.value === 'w') {
     const newOffset = offsetX + mouseEventDownContainer.offsetX
-    const newWidth = mouseEventDownContainer.width + (mouseEventDownContainer.offsetX - newOffset)
+    const newWidth = -offsetX + mouseEventDownContainer.width
 
     if (newWidth <= MIN_WIDTH) {
       return
@@ -75,7 +75,7 @@ const handleMouseMove = (event: MouseEvent) => {
     )
   } else if (resizingSide.value === 'n') {
     const newOffset = offsetY + mouseEventDownContainer.offsetY
-    const newHeight = mouseEventDownContainer.height + (mouseEventDownContainer.offsetY - newOffset)
+    const newHeight = -offsetY + mouseEventDownContainer.height
 
     if (newHeight <= MIN_HEIGHT) {
       return
