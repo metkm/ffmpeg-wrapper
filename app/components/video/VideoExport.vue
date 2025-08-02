@@ -44,7 +44,6 @@ const process = async () => {
     '-ss', formatSeconds(props.video.range[0] || 0),
     '-to', formatSeconds(props.video.range[1] || 1),
     '-i', props.path,
-    '-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`,
     '-vcodec', encoder.value,
     // '-b:v', `${targetBitrate.value}k`,
     '-maxrate', `${targetBitrate.value}k`,
@@ -52,6 +51,10 @@ const process = async () => {
     '-vf', `crop=${props.video.crop.width}:${props.video.crop.height}:${props.video.crop.left}:${props.video.crop.top}`,
     ...args.value,
   ]
+
+  if (twoPass.value) {
+    argsBase.push('-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`)
+  }
 
   if (encoder.value === 'av1_nvenc') {
     argsBase.push('-rc', 'vbr')
