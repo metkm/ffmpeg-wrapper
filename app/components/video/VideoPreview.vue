@@ -7,6 +7,14 @@ defineProps<{
   src: string
 }>()
 
+const showCrop = ref(false)
+
+defineShortcuts({
+  c: () => {
+    showCrop.value = !showCrop.value
+  },
+})
+
 const videoModel = defineModel<Video>({
   default: defaultVideoValues,
 })
@@ -22,6 +30,9 @@ const handleLoad = () => {
   if (!videoElement.value) return
   videoModel.value.duration = videoElement.value.duration
   videoModel.value.range = [0, videoElement.value.duration]
+
+  videoModel.value.crop.width = videoElement.value.videoWidth
+  videoModel.value.crop.height = videoElement.value.videoHeight
 
   if (videoContainerElement.value) {
     videoContainerElement.value.classList.add('fade-in')
@@ -84,18 +95,32 @@ watch(
 
 <template>
   <section class="space-y-4">
-    <motion.p
-      layout-id="hovering-path"
-      class="font-medium truncate text-muted z-10"
-    >
-      {{ decodeURI(src).split('\\').at(-1) }}
-    </motion.p>
+    <div class="font-medium text-muted">
+      <motion.p
+        layout-id="hovering-path"
+        class="truncate z-10"
+      >
+        {{ decodeURI(src).split('\\').at(-1) }}
+      </motion.p>
+
+      <p class="text-xs">
+        (press <UKbd>C</UKbd> to toggle crop)
+      </p>
+    </div>
 
     <div
       ref="videoContainerElement"
       class="relative flex items-center gap-4 rounded-(--ui-radius) overflow-hidden w-full aspect-video opacity-0"
     >
       <div class="rounded-(--ui-radius) overflow-hidden">
+        <VideoCrop
+          v-if="showCrop"
+          v-model="videoModel.crop"
+          :width="videoElement?.videoWidth"
+          :height="videoElement?.videoHeight"
+          class="z-10"
+        />
+
         <video
           ref="videoElement"
           :src="src"

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
-  width: number
-  height: number
+  width?: number
+  height?: number
 }>()
 
 const modelValueCrop = defineModel<{
@@ -152,26 +152,27 @@ onMounted(() => {
 watch(container, () => {
   if (!containerElement.value) return
 
-  modelValueCrop.value.top = range(0, containerElement.value.clientHeight, 0, props.height, container.offsetY)
-  modelValueCrop.value.left = range(0, containerElement.value.clientWidth, 0, props.width, container.offsetX)
-  modelValueCrop.value.width = range(0, containerElement.value.clientWidth, 0, props.width, container.width)
-  modelValueCrop.value.height = range(0, containerElement.value.clientHeight, 0, props.height, container.height)
+  if (props.height) {
+    modelValueCrop.value.top = Math.floor(range(0, containerElement.value.clientHeight, 0, props.height, container.offsetY))
+    modelValueCrop.value.height = Math.floor(range(0, containerElement.value.clientHeight, 0, props.height, container.height))
+  }
+
+  if (props.width) {
+    modelValueCrop.value.left = Math.floor(range(0, containerElement.value.clientWidth, 0, props.width, container.offsetX))
+    modelValueCrop.value.width = Math.floor(range(0, containerElement.value.clientWidth, 0, props.width, container.width))
+  }
 }, {
   immediate: true,
 })
 </script>
 
 <template>
-  <div class="max-w-md mx-auto relative">
-    <img src="https://pbs.twimg.com/media/GxHAvLWaUAA-gnM?format=jpg&name=large">
-
-    <p class="fixed bottom-0">
-      {{ container }}
-    </p>
+  <div class="absolute inset-0">
+    <slot />
 
     <div
       ref="containerElement"
-      class="absolute inset-0"
+      class="relative w-full h-full"
     >
       <div
         ref="containerInnerElement"

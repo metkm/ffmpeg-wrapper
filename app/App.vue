@@ -37,19 +37,9 @@ onMounted(async () => {
         <AppWindowOverlay />
       </Suspense>
 
-      <!-- <main class="flex flex-col grow overflow-x-hidden overflow-y-auto scrollbar">
+      <main class="flex flex-col grow overflow-x-hidden overflow-y-auto scrollbar">
         <NuxtPage />
-      </main> -->
-
-      <VideoCrop
-        v-model="crop"
-        :width="1532"
-        :height="2048"
-      />
-
-      <p class="bg-red-500 fixed bottom-0 right-0">
-        {{ crop }}
-      </p>
+      </main>
     </div>
   </UApp>
 </template>
