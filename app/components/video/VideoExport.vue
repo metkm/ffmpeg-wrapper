@@ -49,6 +49,7 @@ const process = async () => {
     // '-b:v', `${targetBitrate.value}k`,
     '-maxrate', `${targetBitrate.value}k`,
     '-bufsize', `${targetBitrate.value / 2}k`,
+    '-vf', `crop=${props.video.crop.width}:${props.video.crop.height}:${props.video.crop.left}:${props.video.crop.top}`,
     ...args.value,
   ]
 

@@ -3,6 +3,12 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 import { check } from '@tauri-apps/plugin-updater'
 
 const toast = useToast()
+const crop = ref({
+  top: 0,
+  left: 0,
+  width: 0,
+  height: 0,
+})
 
 onMounted(() => {
   getCurrentWindow()
