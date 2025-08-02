@@ -19,23 +19,12 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 max-w-4xl mx-auto w-full p-4">
+  <div class="flex flex-col gap-4 max-w-4xl mx-auto w-full p-4 relative">
     <VideoPreview
       v-model="video"
       :src="src"
       class="w-full"
-    >
-      <template #leading-title>
-        <UButton
-          to="/"
-          icon="i-lucide-arrow-left"
-          variant="soft"
-          color="neutral"
-        >
-          Exit
-        </UButton>
-      </template>
-    </VideoPreview>
+    />
 
     <VideoExport
       :video="video"

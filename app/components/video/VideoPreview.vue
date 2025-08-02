@@ -84,16 +84,12 @@ watch(
 
 <template>
   <section class="space-y-4">
-    <div class="flex items-center gap-4">
-      <slot name="leading-title" />
-
-      <motion.p
-        layout-id="hovering-path"
-        class="font-medium truncate text-muted z-10"
-      >
-        {{ decodeURI(src).split('\\').at(-1) }}
-      </motion.p>
-    </div>
+    <motion.p
+      layout-id="hovering-path"
+      class="font-medium truncate text-muted z-10"
+    >
+      {{ decodeURI(src).split('\\').at(-1) }}
+    </motion.p>
 
     <div
       ref="videoContainerElement"

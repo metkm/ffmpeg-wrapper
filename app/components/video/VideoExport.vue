@@ -6,6 +6,7 @@ import { parametersPerEncoders, videoFilters } from '~/constants'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import type { Encoder } from '~/types/parameters'
 import type { Video } from '~/types/video'
+import { motion } from 'motion-v'
 
 const props = defineProps<{
   video: Video
@@ -77,8 +78,8 @@ const process = async () => {
 </script>
 
 <template>
-  <section class="space-y-4">
-    <div class="grid grid-cols-3 gap-4 rounded-(--ui-radius)">
+  <section class="flex flex-col gap-4 pb-[calc(var(--spacing)*4+50px)]">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-(--ui-radius)">
       <UFormField
         label="Encoder"
         description="encoder that will be used to re-encode"
@@ -116,66 +117,100 @@ const process = async () => {
       />
     </div>
 
-    <div class="flex items-center justify-end gap-4 border border-dashed rounded-(--ui-radius) p-4 border-muted">
-      <LayoutGroup>
-        <AnimatePresence>
-          <Motion layout>
-            <UButton
-              v-if="output.savePath"
-              icon="i-lucide-folder-symlink"
-              variant="link"
-              color="neutral"
-              @click="revealItemInDir(output.savePath)"
-            >
-              {{ output.savePath }}
-            </UButton>
-          </Motion>
+    <pre
+      v-if="stdoutLines.length > 0"
+      ref="stdoutElement"
+      class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
+      style="overflow-wrap: break-word;"
+    >{{ stdoutLines.join('\n') }}</pre>
 
-          <Motion
-            v-if="processing"
-            layout
-            :exit="{ opacity: 0 }"
-            :animate="{ opacity: 1 }"
-            :initial="{ opacity: 0 }"
-          >
-            <UButton
-              icon="i-lucide-circle-stop"
-              color="warning"
-              variant="subtle"
-              @click="stop"
-            >
-              Stop
-            </UButton>
-          </Motion>
-        </AnimatePresence>
-      </LayoutGroup>
-
-      <UButton
-        icon="i-lucide-folder-down"
-        :loading="processing"
-        @click="process"
+    <LayoutGroup>
+      <section
+        layout
+        class="fixed bottom-4 inset-x-2 flex justify-center"
       >
-        Export
-      </UButton>
-    </div>
-
-    <template v-if="stdoutLines.length > 0">
-      <pre
-        ref="stdoutElement"
-        class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
-        style="overflow-wrap: break-word;"
-      >{{ stdoutLines.join('\n') }}</pre>
-
-      <div v-if="progress && processing">
-        <UProgress v-model="progress.percent" />
-
-        <p
-          v-if="(progress.eta ?? 0) > 0"
-          class="text-muted text-sm mt-1 font-medium"
+        <motion.div
+          layout
+          class="flex items-center gap-2 p-2 backdrop-blur-2xl max-w-max border border-muted overflow-hidden relative"
+          :style="{ borderRadius: '999px' }"
         >
-          {{ progress.percent }}% - {{ progress.eta?.toFixed(0) }}s left
-        </p>
-      </div>
-    </template>
+          <AnimatePresence>
+            <Motion layout>
+              <UButton
+                to="/"
+                icon="i-lucide-x"
+                variant="soft"
+                color="neutral"
+                square
+              />
+            </Motion>
+
+            <Motion
+              v-if="output.savePath"
+              layout
+              :exit="{ opacity: 0 }"
+              :animate="{ opacity: 1 }"
+              :initial="{ opacity: 0 }"
+            >
+              <UButton
+                icon="i-lucide-folder-symlink"
+                variant="link"
+                color="neutral"
+                square
+                class="-ml-0.5"
+                @click="revealItemInDir(output.savePath)"
+              >
+                {{ output.savePath }}
+              </UButton>
+            </Motion>
+
+            <Motion
+              v-if="processing"
+              layout
+              :exit="{ opacity: 0 }"
+              :animate="{ opacity: 1 }"
+              :initial="{ opacity: 0 }"
+            >
+              <UButton
+                icon="i-lucide-circle-stop"
+                color="warning"
+                variant="subtle"
+                @click="stop"
+              >
+                Stop
+              </UButton>
+            </Motion>
+
+            <Motion layout>
+              <UButton
+                icon="i-lucide-folder-down"
+                :loading="processing"
+                @click="process"
+              >
+                <motion.p
+                  layout="position"
+                  class="text-center w-11"
+                >
+                  {{ processing && progress?.eta ? `${progress.eta.toFixed(0)}s` : 'Export' }}
+                </motion.p>
+              </UButton>
+            </Motion>
+
+            <motion.div
+              v-if="processing"
+              class="absolute bottom-0 w-full bg-accented transition-all"
+              :exit="{ transform: `translateY(100%)` }"
+              :initial="{ transform: `translateY(100%)` }"
+              :animate="{ transform: `translateY(0)` }"
+            >
+              <div
+                class="h-0.5 bg-primary transition-all"
+                :style="{ width: `${progress?.percent}%` }"
+              />
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
+      </section>
+    </LayoutGroup>
   </section>
 </template>

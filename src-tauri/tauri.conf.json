@@ -16,14 +16,10 @@
         "width": 800,
         "height": 600,
         "transparent": true,
-        "windowEffects": {
-          "effects": ["mica"]
-        },
         "visible": false,
         "minHeight": 200,
         "minWidth": 300,
-        "decorations": false,
-        "titleBarStyle": "Transparent"
+        "decorations": false
       }
     ],
     "security": {

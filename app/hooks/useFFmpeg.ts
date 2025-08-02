@@ -79,9 +79,9 @@ export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
       },
     )
 
-    processing.value = true
     commandChild.value = await command.value.spawn()
 
+    processing.value = true
     await promise
   }
 

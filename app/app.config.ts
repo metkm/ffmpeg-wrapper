@@ -9,5 +9,10 @@ export default defineAppConfig({
         root: 'border p-4 border-muted rounded-lg',
       },
     },
+    button: {
+      slots: {
+        base: 'rounded-full',
+      },
+    },
   },
 })

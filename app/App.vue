@@ -28,7 +28,7 @@ onMounted(async () => {
   <UApp>
     <div class="flex flex-col h-screen w-screen overflow-x-hidden">
       <Suspense>
-        <WindowOverlay />
+        <AppWindowOverlay />
       </Suspense>
 
       <main class="flex flex-col grow overflow-x-hidden overflow-y-auto scrollbar">
