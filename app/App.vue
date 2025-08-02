@@ -3,6 +3,12 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 import { check } from '@tauri-apps/plugin-updater'
 
 const toast = useToast()
+const crop = ref({
+  top: 0,
+  left: 0,
+  width: 0,
+  right: 0,
+})
 
 onMounted(() => {
   getCurrentWindow()
@@ -36,9 +42,14 @@ onMounted(async () => {
       </main> -->
 
       <VideoCrop
+        v-model="crop"
         :width="1532"
         :height="2048"
       />
+
+      <p class="bg-red-500 fixed bottom-0 right-0">
+        {{ crop }}
+      </p>
     </div>
   </UApp>
 </template>

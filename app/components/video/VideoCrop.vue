@@ -4,6 +4,20 @@ const props = defineProps<{
   height: number
 }>()
 
+const modelValueCrop = defineModel<{
+  top: number
+  left: number
+  width: number
+  right: number
+}>({
+  default: {
+    top: 0,
+    left: 0,
+    width: 0,
+    right: 0,
+  },
+})
+
 type Side = 'w' | 'n' | 'e' | 's' | 'move'
 
 const containerElement = useTemplateRef('containerElement')
@@ -64,27 +78,51 @@ const handleMouseMove = (event: MouseEvent) => {
     containerElement.value.clientHeight - mouseEventDownContainer.height,
   )
 
+  const widthClamped = clamp(
+    mouseEventDownContainer.width + offsetXDiff,
+    20,
+    containerElement.value.clientWidth - container.offsetX,
+  )
+
+  const heightClamped = clamp(
+    mouseEventDownContainer.height + offsetYDiff,
+    0,
+    containerElement.value.clientHeight - container.offsetY,
+  )
+
   if (resizingSide.value === 'move') {
     container.offsetX = offsetXClamped
     container.offsetY = offsetYClamped
   } else if (resizingSide.value === 'w') {
-    container.offsetX = offsetXNew
-    container.width = mouseEventDownContainer.width - offsetXDiff
-  } else if (resizingSide.value === 'e') {
-    container.width = clamp(
-      mouseEventDownContainer.width + offsetXDiff,
-      10,
-      containerElement.value.clientWidth - container.offsetX,
-    )
-  } else if (resizingSide.value === 'n') {
-    container.offsetY = offsetYNew
-    container.height = mouseEventDownContainer.height - offsetYDiff
-  } else if (resizingSide.value === 's') {
-    container.height = clamp(
-      mouseEventDownContainer.height + offsetYDiff,
+    const newWidth = mouseEventDownContainer.width - offsetXDiff
+
+    const rightSideOfCropWidth = containerElement.value.clientWidth - offsetXNew - newWidth
+    const leftSideOfCropWidth = containerElement.value.clientWidth - rightSideOfCropWidth
+
+    container.offsetX = clamp(
+      offsetXNew,
       0,
-      containerElement.value.clientHeight - container.offsetY,
+      leftSideOfCropWidth - 20,
     )
+
+    container.width = clamp(newWidth, 20, containerElement.value.clientWidth)
+  } else if (resizingSide.value === 'e') {
+    container.width = widthClamped
+  } else if (resizingSide.value === 'n') {
+    const newHeight = mouseEventDownContainer.height - offsetYDiff
+
+    const bottomSideOfCropWidth = containerElement.value.clientHeight - offsetYNew - newHeight
+    const topSideOfCropWidth = containerElement.value.clientHeight - bottomSideOfCropWidth
+
+    container.offsetY = clamp(
+      offsetYNew,
+      0,
+      topSideOfCropWidth - 20,
+    )
+
+    container.height = clamp(newHeight, 20, containerElement.value.clientHeight)
+  } else if (resizingSide.value === 's') {
+    container.height = heightClamped
   }
 }
 
@@ -107,15 +145,20 @@ onMounted(() => {
   container.height = containerElement.value.clientHeight
   container.width = containerElement.value.clientWidth
 })
+
+watch(container, () => {
+  if (!containerElement.value) return
+  modelValueCrop.value.top = range(0, containerElement.value.clientHeight, 0, props.height, container.offsetY)
+})
 </script>
 
 <template>
   <div class="max-w-md mx-auto relative">
-    <div class="absolute top-4 left-4 bg-elevated">
-      {{ containerStyle }}
-    </div>
-
     <img src="https://pbs.twimg.com/media/GxHAvLWaUAA-gnM?format=jpg&name=large">
+
+    <p class="fixed bottom-0">
+      {{ container }}
+    </p>
 
     <div
       ref="containerElement"
