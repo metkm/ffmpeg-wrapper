@@ -95,13 +95,13 @@ const handleMouseMove = (event: MouseEvent) => {
   } else if (resizingSide.value === 'e') {
     container.width = clamp(
       mouseEventDownContainer.width + offsetX,
-      0,
+      MIN_WIDTH,
       containerElement.value.clientWidth,
     )
   } else if (resizingSide.value === 's') {
     container.height = clamp(
       mouseEventDownContainer.height + offsetY,
-      0,
+      MIN_HEIGHT,
       containerElement.value.clientHeight,
     )
   }
