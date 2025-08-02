@@ -8,13 +8,13 @@ const modelValueCrop = defineModel<{
   top: number
   left: number
   width: number
-  right: number
+  height: number
 }>({
   default: {
     top: 0,
     left: 0,
     width: 0,
-    right: 0,
+    height: 0,
   },
 })
 
@@ -151,7 +151,13 @@ onMounted(() => {
 
 watch(container, () => {
   if (!containerElement.value) return
+
   modelValueCrop.value.top = range(0, containerElement.value.clientHeight, 0, props.height, container.offsetY)
+  modelValueCrop.value.left = range(0, containerElement.value.clientWidth, 0, props.width, container.offsetX)
+  modelValueCrop.value.width = range(0, containerElement.value.clientWidth, 0, props.width, container.width)
+  modelValueCrop.value.height = range(0, containerElement.value.clientHeight, 0, props.height, container.height)
+}, {
+  immediate: true,
 })
 </script>
 
@@ -169,7 +175,7 @@ watch(container, () => {
     >
       <div
         ref="containerInnerElement"
-        class="absolute bg-elevated/50 *:absolute hover:cursor-move"
+        class="absolute bg-elevated/50 *:absolute hover:cursor-move border-2 border-dashed border-muted"
         :style="containerStyle"
       >
         <div
@@ -178,19 +184,19 @@ watch(container, () => {
         />
 
         <div
-          class="left-0 h-full w-1 px-1.5 cursor-w-resize -translate-x-1/2 border"
+          class="left-0 h-full w-1 px-1.5 cursor-w-resize -translate-x-1/2"
           @mousedown="(event) => handleMouseDown(event, 'w')"
         />
         <div
-          class="top-0 w-full h-1 py-1.5 cursor-n-resize -translate-y-1/2 border"
+          class="top-0 w-full h-1 py-1.5 cursor-n-resize -translate-y-1/2"
           @mousedown="(event) => handleMouseDown(event, 'n')"
         />
         <div
-          class="top-full w-full h-1 py-1.5 cursor-s-resize -translate-y-1/2 border"
+          class="top-full w-full h-1 py-1.5 cursor-s-resize -translate-y-1/2"
           @mousedown="(event) => handleMouseDown(event, 's')"
         />
         <div
-          class="left-full h-full w-1 px-1.5 cursor-e-resize -translate-x-1/2 border"
+          class="left-full h-full w-1 px-1.5 cursor-e-resize -translate-x-1/2"
           @mousedown="(event) => handleMouseDown(event, 'e')"
         />
       </div>
