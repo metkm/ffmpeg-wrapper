@@ -4,7 +4,7 @@ const props = defineProps<{
   height: number
 }>()
 
-type Side = 'w' | 'n' | 'e' | 's'
+type Side = 'w' | 'n' | 'e' | 's' | 'move'
 
 const MIN_WIDTH = 20
 const MIN_HEIGHT = 20
@@ -12,7 +12,6 @@ const MIN_HEIGHT = 20
 const containerElement = useTemplateRef('containerElement')
 const containerInnerElement = useTemplateRef('containerInnerElement')
 
-const resizing = ref(false)
 const resizingSide = ref<Side | undefined>()
 
 const mouseEventDown = ref<MouseEvent>()
@@ -30,15 +29,15 @@ const container = reactive({
   height: 100,
 })
 
-const containerStyle = computed(() => ({
-  width: `${container.width}px`,
-  height: `${container.height}px`,
-  transform: `translate(${container.offsetX}px, ${container.offsetY}px)`,
-}))
+const containerStyle = computed(() => {
+  return {
+    width: `${container.width}px`,
+    height: `${container.height}px`,
+    transform: `translate(${container.offsetX}px, ${container.offsetY}px)`,
+  }
+})
 
 const handleMouseUp = () => {
-  resizing.value = false
-
   mouseEventDownContainer.offsetX = container.offsetX
   mouseEventDownContainer.offsetY = container.offsetY
   mouseEventDownContainer.width = container.width
@@ -51,56 +50,58 @@ const handleMouseUp = () => {
 const handleMouseMove = (event: MouseEvent) => {
   if (!mouseEventDown.value || !containerElement.value) return
 
-  const offsetX = -(mouseEventDown.value.clientX - event.clientX)
-  const offsetY = -(mouseEventDown.value.clientY - event.clientY)
+  const offsetXDiff = -(mouseEventDown.value.clientX - event.clientX)
+  const offsetYDiff = -(mouseEventDown.value.clientY - event.clientY)
 
-  if (resizingSide.value === 'w') {
-    const newOffset = offsetX + mouseEventDownContainer.offsetX
-    const newWidth = -offsetX + mouseEventDownContainer.width
+  const offsetXNew = offsetXDiff + mouseEventDownContainer.offsetX
+  const offsetYNew = offsetYDiff + mouseEventDownContainer.offsetY
+
+  const offsetXNewClamped = Math.max(
+    0,
+    mouseEventDownContainer.width + offsetXNew <= containerElement.value.clientWidth
+      ? offsetXNew
+      : offsetXNew - offsetXDiff,
+  )
+
+  const offsetYNewClamped = Math.max(
+    0,
+    mouseEventDownContainer.height + offsetYNew <= containerElement.value.clientHeight
+      ? offsetYNew
+      : offsetYNew - offsetYDiff,
+  )
+
+  if (resizingSide.value === 'move') {
+    container.offsetX = offsetXNewClamped
+    container.offsetY = offsetYNewClamped
+  } else if (resizingSide.value === 'w') {
+    const newWidth = -offsetXDiff + mouseEventDownContainer.width
 
     if (newWidth <= MIN_WIDTH) {
       return
     }
 
-    container.offsetX = clamp(
-      newOffset,
-      0,
-      containerElement.value.clientWidth,
-    )
+    container.offsetX = clamp(offsetXNew, 0, containerElement.value.clientWidth)
 
-    container.width = clamp(
-      newWidth,
-      MIN_WIDTH,
-      containerElement.value.clientWidth,
-    )
+    container.width = clamp(newWidth, MIN_WIDTH, containerElement.value.clientWidth)
   } else if (resizingSide.value === 'n') {
-    const newOffset = offsetY + mouseEventDownContainer.offsetY
-    const newHeight = -offsetY + mouseEventDownContainer.height
+    const newHeight = -offsetYDiff + mouseEventDownContainer.height
 
     if (newHeight <= MIN_HEIGHT) {
       return
     }
 
-    container.offsetY = clamp(
-      newOffset,
-      0,
-      containerElement.value.clientHeight,
-    )
+    container.offsetY = clamp(offsetYNew, 0, containerElement.value.clientHeight)
 
-    container.height = clamp(
-      newHeight,
-      MIN_HEIGHT,
-      containerElement.value.clientHeight,
-    )
+    container.height = clamp(newHeight, MIN_HEIGHT, containerElement.value.clientHeight)
   } else if (resizingSide.value === 'e') {
     container.width = clamp(
-      mouseEventDownContainer.width + offsetX,
+      mouseEventDownContainer.width + offsetXDiff,
       MIN_WIDTH,
       containerElement.value.clientWidth,
     )
   } else if (resizingSide.value === 's') {
     container.height = clamp(
-      mouseEventDownContainer.height + offsetY,
+      mouseEventDownContainer.height + offsetYDiff,
       MIN_HEIGHT,
       containerElement.value.clientHeight,
     )
@@ -108,9 +109,7 @@ const handleMouseMove = (event: MouseEvent) => {
 }
 
 const handleMouseDown = (event: MouseEvent, side: Side) => {
-  resizing.value = true
   resizingSide.value = side
-
   mouseEventDown.value = event
 
   mouseEventDownContainer.offsetX = container.offsetX
@@ -144,23 +143,28 @@ onMounted(() => {
     >
       <div
         ref="containerInnerElement"
-        class="absolute bg-elevated/50 *:absolute *:bg-red-500/50"
+        class="absolute bg-elevated/50 *:absolute hover:cursor-move"
         :style="containerStyle"
       >
         <div
-          class="left-0 h-full w-3 -translate-x-1/2 cursor-w-resize"
+          class="absolute inset-1.5"
+          @mousedown="(event) => handleMouseDown(event, 'move')"
+        />
+
+        <div
+          class="left-0 h-full w-3 cursor-w-resize -translate-x-1/2 border"
           @mousedown="(event) => handleMouseDown(event, 'w')"
         />
         <div
-          class="top-0 w-full h-3 -translate-y-1/2 cursor-n-resize"
+          class="top-0 w-full h-3 cursor-n-resize -translate-y-1/2 border"
           @mousedown="(event) => handleMouseDown(event, 'n')"
         />
         <div
-          class="top-full w-full h-3 -translate-y-1/2 cursor-s-resize"
+          class="top-full w-full h-3 cursor-s-resize -translate-y-1/2 border"
           @mousedown="(event) => handleMouseDown(event, 's')"
         />
         <div
-          class="left-full h-full w-3 -translate-x-1/2 cursor-e-resize"
+          class="left-full h-full w-3 cursor-e-resize -translate-x-1/2 border"
           @mousedown="(event) => handleMouseDown(event, 'e')"
         />
       </div>
