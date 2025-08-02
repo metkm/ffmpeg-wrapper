@@ -18,6 +18,9 @@ const modelValueCrop = defineModel<{
   },
 })
 
+const MIN_HEIGHT = 20
+const MIN_WIDTH = 20
+
 type Side = 'w' | 'n' | 'e' | 's' | 'move'
 
 const containerElement = useTemplateRef('containerElement')
@@ -66,33 +69,17 @@ const handleMouseMove = (event: MouseEvent) => {
   const offsetXNew = offsetXDiff + mouseEventDownContainer.offsetX
   const offsetYNew = offsetYDiff + mouseEventDownContainer.offsetY
 
-  const offsetXClamped = clamp(
-    offsetXNew,
-    0,
-    containerElement.value.clientWidth - mouseEventDownContainer.width,
-  )
-
-  const offsetYClamped = clamp(
-    offsetYNew,
-    0,
-    containerElement.value.clientHeight - mouseEventDownContainer.height,
-  )
-
-  const widthClamped = clamp(
-    mouseEventDownContainer.width + offsetXDiff,
-    20,
-    containerElement.value.clientWidth - container.offsetX,
-  )
-
-  const heightClamped = clamp(
-    mouseEventDownContainer.height + offsetYDiff,
-    0,
-    containerElement.value.clientHeight - container.offsetY,
-  )
-
   if (resizingSide.value === 'move') {
-    container.offsetX = offsetXClamped
-    container.offsetY = offsetYClamped
+    container.offsetX = clamp(
+      offsetXNew,
+      0,
+      containerElement.value.clientWidth - mouseEventDownContainer.width,
+    )
+    container.offsetY = clamp(
+      offsetYNew,
+      0,
+      containerElement.value.clientHeight - mouseEventDownContainer.height,
+    )
   } else if (resizingSide.value === 'w') {
     const newWidth = mouseEventDownContainer.width - offsetXDiff
 
@@ -105,9 +92,17 @@ const handleMouseMove = (event: MouseEvent) => {
       leftSideOfCropWidth - 20,
     )
 
+    if (container.offsetX <= 0) {
+      return
+    }
+
     container.width = clamp(newWidth, 20, containerElement.value.clientWidth)
   } else if (resizingSide.value === 'e') {
-    container.width = widthClamped
+    container.width = clamp(
+      mouseEventDownContainer.width + offsetXDiff,
+      MIN_WIDTH,
+      containerElement.value.clientWidth - container.offsetX,
+    )
   } else if (resizingSide.value === 'n') {
     const newHeight = mouseEventDownContainer.height - offsetYDiff
 
@@ -120,9 +115,17 @@ const handleMouseMove = (event: MouseEvent) => {
       topSideOfCropWidth - 20,
     )
 
+    if (container.offsetY <= 0) {
+      return
+    }
+
     container.height = clamp(newHeight, 20, containerElement.value.clientHeight)
   } else if (resizingSide.value === 's') {
-    container.height = heightClamped
+    container.height = clamp(
+      mouseEventDownContainer.height + offsetYDiff,
+      MIN_HEIGHT,
+      containerElement.value.clientHeight - container.offsetY,
+    )
   }
 }
 
