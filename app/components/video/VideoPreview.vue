@@ -29,14 +29,14 @@ const videoContainerElement = useTemplateRef('videoContainerElement')
 const videoElement = useTemplateRef('videoElement')
 const videoPlaying = ref(false)
 
-const { x: indicatorX, style: indicatorElementStyle } = useDraggable(indicatorElement, {
+const { x: indicatorX, style: indicatorElementStyle, isDragging } = useDraggable(indicatorElement, {
   axis: 'x',
   containerElement: indicatorElementContainer,
   preventDefault: true,
   initialValue: { x: 0, y: 0 },
   onMove: ({ x }) => {
     if (!videoElement.value) return
-    videoElement.value.currentTime = range(0, videoContainerElement.value!.clientWidth, 0, videoModel.value.duration, x)
+    videoElement.value.currentTime = range(0, indicatorElementContainerSize.width.value - indicatorElementSize.width.value, 0, videoModel.value.duration, x)
   },
 })
 
@@ -101,12 +101,13 @@ const indicatorOffset = computed(() => {
   return range(indicatorContainerWidthHalf, indicatorContainerWidth, 0, -targetOffset, x)
 })
 
-const updateIndicatorX = (value: number) => {
+const updateIndicatorX = (time: number) => {
   const containerWidthWithoutIndicator = indicatorElementContainerSize.width.value - indicatorElementSize.width.value
-  indicatorX.value = range(0, videoModel.value.duration, 0, containerWidthWithoutIndicator, value)
+  indicatorX.value = range(0, videoModel.value.duration, 0, containerWidthWithoutIndicator, time)
 }
 
 watch([() => indicatorElementContainerSize.width.value, () => videoModel.value.currentTime], () => {
+  if (isDragging.value) return
   updateIndicatorX(videoModel.value.currentTime)
 })
 
