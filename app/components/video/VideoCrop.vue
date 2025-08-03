@@ -61,6 +61,7 @@ const handleMouseUp = () => {
 }
 
 const handleMouseMove = (event: MouseEvent) => {
+  event.preventDefault()
   if (!mouseEventDown.value || !containerElement.value) return
 
   const offsetXDiff = -(mouseEventDown.value.clientX - event.clientX)
@@ -130,6 +131,7 @@ const handleMouseMove = (event: MouseEvent) => {
 }
 
 const handleMouseDown = (event: MouseEvent, side: Side) => {
+  event.preventDefault()
   resizingSide.value = side
   mouseEventDown.value = event
 
