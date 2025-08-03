@@ -20,14 +20,14 @@ const videoModel = defineModel<Video>({
 })
 
 const indicatorElement = useTemplateRef('indicatorElement')
+const indicatorElementSize = useElementSize(indicatorElement)
+
 const indicatorElementContainer = useTemplateRef('indicatorElementContainer')
+const indicatorElementContainerSize = useElementSize(indicatorElementContainer)
 
 const videoContainerElement = useTemplateRef('videoContainerElement')
 const videoElement = useTemplateRef('videoElement')
 const videoPlaying = ref(false)
-
-const indicatorElementSize = useElementSize(indicatorElement)
-const indicatorElementContainerSize = useElementSize(indicatorElementContainer)
 
 const { x: indicatorX, style: indicatorElementStyle } = useDraggable(indicatorElement, {
   axis: 'x',
@@ -63,7 +63,7 @@ const handleTimeUpdate = () => {
   videoModel.value.currentTime = videoElement.value ? videoElement.value.currentTime : videoModel.value.currentTime
 }
 
-const toggle = () => {
+const togglePlay = () => {
   if (videoPlaying.value) {
     videoElement.value?.pause()
     videoPlaying.value = false
@@ -81,23 +81,25 @@ const toggleFullscreen = () => {
   }
 }
 
-const boundsOffset = computed(() => {
-  if (!indicatorElementContainer.value) return 0
-
-  const thumbWidthHalf = 12 / 2 // returns 6, width of thumb from slider
+const indicatorOffset = computed(() => {
+  const thumbWidthHalf = 12 / 2
   const indicatorWidthHalf = indicatorElementSize.width.value / 2
-  const half = indicatorElementContainerSize.width.value / 2
 
-  if (indicatorX.value < half) {
-    return range(0, half, thumbWidthHalf - indicatorWidthHalf, 0, indicatorX.value)
+  const indicatorContainerWidth = indicatorElementContainerSize.width.value
+  const indicatorContainerWidthHalf = indicatorElementContainerSize.width.value / 2
+
+  const targetOffset = thumbWidthHalf - indicatorWidthHalf
+
+  if (indicatorX.value < indicatorContainerWidthHalf) {
+    return range(0, indicatorContainerWidthHalf, targetOffset, 0, indicatorX.value)
   }
 
-  return range(half, indicatorElementContainerSize.width.value, 0, -(thumbWidthHalf - indicatorWidthHalf), indicatorX.value)
+  return range(indicatorContainerWidthHalf, indicatorContainerWidth, 0, -targetOffset, indicatorX.value)
 })
 
 const updateIndicatorX = (value: number) => {
-  const targetWidth = indicatorElementContainerSize.width.value - indicatorElementSize.width.value
-  indicatorX.value = range(0, videoModel.value.duration, 0, targetWidth, value)
+  const containerWidthWithoutIndicator = indicatorElementContainerSize.width.value - indicatorElementSize.width.value
+  indicatorX.value = range(0, videoModel.value.duration, 0, containerWidthWithoutIndicator, value)
 }
 
 watch(indicatorElementContainerSize.width, () => {
@@ -168,7 +170,7 @@ watch(
             size="sm"
             variant="ghost"
             :ui="{ leadingIcon: 'drop-shadow-lg shadow-black' }"
-            @click="toggle"
+            @click="togglePlay"
           />
 
           <p class="hidden sm:block text-sm font-medium text-center w-32">
@@ -182,7 +184,7 @@ watch(
             <div
               ref="indicatorElement"
               class="absolute w-1 h-3 mt-3.5 bg-primary shadow rounded-full z-10"
-              :style="[indicatorElementStyle, { transform: `translateX(${boundsOffset}px)` }]"
+              :style="[indicatorElementStyle, { transform: `translateX(${indicatorOffset}px)` }]"
             />
 
             <USlider
