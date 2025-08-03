@@ -23,6 +23,8 @@ watch(value, () => {
   } else {
     arg.value[valueIndex] = [argName, value.value]
   }
+}, {
+  immediate: true,
 })
 </script>
 
