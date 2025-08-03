@@ -33,6 +33,7 @@ const { x: indicatorX, style: indicatorElementStyle } = useDraggable(indicatorEl
   axis: 'x',
   containerElement: indicatorElementContainer,
   preventDefault: true,
+  initialValue: { x: 0, y: 0 },
   onMove: ({ x }) => {
     if (!videoElement.value) return
     videoElement.value.currentTime = range(0, videoContainerElement.value!.clientWidth, 0, videoModel.value.duration, x)
@@ -83,6 +84,8 @@ const toggleFullscreen = () => {
 }
 
 const indicatorOffset = computed(() => {
+  const x = indicatorX.value || 0 // indicatorX is NAN on mount for some reason
+
   const thumbWidthHalf = 12 / 2
   const indicatorWidthHalf = indicatorElementSize.width.value / 2
 
@@ -91,11 +94,11 @@ const indicatorOffset = computed(() => {
 
   const targetOffset = thumbWidthHalf - indicatorWidthHalf
 
-  if (indicatorX.value < indicatorContainerWidthHalf) {
-    return range(0, indicatorContainerWidthHalf, targetOffset, 0, indicatorX.value)
+  if (x <= indicatorContainerWidthHalf) {
+    return range(0, indicatorContainerWidthHalf, targetOffset, 0, x)
   }
 
-  return range(indicatorContainerWidthHalf, indicatorContainerWidth, 0, -targetOffset, indicatorX.value)
+  return range(indicatorContainerWidthHalf, indicatorContainerWidth, 0, -targetOffset, x)
 })
 
 const updateIndicatorX = (value: number) => {
@@ -118,7 +121,7 @@ watch(
     if (start !== oldDurationRange[0]) {
       videoElement.value.currentTime = start
       updateIndicatorX(start)
-    } else if (end !== oldDurationRange[1] && oldDurationRange[0] !== 1) {
+    } else if (end !== oldDurationRange[1] && oldDurationRange[1] !== 1) {
       // oldDurationRange[0] !== 1 means the component just mounted
 
       videoElement.value.currentTime = end
