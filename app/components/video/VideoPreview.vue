@@ -27,8 +27,9 @@ const videoElement = useTemplateRef('videoElement')
 const videoPlaying = ref(false)
 
 const indicatorElementSize = useElementSize(indicatorElement)
+const indicatorElementContainerSize = useElementSize(indicatorElementContainer)
 
-const { x: indicatorX, style: indicatorElementStyle, isDragging } = useDraggable(indicatorElement, {
+const { x: indicatorX, style: indicatorElementStyle } = useDraggable(indicatorElement, {
   axis: 'x',
   containerElement: indicatorElementContainer,
   preventDefault: true,
@@ -85,16 +86,22 @@ const boundsOffset = computed(() => {
 
   const thumbWidthHalf = 12 / 2 // returns 6, width of thumb from slider
   const indicatorWidthHalf = indicatorElementSize.width.value / 2
-
-  const half = indicatorElementContainer.value.clientWidth / 2
+  const half = indicatorElementContainerSize.width.value / 2
 
   if (indicatorX.value < half) {
-    // return 0
-    return range(0, half, thumbWidthHalf, 0, indicatorX.value) - indicatorWidthHalf
+    return range(0, half, thumbWidthHalf - indicatorWidthHalf, 0, indicatorX.value)
   }
 
-  // return 0
-  return range(half, indicatorElementContainer.value.clientWidth, 0, -thumbWidthHalf, indicatorX.value) - indicatorWidthHalf
+  return range(half, indicatorElementContainerSize.width.value, 0, -(thumbWidthHalf - indicatorWidthHalf), indicatorX.value)
+})
+
+const updateIndicatorX = (value: number) => {
+  const targetWidth = indicatorElementContainerSize.width.value - indicatorElementSize.width.value
+  indicatorX.value = range(0, videoModel.value.duration, 0, targetWidth, value)
+}
+
+watch(indicatorElementContainerSize.width, () => {
+  updateIndicatorX(videoModel.value.currentTime)
 })
 
 watch(
@@ -107,10 +114,10 @@ watch(
 
     if (start !== oldDurationRange[0]) {
       videoElement.value.currentTime = start
-      indicatorX.value = range(0, videoModel.value.duration, 0, indicatorElementContainer.value!.clientWidth, start)
+      updateIndicatorX(start)
     } else {
       videoElement.value.currentTime = end
-      indicatorX.value = range(0, videoModel.value.duration, 0, indicatorElementContainer.value!.clientWidth, end)
+      updateIndicatorX(end)
     }
   },
 )
@@ -164,26 +171,19 @@ watch(
             @click="toggle"
           />
 
-          <p class="hidden sm:block text-sm font-medium text-center">
+          <p class="hidden sm:block text-sm font-medium text-center w-32">
             {{ rangeStart }} / {{ rangeEnd }}
           </p>
 
-          <div class="flex-1 relative">
+          <div
+            ref="indicatorElementContainer"
+            class="flex-1 relative"
+          >
             <div
-              ref="indicatorElementContainer"
-              :style="{ marginRight: `-${indicatorElementSize.width.value}px` }"
-            >
-              <div
-                ref="indicatorElement"
-                class="absolute w-1 h-3 mt-3.5 bg-primary shadow rounded-full z-10"
-                :style="[indicatorElementStyle, { transform: `translateX(${boundsOffset}px)` }]"
-              >
-                <!-- <div
-                  class="absolute inset-0 w-full h-full bg-primary rounded-full transition-[scale,width]"
-                  :class="{ 'scale-150': isDragging }"
-                /> -->
-              </div>
-            </div>
+              ref="indicatorElement"
+              class="absolute w-1 h-3 mt-3.5 bg-primary shadow rounded-full z-10"
+              :style="[indicatorElementStyle, { transform: `translateX(${boundsOffset}px)` }]"
+            />
 
             <USlider
               v-model="videoModel.durationRange"
