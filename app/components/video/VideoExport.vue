@@ -49,6 +49,7 @@ const process = async () => {
     '-maxrate', `${targetBitrate.value}k`,
     '-bufsize', `${targetBitrate.value / 2}k`,
     '-vf', `crop=${props.video.crop.width}:${props.video.crop.height}:${props.video.crop.left}:${props.video.crop.top}`,
+    '-rc', 'vbr',
     ...args.value,
   ]
 
@@ -56,21 +57,17 @@ const process = async () => {
     argsBase.push('-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`)
   }
 
-  if (encoder.value === 'av1_nvenc') {
-    argsBase.push('-rc', 'vbr')
+  if (twoPass.value) {
+    const args = [
+      ...argsBase,
+      '-an',
+      '-pass', '1',
+      '-f', 'mp4',
+      'NUL',
+    ]
 
-    if (twoPass.value) {
-      const args = [
-        ...argsBase,
-        '-an',
-        '-pass', '1',
-        '-f', 'mp4',
-        'NUL',
-      ]
-
-      await spawn(args)
-      argsBase.push('-pass', '2')
-    }
+    await spawn(args)
+    argsBase.push('-pass', '2')
   }
 
   argsBase.push(output.savePath)
@@ -117,7 +114,7 @@ const process = async () => {
         v-model="twoPass"
         label="Two pass"
         variant="card"
-        description="analyze video twice for better compression (might be useful for av1 encoders)"
+        description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
       />
     </div>
 
