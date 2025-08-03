@@ -40,5 +40,5 @@ export const parametersPerEncoders = {
 
 export const videoFilters: DialogFilter[] = [{
   name: 'video',
-  extensions: ['.mp4', '.avi'],
+  extensions: ['mp4', 'avi', 'mov', 'webm'],
 }]
