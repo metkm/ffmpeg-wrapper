@@ -17,8 +17,8 @@ const emit = defineEmits<{
   exportEnd: []
 }>()
 
-const targetBitrate = computed(() => output.targetFileSize * 8192 / (props.video.range[1] - props.video.range[0]) - 196)
-const duration = computed(() => props.video.range[1] - props.video.range[0])
+const targetBitrate = computed(() => output.targetFileSize * 8192 / (props.video.durationRange[1] - props.video.durationRange[0]) - 196)
+const duration = computed(() => props.video.durationRange[1] - props.video.durationRange[0])
 
 const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg(duration)
 
@@ -41,8 +41,8 @@ const process = async () => {
 
   const argsBase = [
     '-y',
-    '-ss', formatSeconds(props.video.range[0] || 0),
-    '-to', formatSeconds(props.video.range[1] || 1),
+    '-ss', formatSeconds(props.video.durationRange[0] || 0),
+    '-to', formatSeconds(props.video.durationRange[1] || 1),
     '-i', props.path,
     '-vcodec', encoder.value,
     // '-b:v', `${targetBitrate.value}k`,

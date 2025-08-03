@@ -4,7 +4,7 @@ import type { Video } from './types/video'
 export const defaultVideoValues: Video = {
   duration: 0,
   currentTime: 0,
-  range: [0, 1],
+  durationRange: [0, 1],
   crop: {
     top: 0,
     left: 0,

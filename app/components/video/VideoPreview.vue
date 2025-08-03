@@ -19,17 +19,32 @@ const videoModel = defineModel<Video>({
   default: defaultVideoValues,
 })
 
+const indicatorElement = useTemplateRef('indicatorElement')
+const indicatorElementContainer = useTemplateRef('indicatorElementContainer')
+
 const videoContainerElement = useTemplateRef('videoContainerElement')
 const videoElement = useTemplateRef('videoElement')
 const videoPlaying = ref(false)
 
-const rangeStart = computed(() => formatSeconds(videoModel.value.range[0]!))
-const rangeEnd = computed(() => formatSeconds(videoModel.value.range[1]!))
+const indicatorElementSize = useElementSize(indicatorElement)
+
+const { x: indicatorX, style: indicatorElementStyle, isDragging } = useDraggable(indicatorElement, {
+  axis: 'x',
+  containerElement: indicatorElementContainer,
+  preventDefault: true,
+  onMove: ({ x }) => {
+    if (!videoElement.value) return
+    videoElement.value.currentTime = range(0, videoContainerElement.value!.clientWidth, 0, videoModel.value.duration, x)
+  },
+})
+
+const rangeStart = computed(() => formatSeconds(videoModel.value.durationRange[0]!))
+const rangeEnd = computed(() => formatSeconds(videoModel.value.durationRange[1]!))
 
 const handleLoad = () => {
   if (!videoElement.value) return
   videoModel.value.duration = videoElement.value.duration
-  videoModel.value.range = [0, videoElement.value.duration]
+  videoModel.value.durationRange = [0, videoElement.value.duration]
 
   videoModel.value.crop.width = videoElement.value.videoWidth
   videoModel.value.crop.height = videoElement.value.videoHeight
@@ -65,29 +80,37 @@ const toggleFullscreen = () => {
   }
 }
 
-const currentTimePercent = computed(() => {
-  return videoModel.value.currentTime * 100 / videoModel.value.duration
-})
-
 const boundsOffset = computed(() => {
-  const indicatorWidthHalf = 12 / 2
+  if (!indicatorElementContainer.value) return 0
 
-  if (currentTimePercent.value < 50) {
-    return indicatorWidthHalf - range(0, 50, 0, indicatorWidthHalf, currentTimePercent.value)
+  const thumbWidthHalf = 12 / 2 // returns 6, width of thumb from slider
+  const indicatorWidthHalf = indicatorElementSize.width.value / 2
+
+  const half = indicatorElementContainer.value.clientWidth / 2
+
+  if (indicatorX.value < half) {
+    // return 0
+    return range(0, half, thumbWidthHalf, 0, indicatorX.value) - indicatorWidthHalf
   }
 
-  return -range(50, 100, 0, indicatorWidthHalf, currentTimePercent.value)
+  // return 0
+  return range(half, indicatorElementContainer.value.clientWidth, 0, -thumbWidthHalf, indicatorX.value) - indicatorWidthHalf
 })
 
 watch(
-  () => videoModel.value.range,
-  (range, oldRange) => {
+  () => videoModel.value.durationRange,
+  (durationRange, oldDurationRange) => {
     if (!videoElement.value) return
 
-    if (range[0] !== oldRange[0]) {
-      videoElement.value.currentTime = range[0]
+    const start = durationRange[0]
+    const end = durationRange[1]
+
+    if (start !== oldDurationRange[0]) {
+      videoElement.value.currentTime = start
+      indicatorX.value = range(0, videoModel.value.duration, 0, indicatorElementContainer.value!.clientWidth, start)
     } else {
-      videoElement.value.currentTime = range[1]
+      videoElement.value.currentTime = end
+      indicatorX.value = range(0, videoModel.value.duration, 0, indicatorElementContainer.value!.clientWidth, end)
     }
   },
 )
@@ -145,17 +168,25 @@ watch(
             {{ rangeStart }} / {{ rangeEnd }}
           </p>
 
-          <div class="flex-1 relative mx-2">
+          <div class="flex-1 relative">
             <div
-              class="absolute w-1 h-3 mt-3.5 bg-primary shadow rounded-full z-10 pointer-events-none transition-all"
-              :style="{
-                left: `calc(${currentTimePercent}% + ${boundsOffset}px)`,
-                transform: 'translateX(-50%)',
-              }"
-            />
+              ref="indicatorElementContainer"
+              :style="{ marginRight: `-${indicatorElementSize.width.value}px` }"
+            >
+              <div
+                ref="indicatorElement"
+                class="absolute w-1 h-3 mt-3.5 bg-primary shadow rounded-full z-10"
+                :style="[indicatorElementStyle, { transform: `translateX(${boundsOffset}px)` }]"
+              >
+                <!-- <div
+                  class="absolute inset-0 w-full h-full bg-primary rounded-full transition-[scale,width]"
+                  :class="{ 'scale-150': isDragging }"
+                /> -->
+              </div>
+            </div>
 
             <USlider
-              v-model="videoModel.range"
+              v-model="videoModel.durationRange"
               color="neutral"
               :min="0"
               :max="videoModel.duration"

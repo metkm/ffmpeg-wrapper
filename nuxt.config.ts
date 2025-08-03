@@ -1,6 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@nuxt/ui', '@nuxt/eslint', 'motion-v/nuxt'],
+  modules: [
+    '@nuxt/ui',
+    '@nuxt/eslint',
+    'motion-v/nuxt',
+    '@vueuse/nuxt',
+  ],
   ssr: false,
   devtools: { enabled: false },
   app: {
