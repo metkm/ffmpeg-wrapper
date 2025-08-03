@@ -183,7 +183,7 @@ watch(
           >
             <div
               ref="indicatorElement"
-              class="absolute w-1 h-3 mt-3.5 bg-primary shadow rounded-full z-10"
+              class="absolute w-1.5 h-3 mt-3.5 ring-2 bg-primary shadow rounded-full z-10"
               :style="[indicatorElementStyle, { transform: `translateX(${indicatorOffset}px)` }]"
             />
 
