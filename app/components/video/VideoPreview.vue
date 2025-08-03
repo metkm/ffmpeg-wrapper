@@ -49,6 +49,7 @@ const handleLoad = () => {
 
   videoModel.value.crop.width = videoElement.value.videoWidth
   videoModel.value.crop.height = videoElement.value.videoHeight
+  videoModel.value.currentTime = 0
 
   if (videoContainerElement.value) {
     videoContainerElement.value.classList.add('fade-in')
@@ -102,7 +103,7 @@ const updateIndicatorX = (value: number) => {
   indicatorX.value = range(0, videoModel.value.duration, 0, containerWidthWithoutIndicator, value)
 }
 
-watch(indicatorElementContainerSize.width, () => {
+watch([() => indicatorElementContainerSize.width.value, () => videoModel.value.currentTime], () => {
   updateIndicatorX(videoModel.value.currentTime)
 })
 
@@ -117,7 +118,9 @@ watch(
     if (start !== oldDurationRange[0]) {
       videoElement.value.currentTime = start
       updateIndicatorX(start)
-    } else {
+    } else if (end !== oldDurationRange[1] && oldDurationRange[0] !== 1) {
+      // oldDurationRange[0] !== 1 means the component just mounted
+
       videoElement.value.currentTime = end
       updateIndicatorX(end)
     }
