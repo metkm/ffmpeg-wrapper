@@ -5,6 +5,10 @@ import { open } from '@tauri-apps/plugin-dialog'
 import { motion } from 'motion-v'
 import { videoFilters } from '~/constants'
 
+defineProps<{
+  disabled?: boolean
+}>()
+
 const emit = defineEmits<{
   select: []
 }>()
@@ -65,17 +69,22 @@ onUnmounted(() => unlistenFn?.())
 <template>
   <div class="flex flex-col flex-1 gap-2 rounded-(--ui-radius) overflow-hidden">
     <button
-      class="flex flex-col items-center justify-center h-full w-full hover:bg-muted/50 transition-colors"
+      class="flex flex-col items-center justify-center h-full w-full transition-colors"
+      :class="{
+        'cursor-no-drop pointer-events-none': disabled,
+        'hover:bg-muted/50': !disabled,
+      }"
       @click="openFile"
     >
       <LayoutGroup>
         <AnimatePresence>
           <motion.span
             layout
-            class="p-4 shrink-0 flex items-center justify-center rounded-full border border-dashed border-muted"
+            class="p-4 shrink-0 flex items-center justify-center rounded-full border border-dashed border-muted transition-colors"
+            :class="{ 'bg-muted': disabled }"
           >
             <UIcon
-              name="i-lucide-upload"
+              :name="disabled ? 'i-lucide-circle-off' : 'i-lucide-upload'"
               class="text-muted size-8"
             />
           </motion.span>

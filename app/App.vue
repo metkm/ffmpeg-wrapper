@@ -1,41 +1,22 @@
 <script setup lang="ts">
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { check } from '@tauri-apps/plugin-updater'
-
-const toast = useToast()
 
 onMounted(() => {
   getCurrentWindow()
     .show()
 })
-
-onMounted(async () => {
-  const update = await check()
-  if (!update) return
-
-  await update.downloadAndInstall(({ event }) => {
-    if (event === 'Started') {
-      toast.add({
-        title: 'Update found',
-        description: 'App will be automatically restarted when update is completed',
-      })
-    }
-  })
-})
 </script>
 
 <template>
-  <UApp>
-    <div class="flex flex-col h-screen w-screen overflow-x-hidden">
-      <Suspense>
-        <AppWindowOverlay />
-      </Suspense>
+  <div class="flex flex-col h-screen w-screen overflow-x-hidden">
+    <Suspense>
+      <AppWindowOverlay />
+    </Suspense>
 
-      <main class="flex flex-col grow overflow-x-hidden overflow-y-auto scrollbar">
-        <NuxtPage />
-      </main>
-    </div>
-  </UApp>
+    <main class="flex flex-col grow overflow-x-hidden overflow-y-auto scrollbar">
+      <NuxtPage />
+    </main>
+  </div>
 </template>
 
 <style>
