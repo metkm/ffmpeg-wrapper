@@ -58,7 +58,7 @@ onMounted(async () => {
         >
           <FileDrop
             v-model="videoPath"
-            class="grow -mx-4"
+            class="grow -m-4"
             :disabled="isUpdating"
             @select="onSelect"
           />
@@ -70,7 +70,7 @@ onMounted(async () => {
           :initial="{ opacity: 0 }"
           :animate="{ opacity: 1 }"
           :exit="{ opacity: 0 }"
-          class="-mx-4"
+          class="-m-4"
         >
           <p class="text-muted text-sm font-medium p-2">
             Installing update ({{ progress.toFixed(0) }}%)
