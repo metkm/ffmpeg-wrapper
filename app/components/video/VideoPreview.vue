@@ -43,22 +43,15 @@ const { x: indicatorX, style: indicatorElementStyle, isDragging } = useDraggable
 const rangeStart = computed(() => formatSeconds(videoModel.value.durationRange[0]!))
 const rangeEnd = computed(() => formatSeconds(videoModel.value.durationRange[1]!))
 
-const handleLoad = () => {
-  if (!videoElement.value) return
-  videoModel.value.duration = videoElement.value.duration
-  videoModel.value.durationRange = [0, videoElement.value.duration]
+const handleLoad = (event: Event) => {
+  const element = videoElement.value ?? event.target as HTMLVideoElement
 
-  videoModel.value.crop.width = videoElement.value.videoWidth
-  videoModel.value.crop.height = videoElement.value.videoHeight
+  videoModel.value.duration = element.duration
+  videoModel.value.durationRange = [0, element.duration]
+
+  videoModel.value.crop.width = element.videoWidth
+  videoModel.value.crop.height = element.videoHeight
   videoModel.value.currentTime = 0
-
-  if (videoContainerElement.value) {
-    videoContainerElement.value.classList.add('fade-in')
-    videoContainerElement.value.classList.remove('opacity-0')
-
-    videoElement.value.classList.add('fade-in')
-    videoElement.value.classList.remove('opacity-0')
-  }
 }
 
 const handleTimeUpdate = () => {
@@ -150,7 +143,7 @@ watch(
 
     <div
       ref="videoContainerElement"
-      class="relative flex items-center gap-4 rounded-(--ui-radius) overflow-hidden w-full aspect-video opacity-0"
+      class="relative flex items-center gap-4 rounded-(--ui-radius) overflow-hidden w-full aspect-video"
     >
       <div class="rounded-(--ui-radius) overflow-hidden">
         <VideoCrop
@@ -164,7 +157,7 @@ watch(
         <video
           ref="videoElement"
           :src="src"
-          class="aspect-video rounded-(--ui-radius) overflow-hidden w-full opacity-0"
+          class="aspect-video rounded-(--ui-radius) overflow-hidden w-full"
           @loadeddata="handleLoad"
           @timeupdate="handleTimeUpdate"
         />
@@ -221,20 +214,3 @@ watch(
     </div>
   </section>
 </template>
-
-<style>
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.fade-in {
-  animation-name: fade-in;
-  animation-timing-function: ease-out;
-  animation-duration: 500ms;
-}
-</style>
