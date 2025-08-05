@@ -6,20 +6,26 @@ import { motion } from 'motion-v'
 import { videoFilters } from '~/constants'
 
 const emit = defineEmits<{
-  drop: []
+  select: []
 }>()
 
-const path = defineModel<string>()
+const modelValue = defineModel<string>()
 
 const hovering = ref(false)
 const hoveringPath = ref<string>()
 
 const openFile = async () => {
-  path.value = await open({
+  modelValue.value = await open({
     multiple: false,
     directory: false,
     filters: videoFilters,
   }) ?? undefined
+
+  await nextTick()
+
+  if (modelValue.value) {
+    emit('select')
+  }
 }
 
 let unlistenFn: UnlistenFn | undefined
@@ -47,8 +53,8 @@ onMounted(async () => {
           return
         }
 
-        path.value = event.payload.paths.at(0)
-        emit('drop')
+        modelValue.value = event.payload.paths.at(0)
+        emit('select')
       }
     })
 })

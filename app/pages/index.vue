@@ -5,8 +5,8 @@ definePageMeta({
 
 const videoPath = ref<string>('')
 
-const onDrop = () => {
-  navigateTo({
+const onSelect = async () => {
+  await navigateTo({
     name: 'export',
     query: {
       path: videoPath.value,
@@ -19,6 +19,6 @@ const onDrop = () => {
   <FileDrop
     v-model="videoPath"
     class="grow -mx-4"
-    @drop="onDrop"
+    @select="onSelect"
   />
 </template>
