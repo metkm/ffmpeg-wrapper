@@ -138,6 +138,7 @@ watch(
       <motion.p
         layout-id="hovering-path"
         class="truncate z-10"
+        layout="position"
       >
         {{ decodeURI(src).split('\\').at(-1) }}
       </motion.p>
