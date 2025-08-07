@@ -6,10 +6,11 @@ const route = useRoute()
 const window = getCurrentWindow()
 const isWindowMaximized = ref(await window.isMaximized())
 
-const toggleMaximize = () => {
-  isWindowMaximized.value = !isWindowMaximized.value
-  window.toggleMaximize()
-}
+const resizeListener = await window.onResized(async () => {
+  isWindowMaximized.value = await window.isMaximized()
+})
+
+onUnmounted(resizeListener)
 </script>
 
 <template>
@@ -53,7 +54,7 @@ const toggleMaximize = () => {
 
       <button
         class="w-12 h-8 flex items-center justify-center hover:bg-white/10"
-        @click="toggleMaximize"
+        @click="window.toggleMaximize"
       >
         <svg
           v-if="!isWindowMaximized"
