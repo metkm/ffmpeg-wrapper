@@ -17,18 +17,25 @@ const emit = defineEmits<{
   exportEnd: []
 }>()
 
-const targetBitrate = computed(() => output.targetFileSize * 8192 / (props.video.durationRange[1] - props.video.durationRange[0]) - 196)
-const duration = computed(() => props.video.durationRange[1] - props.video.durationRange[0])
-
-const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg(duration)
-
 const encoder = ref<Encoder>('h264_nvenc')
 const twoPass = ref<boolean>(false)
+const removeAudio = ref<boolean>(false)
 const args = ref<string[]>([])
 
 const output = reactive({
   savePath: null as string | null,
   targetFileSize: 10,
+  speed: 1,
+})
+
+const duration = computed(() => {
+  return (props.video.durationRange[1] - props.video.durationRange[0]) / output.speed
+})
+
+const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg(duration)
+
+const targetBitrate = computed(() => {
+  return output.targetFileSize * 8192 / duration.value - 196
 })
 
 const process = async () => {
@@ -52,6 +59,15 @@ const process = async () => {
     '-rc', 'vbr',
     ...args.value,
   ]
+
+  if (output.speed !== 1) {
+    argsBase.push('-filter:v', `setpts=PTS/${output.speed}`)
+    argsBase.push('-filter:a', `atempo=${output.speed}`)
+  }
+
+  if (removeAudio.value) {
+    argsBase.push('-an')
+  }
 
   if (twoPass.value) {
     argsBase.push('-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`)
@@ -105,6 +121,21 @@ const process = async () => {
         />
       </UFormField>
 
+      <UFormField
+        label="Video speed"
+        description="speed of video"
+        class="capitalize"
+      >
+        <UInputNumber
+          v-model="output.speed"
+          :min="0.5"
+          :max="100"
+          :step="0.05"
+          color="neutral"
+          class="w-full after:content-['x'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-14 after:font-medium after:text-muted after:pointer-events-none"
+        />
+      </UFormField>
+
       <CommandParameters
         v-model="args"
         :encoder="encoder"
@@ -115,6 +146,12 @@ const process = async () => {
         label="Two pass"
         variant="card"
         description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
+      />
+
+      <UCheckbox
+        v-model="removeAudio"
+        label="Remove audio"
+        variant="card"
       />
     </div>
 
