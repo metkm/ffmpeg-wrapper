@@ -96,7 +96,7 @@ const process = async () => {
 
 <template>
   <section class="flex flex-col gap-4 pb-[calc(var(--spacing)*4+50px)] z-50">
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-(--ui-radius)">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 rounded-(--ui-radius)">
       <UFormField
         label="Encoder"
         description="encoder that will be used to re-encode"
