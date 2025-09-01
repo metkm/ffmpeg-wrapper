@@ -3,24 +3,7 @@
 
 @theme {
   --font-sans: 'Inter', sans-serif;
-  --ui-primary: 'red';
 }
-
-/* :root {
-  --ui-bg: #fff8f8;
-  --ui-bg-muted: #f9eaee;
-  --ui-bg-elevated: #f3e4e9;
-
-  --ui-text: #21191d;
-}
-
-.dark {
-  --ui-bg: #181114;
-  --ui-bg-muted: #251d21;
-  --ui-bg-elevated: #30282b;
-
-  --ui-text: #eedfe3;
-} */
 
 :root {
   --ui-color-primary-50:  #FEFCF9;
