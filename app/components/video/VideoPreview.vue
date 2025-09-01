@@ -25,7 +25,6 @@ const indicatorElementSize = useElementSize(indicatorElement)
 const indicatorElementContainer = useTemplateRef('indicatorElementContainer')
 const indicatorElementContainerSize = useElementSize(indicatorElementContainer)
 
-const videoContainerElement = useTemplateRef('videoContainerElement')
 const videoElement = useTemplateRef('videoElement')
 const videoPlaying = ref(false)
 
@@ -33,7 +32,7 @@ const { x: indicatorX, style: indicatorElementStyle, isDragging } = useDraggable
   axis: 'x',
   containerElement: indicatorElementContainer,
   preventDefault: true,
-  initialValue: { x: 0, y: 0 },
+  // initialValue: { x: 0 },
   onMove: ({ x }) => {
     if (!videoElement.value) return
     videoElement.value.currentTime = range(0, indicatorElementContainerSize.width.value - indicatorElementSize.width.value, 0, videoModel.value.duration, x)
@@ -65,14 +64,6 @@ const togglePlay = () => {
   } else {
     videoElement.value?.play()
     videoPlaying.value = true
-  }
-}
-
-const toggleFullscreen = () => {
-  if (document.fullscreenElement) {
-    document.exitFullscreen()
-  } else {
-    videoContainerElement.value?.requestFullscreen()
   }
 }
 
@@ -127,7 +118,7 @@ watch(
 
 <template>
   <section class="space-y-4">
-    <div class="font-medium text-muted">
+    <div class="font-medium text-muted w-full mx-auto">
       <motion.p
         layout-id="hovering-path"
         class="truncate z-10"
@@ -141,40 +132,31 @@ watch(
       </p>
     </div>
 
-    <div
-      ref="videoContainerElement"
-      class="relative flex items-center gap-4 rounded-(--ui-radius) overflow-hidden w-full aspect-video"
-    >
-      <div class="rounded-(--ui-radius) overflow-hidden">
-        <VideoCrop
-          v-if="showCrop"
-          v-model="videoModel.crop"
-          :width="videoElement?.videoWidth"
-          :height="videoElement?.videoHeight"
-          class="z-10"
-        />
-
+    <div class="flex flex-col items-center space-y-4">
+      <div class="relative">
         <video
           ref="videoElement"
           :src="src"
-          class="aspect-video rounded-(--ui-radius) overflow-hidden w-full"
+          class="rounded-(--ui-radius) shadow shadow-black aspect-video"
           @loadeddata="handleLoad"
           @timeupdate="handleTimeUpdate"
         />
+
+        <div
+          class="absolute inset-0"
+          @click="togglePlay"
+        />
       </div>
 
-      <div class="p-4 absolute bottom-0 inset-x-0  bg-gradient-to-t from-black">
-        <div class="flex items-center gap-2 rounded-full">
-          <UButton
-            :icon="videoPlaying ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
-            color="neutral"
-            size="sm"
-            variant="ghost"
-            :ui="{ leadingIcon: 'drop-shadow-lg shadow-black' }"
-            @click="togglePlay"
-          />
+      <div class="flex items-center gap-4 w-full">
+        <UButton
+          :icon="videoPlaying ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
+          size="xl"
+          @click="togglePlay"
+        />
 
-          <p class="hidden sm:block text-sm font-medium text-center w-32">
+        <div class="w-full -mt-1">
+          <p class="text-xs mb-1.5">
             {{ rangeStart }} / {{ rangeEnd }}
           </p>
 
@@ -184,33 +166,57 @@ watch(
           >
             <div
               ref="indicatorElement"
-              class="absolute w-1.5 h-3 mt-3.5 ring-2 bg-primary shadow rounded-full z-10"
+              class="absolute flex flex-col items-center !top-full"
               :style="[indicatorElementStyle, { transform: `translateX(${indicatorOffset}px)` }]"
-            />
+            >
+              <div class="relative h-3 w-1 bg-neutral-600 dark:bg-white rounded-t-full sq" />
+              <div class="size-4 bg-neutral-600 dark:bg-white rounded-b-full rounded-t-full" />
+            </div>
 
             <USlider
               v-model="videoModel.durationRange"
-              color="neutral"
               :min="0"
               :max="videoModel.duration"
-              size="xs"
-              class="flex-1"
               :min-steps-between-thumbs="1"
-              :ui="{
-                track: 'shadow opacity-85',
-              }"
             />
           </div>
-
-          <UButton
-            icon="i-lucide-fullscreen"
-            size="sm"
-            variant="ghost"
-            color="neutral"
-            @click="toggleFullscreen"
-          />
         </div>
       </div>
     </div>
   </section>
 </template>
+
+<style>
+.sq::before, .sq::after {
+  content: "";
+  width: 44px;
+  height: 34px;
+  position: absolute;
+  bottom: -5px;
+  background-color: inherit;
+
+  /* mask-image:
+    linear-gradient(to top, black, black),
+    radial-gradient(ellipse 24px 24px, green calc(100% - 1px), transparent); */
+
+  mask-image:
+    linear-gradient(to top, black, black),
+    radial-gradient(ellipse 22px 28px, green calc(100% - 1px), transparent);
+
+  mask-size: 50% 50%, 100%;
+  mask-repeat: no-repeat;
+  mask-composite: subtract;
+
+  pointer-events: none;
+}
+
+.sq::before {
+  right: calc(100% - 1px);
+  mask-position: bottom right;
+}
+
+.sq::after {
+  left: calc(100% - 1px);
+  mask-position: bottom left;
+}
+</style>

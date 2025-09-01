@@ -95,64 +95,75 @@ const process = async () => {
 </script>
 
 <template>
-  <section class="flex flex-col gap-4 pb-[calc(var(--spacing)*4+50px)] z-50">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 rounded-(--ui-radius)">
-      <UFormField
-        label="Encoder"
-        description="encoder that will be used to re-encode"
-      >
-        <USelect
-          v-model="encoder"
-          :items="Object.keys(parametersPerEncoders)"
-          class="w-full"
+  <section class="mb-[calc(var(--spacing)*4+50px)] z-50">
+    <!-- <h1 class="font-medium p-4">
+      Video export settings
+    </h1> -->
+
+    <div class="*:flex *:items-start *:gap-4 space-y-4">
+      <div>
+        <UFormField
+          label="Encoder"
+          description="h264 is recommended"
+        >
+          <USelect
+            v-model="encoder"
+            :items="Object.keys(parametersPerEncoders)"
+            size="lg"
+            variant="soft"
+          />
+        </UFormField>
+      </div>
+
+      <div>
+        <UFormField
+          label="target file size"
+          :description="`${targetBitrate.toFixed(0)} bitrate`"
+          class="capitalize"
+        >
+          <UInputNumber
+            v-model="output.targetFileSize"
+            :min="0"
+            color="neutral"
+            class="after:content-['(MB)'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-18 after:font-medium after:text-muted after:pointer-events-none"
+          />
+        </UFormField>
+
+        <UFormField
+          label="Video speed"
+          description="speed of video"
+          class="capitalize"
+        >
+          <UInputNumber
+            v-model="output.speed"
+            :min="0.5"
+            :max="100"
+            :step="0.05"
+            color="neutral"
+            class="after:content-['x'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-14 after:font-medium after:text-muted after:pointer-events-none"
+          />
+        </UFormField>
+
+        <CommandParameters
+          v-model="args"
+          :encoder="encoder"
         />
-      </UFormField>
+      </div>
 
-      <UFormField
-        label="target file size"
-        :description="`${targetBitrate.toFixed(0)} bitrate`"
-        class="capitalize"
-      >
-        <UInputNumber
-          v-model="output.targetFileSize"
-          :min="0"
-          color="neutral"
-          class="w-full after:content-['(MB)'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-18 after:font-medium after:text-muted after:pointer-events-none"
+      <div>
+        <UCheckbox
+          v-model="twoPass"
+          label="Two pass"
+          description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
+          variant="card"
         />
-      </UFormField>
 
-      <UFormField
-        label="Video speed"
-        description="speed of video"
-        class="capitalize"
-      >
-        <UInputNumber
-          v-model="output.speed"
-          :min="0.5"
-          :max="100"
-          :step="0.05"
-          color="neutral"
-          class="w-full after:content-['x'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-14 after:font-medium after:text-muted after:pointer-events-none"
+        <UCheckbox
+          v-model="removeAudio"
+          label="Remove audio"
+          variant="card"
         />
-      </UFormField>
-
-      <CommandParameters
-        v-model="args"
-        :encoder="encoder"
-      />
-
-      <UCheckbox
-        v-model="twoPass"
-        label="Two pass"
-        variant="card"
-        description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
-      />
-
-      <UCheckbox
-        v-model="removeAudio"
-        label="Remove audio"
-        variant="card"
-      />
+      </div>
     </div>
 
     <pre
@@ -178,7 +189,6 @@ const process = async () => {
                 to="/"
                 icon="i-lucide-x"
                 variant="soft"
-                color="neutral"
                 square
               />
             </Motion>

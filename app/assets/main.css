@@ -1,2 +1,51 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --ui-primary: 'red';
+}
+
+/* :root {
+  --ui-bg: #fff8f8;
+  --ui-bg-muted: #f9eaee;
+  --ui-bg-elevated: #f3e4e9;
+
+  --ui-text: #21191d;
+}
+
+.dark {
+  --ui-bg: #181114;
+  --ui-bg-muted: #251d21;
+  --ui-bg-elevated: #30282b;
+
+  --ui-text: #eedfe3;
+} */
+
+:root {
+  --ui-color-primary-50:  #FEFCF9;
+  --ui-color-primary-100: #FCF8F0;
+  --ui-color-primary-200: #F9EFDB;
+  --ui-color-primary-300: #F2E3C6;
+  --ui-color-primary-400: #E9D3AE;
+  --ui-color-primary-500: #D9BB8D;
+  --ui-color-primary-600: #C39D6D;
+  --ui-color-primary-700: #A47D50;
+  --ui-color-primary-800: #7C5C37;
+  --ui-color-primary-900: #4F3821;
+  --ui-color-primary-950: #2A1D11;
+}
+
+.dark {
+  --ui-color-primary-50:  #FDFBF7;
+  --ui-color-primary-100: #FBF6EE;
+  --ui-color-primary-200: #F9EFDB;
+  --ui-color-primary-300: #EEDFC4;
+  --ui-color-primary-400: #E0CEAA;
+  --ui-color-primary-500: #CDB890;
+  --ui-color-primary-600: #AE9971;
+  --ui-color-primary-700: #8C7651;
+  --ui-color-primary-800: #615239;
+  --ui-color-primary-900: #3D3322;
+  --ui-color-primary-950: #1F1A11;
+}

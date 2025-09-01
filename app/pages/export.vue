@@ -19,11 +19,10 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 max-w-7xl mx-auto w-full relative">
+  <div class="flex-1 flex flex-col gap-8 max-w-video mx-auto">
     <VideoPreview
       v-model="video"
       :src="src"
-      class="w-full"
     />
 
     <VideoExport
@@ -32,3 +31,17 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
     />
   </div>
 </template>
+
+<style>
+:root {
+  --video-max-height: calc(100vh - var(--spacing) * 64);
+}
+
+.max-h-video {
+  max-height: var(--video-max-height);
+}
+
+.max-w-video {
+  max-width: calc(var(--video-max-height) * 16 / 9);
+}
+</style>

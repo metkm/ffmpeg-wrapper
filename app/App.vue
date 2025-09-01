@@ -13,7 +13,8 @@ onMounted(() => {
       <AppWindowOverlay />
     </Suspense>
 
-    <main class="flex flex-col grow overflow-x-hidden overflow-y-auto py-4 scrollbar">
+    <main class="relative flex flex-col grow p-4 overflow-x-hidden overflow-y-auto scrollbar">
+      <AppColorMode class="right-4 top-4 absolute" />
       <NuxtPage />
     </main>
   </div>
@@ -21,11 +22,11 @@ onMounted(() => {
 
 <style>
 .scrollbar::-webkit-scrollbar {
-  display: block;
-  width: calc(var(--spacing) * 3.5);
+  display: none;
+  /* width: calc(var(--spacing) * 3.5); */
 }
 
-.scrollbar::-webkit-scrollbar-thumb {
+/* .scrollbar::-webkit-scrollbar-thumb {
   background-color: var(--ui-bg-accented);
   border-radius: var(--radius-4xl);
   background-clip: padding-box;
@@ -42,7 +43,7 @@ onMounted(() => {
 
 .scrollbar {
   scrollbar-gutter: stable both-edges;
-}
+} */
 
 .page-enter-active,
 .page-leave-active {

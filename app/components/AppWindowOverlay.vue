@@ -19,21 +19,21 @@ onUnmounted(resizeListener)
       data-tauri-drag-region
       class="flex items-center w-[140px]"
     >
-      <AppVersion class="flex items-center pl-2 pointer-events-none" />
+      <!-- <AppVersion class="flex items-center pl-2 pointer-events-none" /> -->
     </div>
 
     <div
       data-tauri-drag-region
       class="flex items-center justify-center flex-1"
     >
-      <p class="flex items-center text-xs font-medium text-muted capitalize mx-auto pointer-events-none">
+      <p class="flex items-center capitalize mx-auto pointer-events-none text-sm">
         {{ route.name }}
       </p>
     </div>
 
     <div class="flex items-center [&_button]:justify-center">
       <button
-        class="w-12 h-8 flex items-center justify-center hover:bg-white/10"
+        class="w-12 h-8 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10"
         @click="window.minimize()"
       >
         <svg
@@ -41,19 +41,21 @@ onUnmounted(resizeListener)
           y="0px"
           viewBox="0 0 10.2 1"
           class="size-[10px]"
-          fill="white"
+          fill="none"
         >
           <rect
             x="0"
             y="50%"
             width="10.2"
             height="1"
+            fill="currentColor"
+            fill-opacity="0.8956"
           />
         </svg>
       </button>
 
       <button
-        class="w-12 h-8 flex items-center justify-center hover:bg-white/10"
+        class="w-12 h-8 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10"
         @click="window.toggleMaximize"
       >
         <svg
@@ -86,26 +88,9 @@ onUnmounted(resizeListener)
         </svg>
       </button>
 
-      <!-- <UButton
-        icon="i-fluent-minimize-16-regular"
-        class="text-white w-11 rounded-none h-full"
-        variant="ghost"
-        size="sm"
-        color="neutral"
-      /> -->
-
-      <!-- <UButton
-        icon="i-fluent-maximize-16-regular"
-        class="text-white w-11 rounded-none h-full hover:bg-white/10"
-        variant="ghost"
-        size="sm"
-        color="neutral"
-        @click="window.toggleMaximize()"
-      /> -->
-
       <UButton
         icon="i-fluent-dismiss-16-regular"
-        class="text-white w-11 rounded-none h-full hover:bg-[#e81123]"
+        class="w-11 rounded-none h-full hover:bg-[#e81123]"
         variant="ghost"
         size="sm"
         color="neutral"

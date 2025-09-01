@@ -40,7 +40,6 @@ watch(value, () => {
       :min="parameter.min"
       :max="parameter.max"
       color="neutral"
-      class="w-full"
     />
   </UFormField>
 </template>
