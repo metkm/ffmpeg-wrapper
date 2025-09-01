@@ -39,7 +39,7 @@ watch(value, () => {
       v-model="value"
       :min="parameter.min"
       :max="parameter.max"
-      color="neutral"
+      variant="soft"
     />
   </UFormField>
 </template>

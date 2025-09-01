@@ -93,88 +93,76 @@ const process = async () => {
   kill()
   emit('exportEnd')
 }
+
+const encoderItems = Object.keys(parametersPerEncoders)
 </script>
 
 <template>
   <section class="mb-[calc(var(--spacing)*4+50px)] z-50">
-    <div class="*:grid *:grid-cols-2 *:lg:grid-cols-4 *:gap-4 *:items-start space-y-4 mb-4">
-      <div>
-        <UFormField
-          label="Encoder"
-          description="h264 is recommended"
-          class="w-max"
-        >
-          <USelect
-            v-model="encoder"
-            :items="Object.keys(parametersPerEncoders)"
-            size="lg"
-            variant="soft"
-          />
-        </UFormField>
-      </div>
-
-      <div>
-        <UFormField
-          label="target file size"
-          :description="`${targetBitrate.toFixed(0)} bitrate`"
-          class="capitalize"
-        >
-          <UInputNumber
-            v-model="output.targetFileSize"
-            :min="0"
-            color="neutral"
-            class="after:content-['(MB)'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-18 after:font-medium after:text-muted after:pointer-events-none"
-          />
-        </UFormField>
-
-        <UFormField
-          label="Video speed"
-          description="speed of video"
-          class="capitalize"
-        >
-          <UInputNumber
-            v-model="output.speed"
-            :min="0.5"
-            :max="100"
-            :step="0.05"
-            color="neutral"
-            class="after:content-['x'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-14 after:font-medium after:text-muted after:pointer-events-none"
-          />
-        </UFormField>
-
-        <UFormField
-          label="FPS"
-          description="Frames per second"
-          class="capitalize"
-        >
-          <USelect
-            v-model="output.fps"
-            :items="[30, 60, 144, 180, 240]"
-            color="neutral"
-            class="w-full"
-          />
-        </UFormField>
-
-        <CommandParameters
-          v-model="args"
-          :encoder="encoder"
+    <!-- <div class="*:grid *:grid-cols-2 *:lg:grid-cols-4 *:gap-4 *:items-start space-y-4 mb-4"> -->
+    <div class="space-y-4 *:capitalize grid grid-cols-4 gap-4">
+      <UFormField
+        label="Encoder"
+        description="h264 is recommended"
+      >
+        <USelect
+          v-model="encoder"
+          :items="encoderItems"
+          variant="soft"
         />
-      </div>
+      </UFormField>
 
-      <div>
-        <UCheckbox
-          v-model="twoPass"
-          label="Two pass"
-          description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
-          variant="card"
+      <UFormField
+        label="target file size"
+        :description="`${targetBitrate.toFixed(0)} bitrate`"
+      >
+        <UInputNumber
+          v-model="output.targetFileSize"
+          :min="0"
+          variant="soft"
         />
+      </UFormField>
 
-        <UCheckbox
-          v-model="removeAudio"
-          label="Remove audio"
-          variant="card"
+      <UFormField
+        label="Video speed"
+        description="speed of video"
+      >
+        <UInputNumber
+          v-model="output.speed"
+          :min="0.5"
+          :max="100"
+          :step="0.05"
+          variant="soft"
         />
-      </div>
+      </UFormField>
+
+      <UFormField
+        label="FPS"
+        description="Frames per second"
+      >
+        <USelect
+          v-model="output.fps"
+          :items="[30, 60, 144, 180, 240]"
+          color="neutral"
+          variant="soft"
+        />
+      </UFormField>
+
+      <CommandParameters
+        v-model="args"
+        :encoder="encoder"
+      />
+
+      <UCheckbox
+        v-model="twoPass"
+        label="Two pass"
+        description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
+      />
+
+      <UCheckbox
+        v-model="removeAudio"
+        label="Remove audio"
+      />
     </div>
 
     <pre

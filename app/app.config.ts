@@ -4,9 +4,15 @@ export default defineAppConfig({
       primary: 'purple',
       neutral: 'zinc',
     },
-    formField: {
+    select: {
       slots: {
-        root: 'border p-4 border-muted rounded-lg',
+        base: 'w-full',
+      },
+    },
+    inputNumber: {
+      slots: {
+        base: 'w-full',
+        root: 'w-full',
       },
     },
     button: {

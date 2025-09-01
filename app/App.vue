@@ -23,27 +23,7 @@ onMounted(() => {
 <style>
 .scrollbar::-webkit-scrollbar {
   display: none;
-  /* width: calc(var(--spacing) * 3.5); */
 }
-
-/* .scrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--ui-bg-accented);
-  border-radius: var(--radius-4xl);
-  background-clip: padding-box;
-  border: 3px solid transparent;
-}
-
-.scrollbar::-webkit-scrollbar-corner {
-  display: none;
-}
-
-.scrollbar::-webkit-scrollbar:horizontal {
-  display: none;
-}
-
-.scrollbar {
-  scrollbar-gutter: stable both-edges;
-} */
 
 .page-enter-active,
 .page-leave-active {
