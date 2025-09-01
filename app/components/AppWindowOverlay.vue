@@ -19,7 +19,7 @@ onUnmounted(resizeListener)
       data-tauri-drag-region
       class="flex items-center w-[140px]"
     >
-      <!-- <AppVersion class="flex items-center pl-2 pointer-events-none" /> -->
+      <AppVersion class="pl-2" />
     </div>
 
     <div

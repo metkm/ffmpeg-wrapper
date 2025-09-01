@@ -5,7 +5,7 @@ const version = await getVersion()
 </script>
 
 <template>
-  <p class="text-muted font-medium text-right text-sm">
+  <p class="text-muted font-medium text-right text-xs">
     {{ version }}
   </p>
 </template>

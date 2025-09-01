@@ -58,7 +58,7 @@ onMounted(async () => {
         >
           <FileDrop
             v-model="videoPath"
-            class="grow"
+            class="grow -m-4"
             :disabled="isUpdating"
             @select="onSelect"
           />
