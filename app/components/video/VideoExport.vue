@@ -26,6 +26,7 @@ const output = reactive({
   savePath: null as string | null,
   targetFileSize: 10,
   speed: 1,
+  fps: 60,
 })
 
 const duration = computed(() => {
@@ -55,7 +56,7 @@ const process = async () => {
     // '-b:v', `${targetBitrate.value}k`,
     '-maxrate', `${targetBitrate.value}k`,
     '-bufsize', `${targetBitrate.value / 2}k`,
-    '-vf', `crop=${props.video.crop.width}:${props.video.crop.height}:${props.video.crop.left}:${props.video.crop.top}`,
+    '-vf', `crop=${props.video.crop.width}:${props.video.crop.height}:${props.video.crop.left}:${props.video.crop.top},fps=${output.fps}`,
     '-rc', 'vbr',
     ...args.value,
   ]
@@ -96,15 +97,12 @@ const process = async () => {
 
 <template>
   <section class="mb-[calc(var(--spacing)*4+50px)] z-50">
-    <!-- <h1 class="font-medium p-4">
-      Video export settings
-    </h1> -->
-
-    <div class="*:flex *:items-start *:gap-4 space-y-4">
+    <div class="*:grid *:grid-cols-2 *:lg:grid-cols-4 *:gap-4 *:items-start space-y-4 mb-4">
       <div>
         <UFormField
           label="Encoder"
           description="h264 is recommended"
+          class="w-max"
         >
           <USelect
             v-model="encoder"
@@ -141,6 +139,19 @@ const process = async () => {
             :step="0.05"
             color="neutral"
             class="after:content-['x'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:pl-14 after:font-medium after:text-muted after:pointer-events-none"
+          />
+        </UFormField>
+
+        <UFormField
+          label="FPS"
+          description="Frames per second"
+          class="capitalize"
+        >
+          <USelect
+            v-model="output.fps"
+            :items="[30, 60, 144, 180, 240]"
+            color="neutral"
+            class="w-full"
           />
         </UFormField>
 

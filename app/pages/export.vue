@@ -19,7 +19,7 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col gap-8 max-w-video mx-auto">
+  <div class="flex-1 flex flex-col gap-8 max-w-video w-full mx-auto">
     <VideoPreview
       v-model="video"
       :src="src"
