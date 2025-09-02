@@ -175,7 +175,7 @@ const encoderItems = Object.keys(parametersPerEncoders)
     <LayoutGroup>
       <section
         layout
-        class="fixed bottom-4 inset-x-2 flex justify-center"
+        class="fixed bottom-4 inset-x-2 flex justify-center pointer-events-none"
       >
         <motion.div
           layout
