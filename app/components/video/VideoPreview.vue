@@ -136,6 +136,16 @@ watch(() => videoModel.value.volume, () => {
 
   videoElement.value.volume = videoModel.value.volume
 })
+
+const volumeIcon = computed(
+  () => videoModel.value.volume === 0
+    ? 'i-lucide-volume-x'
+    : videoModel.value.volume < 0.33
+      ? 'i-lucide-volume'
+      : videoModel.value.volume < 0.66
+        ? 'i-lucide-volume-1'
+        : 'i-lucide-volume-2',
+)
 </script>
 
 <template>
@@ -204,15 +214,7 @@ watch(() => videoModel.value.volume, () => {
 
         <div class="w-32 -mt-1">
           <UIcon
-            :name="`i-lucide-volume${
-              videoModel.volume === 0
-                ? '-x'
-                : videoModel.volume < 0.33
-                  ? ''
-                  : videoModel.volume < 0.66
-                    ? '-1'
-                    : '-2'
-            }`"
+            :name="volumeIcon"
             class="size-4"
           />
 

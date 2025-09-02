@@ -32,4 +32,19 @@ export default defineNuxtConfig({
       stylistic: true,
     },
   },
+  icon: {
+    clientBundle: {
+      icons: [
+        'lucide:volume-x',
+        'lucide:volume',
+        'lucide:volume-1',
+        'lucide:volume-2',
+        'lucide:moon',
+        'lucide:sun',
+        'heroicons:pause-solid',
+        'heroicons:play-solid',
+      ],
+      scan: true,
+    },
+  },
 })
