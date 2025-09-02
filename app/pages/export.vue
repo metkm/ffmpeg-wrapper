@@ -20,6 +20,11 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
 
 <template>
   <div class="flex-1 flex flex-col gap-14 max-w-video w-full mx-auto">
+    <FileDrop
+      class="fixed inset-0 z-50 pointer-events-none opacity-0"
+      @select="(path) => navigateTo({ name: 'export', query: { path } })"
+    />
+
     <VideoPreview
       v-model="video"
       :src="src"

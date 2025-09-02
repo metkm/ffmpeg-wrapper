@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { motion } from 'motion-v'
 import { defaultVideoValues } from '~/constants'
 import type { Video } from '~/types/video'
 
@@ -32,7 +31,6 @@ const { x: indicatorX, style: indicatorElementStyle, isDragging } = useDraggable
   axis: 'x',
   containerElement: indicatorElementContainer,
   preventDefault: true,
-  // initialValue: { x: 0 },
   onMove: ({ x }) => {
     if (!videoElement.value) return
     videoElement.value.currentTime = range(0, indicatorElementContainerSize.width.value - indicatorElementSize.width.value, 0, videoModel.value.duration, x)
@@ -46,7 +44,7 @@ const handleLoad = (event: Event) => {
   const element = videoElement.value ?? event.target as HTMLVideoElement
 
   videoModel.value.duration = element.duration
-  videoModel.value.durationRange = [0, element.duration]
+  videoModel.value.durationRange = [0, Math.round(element.duration)]
 
   videoModel.value.crop.width = element.videoWidth
   videoModel.value.crop.height = element.videoHeight
@@ -90,25 +88,26 @@ const updateIndicatorX = (time: number) => {
   indicatorX.value = range(0, videoModel.value.duration, 0, containerWidthWithoutIndicator, time)
 }
 
-watch([() => indicatorElementContainerSize.width.value, () => videoModel.value.currentTime], () => {
-  if (isDragging.value) return
-  updateIndicatorX(videoModel.value.currentTime)
-})
+watch(
+  [
+    () => indicatorElementContainerSize.width.value,
+    () => videoModel.value.currentTime,
+  ],
+  () => {
+    if (isDragging.value) return
+    updateIndicatorX(videoModel.value.currentTime)
+  })
 
 watch(
   () => videoModel.value.durationRange,
-  (durationRange, oldDurationRange) => {
-    if (!videoElement.value) return
+  ([start, end], [oldStart, oldEnd]) => {
+    if (!videoElement.value || oldEnd === 1)
+      return
 
-    const start = durationRange[0]
-    const end = durationRange[1]
-
-    if (start !== oldDurationRange[0]) {
+    if (start !== oldStart) {
       videoElement.value.currentTime = start
       updateIndicatorX(start)
-    } else if (end !== oldDurationRange[1] && oldDurationRange[1] !== 1) {
-      // oldDurationRange[0] !== 1 means the component just mounted
-
+    } else if (end !== oldEnd) {
       videoElement.value.currentTime = end
       updateIndicatorX(end)
     }
@@ -119,13 +118,9 @@ watch(
 <template>
   <section class="space-y-4">
     <div class="font-medium text-muted w-full mx-auto">
-      <motion.p
-        layout-id="hovering-path"
-        class="truncate z-10"
-        layout="position"
-      >
+      <p class="truncate z-10">
         {{ decodeURI(src).split('\\').at(-1) }}
-      </motion.p>
+      </p>
 
       <p class="text-xs">
         (press <UKbd>C</UKbd> to toggle crop)
@@ -133,7 +128,7 @@ watch(
     </div>
 
     <div class="flex flex-col items-center space-y-4">
-      <div class="relative">
+      <div class="relative w-full aspect-video">
         <video
           ref="videoElement"
           :src="src"
@@ -152,6 +147,7 @@ watch(
         <UButton
           :icon="videoPlaying ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
           size="xl"
+          class="shadow shadow-black"
           @click="togglePlay"
         />
 
@@ -169,8 +165,8 @@ watch(
               class="absolute flex flex-col items-center !top-full"
               :style="[indicatorElementStyle, { transform: `translateX(${indicatorOffset}px)` }]"
             >
-              <div class="relative h-3 w-1 bg-neutral-600 dark:bg-white rounded-t-full sq" />
-              <div class="size-4 bg-neutral-600 dark:bg-white rounded-b-full rounded-t-full" />
+              <div class="relative h-2 w-1 bg-primary sq" />
+              <div class="size-4 bg-primary rounded-b-full rounded-t-full" />
             </div>
 
             <USlider
@@ -192,7 +188,7 @@ watch(
   width: 44px;
   height: 34px;
   position: absolute;
-  bottom: -5px;
+  bottom: -4px;
   background-color: inherit;
 
   /* mask-image:
@@ -201,7 +197,7 @@ watch(
 
   mask-image:
     linear-gradient(to top, black, black),
-    radial-gradient(ellipse 22px 28px, green calc(100% - 1px), transparent);
+    radial-gradient(ellipse 22px 26px, green calc(100% - 1px), transparent);
 
   mask-size: 50% 50%, 100%;
   mask-repeat: no-repeat;

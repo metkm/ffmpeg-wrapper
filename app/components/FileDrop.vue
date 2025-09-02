@@ -10,7 +10,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  select: []
+  select: [path: string]
 }>()
 
 const modelValue = defineModel<string>()
@@ -28,7 +28,7 @@ const openFile = async () => {
   await nextTick()
 
   if (modelValue.value) {
-    emit('select')
+    emit('select', modelValue.value)
   }
 }
 
@@ -58,7 +58,7 @@ onMounted(async () => {
         }
 
         modelValue.value = event.payload.paths.at(0)
-        emit('select')
+        emit('select', event.payload.paths.at(0)!)
       }
     })
 })
