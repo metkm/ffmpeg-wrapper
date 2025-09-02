@@ -8,16 +8,18 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col h-screen w-screen overflow-x-hidden">
-    <Suspense>
-      <AppWindowOverlay />
-    </Suspense>
+  <UApp>
+    <div class="flex flex-col h-screen w-screen overflow-x-hidden">
+      <Suspense>
+        <AppWindowOverlay />
+      </Suspense>
 
-    <main class="relative flex flex-col grow p-4 overflow-x-hidden overflow-y-auto scrollbar">
-      <AppColorMode class="right-4 top-4 absolute" />
-      <NuxtPage />
-    </main>
-  </div>
+      <main class="relative flex flex-col grow p-4 overflow-x-hidden overflow-y-auto scrollbar">
+        <AppColorMode class="right-4 top-4 absolute" />
+        <NuxtPage />
+      </main>
+    </div>
+  </UApp>
 </template>
 
 <style>

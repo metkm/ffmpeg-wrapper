@@ -11,6 +11,7 @@ export const defaultVideoValues: Video = {
     height: 0,
     width: 0,
   },
+  volume: 0,
 }
 
 export const parametersPerEncoders = {

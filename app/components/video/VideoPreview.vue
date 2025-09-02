@@ -37,6 +37,16 @@ const { x: indicatorX, style: indicatorElementStyle, isDragging } = useDraggable
   },
 })
 
+const isMovingRange = ref(false)
+
+const setMovingToFalseDebounced = useDebounceFn(() => {
+  isMovingRange.value = false
+}, 250)
+
+const shouldTransitionIndicator = computed(
+  () => !isMovingRange.value && !isDragging.value,
+)
+
 const rangeStart = computed(() => formatSeconds(videoModel.value.durationRange[0]!))
 const rangeEnd = computed(() => formatSeconds(videoModel.value.durationRange[1]!))
 
@@ -49,6 +59,8 @@ const handleLoad = (event: Event) => {
   videoModel.value.crop.width = element.videoWidth
   videoModel.value.crop.height = element.videoHeight
   videoModel.value.currentTime = 0
+
+  videoModel.value.volume = element.volume
 }
 
 const handleTimeUpdate = () => {
@@ -104,6 +116,8 @@ watch(
     if (!videoElement.value || oldEnd === 1)
       return
 
+    isMovingRange.value = true
+
     if (start !== oldStart) {
       videoElement.value.currentTime = start
       updateIndicatorX(start)
@@ -111,8 +125,17 @@ watch(
       videoElement.value.currentTime = end
       updateIndicatorX(end)
     }
+
+    setMovingToFalseDebounced()
   },
 )
+
+watch(() => videoModel.value.volume, () => {
+  if (!videoElement.value)
+    return
+
+  videoElement.value.volume = videoModel.value.volume
+})
 </script>
 
 <template>
@@ -164,6 +187,7 @@ watch(
               ref="indicatorElement"
               class="absolute flex flex-col items-center !top-full"
               :style="[indicatorElementStyle, { transform: `translateX(${indicatorOffset}px)` }]"
+              :class="{ 'transition-all ease-linear duration-300': shouldTransitionIndicator }"
             >
               <div class="relative h-2 w-1 bg-primary sq" />
               <div class="size-4 bg-primary rounded-b-full rounded-t-full" />
@@ -176,6 +200,29 @@ watch(
               :min-steps-between-thumbs="1"
             />
           </div>
+        </div>
+
+        <div class="w-32 -mt-1">
+          <UIcon
+            :name="`i-lucide-volume${
+              videoModel.volume === 0
+                ? '-x'
+                : videoModel.volume < 0.33
+                  ? ''
+                  : videoModel.volume < 0.66
+                    ? '-1'
+                    : '-2'
+            }`"
+            class="size-4"
+          />
+
+          <USlider
+            v-model="videoModel.volume"
+            :min="0"
+            :max="1"
+            :step="0.01"
+            tooltip
+          />
         </div>
       </div>
     </div>

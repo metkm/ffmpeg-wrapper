@@ -8,4 +8,5 @@ export interface Video {
     left: number
     top: number
   }
+  volume: number
 }
