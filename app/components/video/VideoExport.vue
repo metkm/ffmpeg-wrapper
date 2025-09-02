@@ -179,7 +179,7 @@ const encoderItems = Object.keys(parametersPerEncoders)
       >
         <motion.div
           layout
-          class="flex items-center gap-2 p-2 backdrop-blur-2xl shadow max-w-max border border-muted overflow-hidden relative"
+          class="flex items-center gap-2 p-2 backdrop-blur-2xl shadow max-w-max border border-muted overflow-hidden relative pointer-events-auto"
           :style="{ borderRadius: '999px' }"
         >
           <AnimatePresence>
