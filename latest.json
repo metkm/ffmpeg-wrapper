@@ -1,9 +1,9 @@
 {
-  "version": "1.2.4",
+  "version": "1.2.5",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSeWVGT1YwSnRxU3A5NUZ2ZnMvVG5sU3RNZ0xxRE8vUlIxYVdGYlVldE1WOS9keDNmdEdBVFo1YlNJOC9WZ2xENkIweGZOM0l4RkVWRjFqUnBCUEJ2NkJobm53T3JtT2c4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzU2NzQ2NTk2CWZpbGU6ZmZtcGVnLXdyYXBwZXJfMS4yLjRfeDY0X2VuLVVTLm1zaQpFZkxXNi9UdmVjMC9DblR5eTd6eVV1WEYxc0pzRFNQNGJKRXpjSmxWeGhmaUNHbTVrMmI2K3M2SU5IVzg3Wm14Tng0emtVY1YreG1VazhhemljNlhCdz09Cg==",
-      "url": "https://github.com/metkm/ffmpeg-wrapper/releases/latest/download/ffmpeg-wrapper_1.2.4_x64_en-US.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSeWVGT1YwSnRxU3NReWFJaGdEU3ZCK0Z3cDhZOFhNT3lhSWJtbUVUWnFicTBnc29SYkRFYm53SHVERng3b1hvOWxUTU1DQkNrL1Y4bC9xSjI0dEhwVVZWM0o1dVd2NEFRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzU2ODE1ODIyCWZpbGU6ZmZtcGVnLXdyYXBwZXJfMS4yLjVfeDY0X2VuLVVTLm1zaQpYMHJkOUt0SlF6Uk8zZk1iM0tvVUN5TXUrd25QaUt2S0ZMSnBFRGFvUFlva1ZKTmFCUHVzVE5ydlpJYkNxUVpaYUwrYm9VZ2h0Q2QzMVNmNVpManVEdz09Cg==",
+      "url": "https://github.com/metkm/ffmpeg-wrapper/releases/latest/download/ffmpeg-wrapper_1.2.5_x64_en-US.msi"
     }
   }
 }
