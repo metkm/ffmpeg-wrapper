@@ -77,23 +77,23 @@ const togglePlay = () => {
   }
 }
 
-const indicatorOffset = computed(() => {
-  const x = indicatorX.value || 0 // indicatorX is NAN on mount for some reason
+// const indicatorOffset = computed(() => {
+//   const x = indicatorX.value || 0 // indicatorX is NAN on mount for some reason
 
-  const thumbWidthHalf = 12 / 2
-  const indicatorWidthHalf = indicatorElementSize.width.value / 2
+//   const thumbWidthHalf = 12 / 2
+//   const indicatorWidthHalf = indicatorElementSize.width.value / 2
 
-  const indicatorContainerWidth = indicatorElementContainerSize.width.value
-  const indicatorContainerWidthHalf = indicatorElementContainerSize.width.value / 2
+//   const indicatorContainerWidth = indicatorElementContainerSize.width.value
+//   const indicatorContainerWidthHalf = indicatorElementContainerSize.width.value / 2
 
-  const targetOffset = thumbWidthHalf - indicatorWidthHalf
+//   const targetOffset = thumbWidthHalf - indicatorWidthHalf
 
-  if (x <= indicatorContainerWidthHalf) {
-    return range(0, indicatorContainerWidthHalf, targetOffset, 0, x)
-  }
+//   if (x <= indicatorContainerWidthHalf) {
+//     return range(0, indicatorContainerWidthHalf, targetOffset, 0, x)
+//   }
 
-  return range(indicatorContainerWidthHalf, indicatorContainerWidth, 0, -targetOffset, x)
-})
+//   return range(indicatorContainerWidthHalf, indicatorContainerWidth, 0, -targetOffset, x)
+// })
 
 const updateIndicatorX = (time: number) => {
   const containerWidthWithoutIndicator = indicatorElementContainerSize.width.value - indicatorElementSize.width.value
@@ -185,8 +185,8 @@ watch(() => videoModel.value.volume, () => {
           >
             <div
               ref="indicatorElement"
-              class="absolute flex flex-col items-center !top-full"
-              :style="[indicatorElementStyle, { transform: `translateX(${indicatorOffset}px)` }]"
+              class="absolute flex flex-col items-center mt-2"
+              :style="[indicatorElementStyle]"
               :class="{ 'transition-all ease-linear duration-300': shouldTransitionIndicator }"
             >
               <div class="relative h-2 w-1 bg-primary sq" />
@@ -230,12 +230,15 @@ watch(() => videoModel.value.volume, () => {
 </template>
 
 <style>
+/* for some reason with with more than 8px cause indicator to overflow from container element */
+
 .sq::before, .sq::after {
   content: "";
-  width: 44px;
-  height: 34px;
+
+  width: 6px;
+  height: 16px;
   position: absolute;
-  bottom: -4px;
+  bottom: -2px;
   background-color: inherit;
 
   /* mask-image:
@@ -244,22 +247,23 @@ watch(() => videoModel.value.volume, () => {
 
   mask-image:
     linear-gradient(to top, black, black),
-    radial-gradient(ellipse 22px 26px, green calc(100% - 1px), transparent);
+    radial-gradient(ellipse 3.5px 8px, green calc(100% - 1px), transparent);
 
   mask-size: 50% 50%, 100%;
   mask-repeat: no-repeat;
+
   mask-composite: subtract;
 
   pointer-events: none;
 }
 
 .sq::before {
-  right: calc(100% - 1px);
-  mask-position: bottom right;
+  right: 100%;
+  mask-position: bottom right, center;
 }
 
 .sq::after {
-  left: calc(100% - 1px);
-  mask-position: bottom left;
+  left: 100%;
+  mask-position: bottom left, center;
 }
 </style>
