@@ -11,10 +11,8 @@ const emit = defineEmits<{
   seek: []
 }>()
 
-// const modelValueCurrentTime = defineModel<number>({ default: 0 })
-// const modelValueRange = defineModel<[number, number]>('range', { default: [0, 0] })
-
-// const offsetX = ref(0)
+const modelValueCurrentTime = defineModel<number>({ default: 0 })
+const modelValueRange = defineModel<[number, number]>('range', { default: [0, 0] })
 
 const leftThumb = useTemplateRef('leftThumb')
 const leftThumbElement = computed(() => leftThumb.value?.$el as HTMLElement)
@@ -23,85 +21,53 @@ const rightThumb = useTemplateRef('rightThumb')
 const rightThumbElement = computed(() => rightThumb.value?.$el as HTMLElement)
 
 const containerElement = useTemplateRef('container')
+const innerContainerElement = useTemplateRef('innerContainer')
 
-const { offsetX: leftThumbx } = useThumb(leftThumbElement, containerElement)
-const { offsetX: rightThumbx } = useThumb(rightThumbElement, containerElement)
+const { width: innerContainerWidth } = useElementSize(innerContainerElement)
 
-// const { frameUrls } = useFrames(props.src, innerContainerElement)
+const { offsetX: leftThumbx } = useThumb(leftThumbElement, {
+  containerElement,
+  onMove: (x) => {
+    const diff = rightThumbx.value - x - leftThumbElement.value.clientWidth
 
-// const { style: leftThumbStyle, x: leftX } = useDraggable(leftThumbElement, {
-//   containerElement,
-//   preventDefault: true,
-//   stopPropagation: true,
-//   onEnd: () => {
-//     const thumbWidth = leftThumbElement.value.clientWidth
-//     const diff = rightX.value - leftX.value - thumbWidth
+    if (diff <= 0)
+      return false
+  },
+})
 
-//     if (diff <= 0) {
-//       leftX.value = rightX.value - thumbWidth
-//     }
+const { offsetX: rightThumbx } = useThumb(rightThumbElement, {
+  containerElement,
+  initialValue: { x: 1 },
+  onMove: (x) => {
+    const diff = x - leftThumbx.value - rightThumbElement.value.clientWidth
 
-//     if (innerContainerElement.value) {
-//       modelValueRange.value[0] = range(0, innerContainerElement.value.clientWidth, 0, props.duration, leftX.value)
-//     }
-//   },
-// })
+    if (diff <= 0)
+      return false
+  },
+})
 
-// const { style: rightThumbStyle, x: rightX } = useDraggable(rightThumbElement, {
-//   containerElement,
-//   preventDefault: true,
-//   stopPropagation: true,
-//   onEnd: () => {
-//     const thumbWidth = rightThumbElement.value.clientWidth
-//     const diff = rightX.value - leftX.value - thumbWidth
+const { frameUrls } = useFrames(props.src, innerContainerElement)
 
-//     if (diff <= 0) {
-//       rightX.value = leftX.value + thumbWidth
-//     }
+const seekToTime = (event: PointerEvent) => {
+  modelValueCurrentTime.value = event.offsetX / innerContainerWidth.value * props.duration
+  emit('seek')
 
-//     if (innerContainerElement.value) {
-//       modelValueRange.value[1] = range(0, innerContainerElement.value.clientWidth, 0, props.duration, rightX.value - thumbWidth)
-//     }
-//   },
-// })
+  event.preventDefault()
 
-// const { width: windowWidth, height: windowHeight } = useWindowSize()
+  const target = event.target as HTMLElement
+  target.setPointerCapture(event.pointerId)
+}
 
-// const seekToPosition = (event: PointerEvent) => {
-//   modelValueCurrentTime.value = range(0, innerContainerElement.value?.clientWidth || 0, 0, props.duration, event.offsetX)
-//   emit('seek')
+useEventListener(innerContainerElement, 'pointermove', (event) => {
+  if (event.buttons === 0)
+    return
 
-//   event.preventDefault()
-//   event.stopPropagation()
+  seekToTime(event)
+})
 
-//   const target = event.target as HTMLElement
-//   target.setPointerCapture(event.pointerId)
-// }
+useEventListener(innerContainerElement, 'click', seekToTime)
 
-// useEventListener(innerContainerElement, 'pointermove', (event) => {
-//   if (event.buttons === 0)
-//     return
-
-//   seekToPosition(event)
-// })
-
-// useEventListener(innerContainerElement, 'click', seekToPosition)
-
-// watch(modelValueCurrentTime, () => {
-//   offsetX.value = range(0, props.duration, 0, innerContainerElement.value?.clientWidth || 0, modelValueCurrentTime.value)
-// })
-
-// watch([windowWidth, windowHeight], ([width, height], [oldWidth, oldHeight]) => {
-//   const widthDiff = width - oldWidth
-//   console.log(widthDiff)
-
-//   leftX.value -= widthDiff
-//   rightX.value += widthDiff
-// })
-
-// onMounted(() => {
-//   rightX.value = (innerContainerElement.value?.clientWidth || 0) + rightThumbElement.value.clientWidth
-// })
+const indicatorOffset = computed(() => (modelValueCurrentTime.value / props.duration) * innerContainerWidth.value)
 </script>
 
 <template>
@@ -111,7 +77,7 @@ const { offsetX: rightThumbx } = useThumb(rightThumbElement, containerElement)
   >
     <TimelineThumb
       ref="leftThumb"
-      class="absolute rounded-l"
+      class="absolute rounded-l z-10"
       :style="{
         left: `${leftThumbx}px`,
       }"
@@ -119,38 +85,26 @@ const { offsetX: rightThumbx } = useThumb(rightThumbElement, containerElement)
 
     <TimelineThumb
       ref="rightThumb"
-      class="absolute rounded-r"
+      class="absolute rounded-r z-10"
       :style="{
         left: `${rightThumbx}px`,
       }"
     />
 
-    <!-- <TimelineThumb
-      ref="leftThumb"
-      class="z-10 rounded-l"
-      :style="leftThumbStyle"
-    />
-
-    <TimelineThumb
-      ref="rightThumb"
-      class=" z-10 rounded-r"
-      :style="rightThumbStyle"
-    /> -->
-
-    <!-- <div
+    <div
       ref="innerContainer"
-      class="relative h-full bg-elevated rounded overflow-hidden"
+      class="relative h-full bg-elevated overflow-hidden"
     >
       <div
         class="absolute inset-0 bg-black pointer-events-none"
         :style="{
-          maskImage: `linear-gradient(to right, rgba(0, 0, 0, 0.7) calc(${leftX}px - 8px), transparent calc(${leftX}px - 8px), transparent calc(${rightX}px - 8px), rgba(0, 0, 0, 0.7) calc(${rightX}px - 8px))`,
+          maskImage: `linear-gradient(to right, rgba(0, 0, 0, 0.7) calc(${leftThumbx}px - 8px), transparent calc(${leftThumbx}px - 8px), transparent calc(${rightThumbx}px - 8px), rgba(0, 0, 0, 0.7) calc(${rightThumbx}px - 8px))`,
         }"
       />
 
       <div
         class="absolute h-full w-0.5 bg-white z-50 pointer-events-none select-none -translate-x-1/2"
-        :style="{ left: `${offsetX}px` }"
+        :style="{ left: `${indicatorOffset}px` }"
       />
 
       <div class="flex h-full w-full overflow-hidden pointer-events-none select-none">
@@ -161,6 +115,6 @@ const { offsetX: rightThumbx } = useThumb(rightThumbElement, containerElement)
           class="h-full aspect-square object-cover pointer-events-none select-none"
         >
       </div>
-    </div> -->
+    </div>
   </div>
 </template>
