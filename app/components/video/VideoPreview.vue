@@ -55,6 +55,9 @@ const handleSeek = () => {
   videoElement.value.currentTime = videoModel.value.currentTime
 }
 
+const rangeStart = computed(() => formatSeconds(videoModel.value.durationRange[0]!))
+const rangeEnd = computed(() => formatSeconds(videoModel.value.durationRange[1]!))
+
 watch(() => videoModel.value.volume, () => {
   if (!videoElement.value)
     return
@@ -110,19 +113,20 @@ const volumeIcon = computed(
           @click="togglePlay"
         />
 
-        <VideoTimeline
-          v-model="videoModel.currentTime"
-          :duration="videoModel.duration"
-          :src="src"
-          @seek="handleSeek"
-        />
+        <div class="w-full">
+          <VideoTimeline
+            v-model="videoModel.currentTime"
+            v-model:range="videoModel.durationRange"
+            :duration="videoModel.duration"
+            :src="src"
+            @seek="handleSeek"
+          />
 
-        <!-- <div class="w-full border">
-          <p class="text-xs mb-1.5">
+          <!-- <p class="text-xs mb-1.5">
             {{ rangeStart }} / {{ rangeEnd }}
-          </p>
+          </p> -->
 
-          <div
+          <!-- <div
             ref="indicatorElementContainer"
             class="flex-1 relative bg-green-800 h-14 mx-4"
           >
@@ -139,8 +143,8 @@ const volumeIcon = computed(
               :duration="videoModel.duration"
               :src="src"
             />
-          </div>
-        </div> -->
+          </div> -->
+        </div>
 
         <div class="w-32 -mt-1">
           <UIcon

@@ -2,7 +2,9 @@ import type { ShallowRef } from 'vue'
 
 export const useFrames = (src: string, containerElement: Readonly<ShallowRef<HTMLElement | null>>) => {
   const { height, width } = useElementSize(containerElement)
+
   const frameUrls = ref<string[]>([])
+  const dataLoaded = ref(false)
 
   const videoElement = document.createElement('video')
   const canvasElement = document.createElement('canvas')
@@ -13,7 +15,11 @@ export const useFrames = (src: string, containerElement: Readonly<ShallowRef<HTM
 
   const frameCount = computed(() => Math.floor(width.value / height.value) + 1)
 
-  videoElement.addEventListener('loadeddata', () => {
+  const generateFrames = () => {
+    frameUrls.value = []
+    videoElement.currentTime = 0
+
+    console.log(frameUrls.value)
     const videoRatio = videoElement.videoWidth / videoElement.videoHeight
 
     const thumbHeight = height.value
@@ -36,6 +42,20 @@ export const useFrames = (src: string, containerElement: Readonly<ShallowRef<HTM
     }
 
     videoElement.requestVideoFrameCallback(extractFrame)
+  }
+
+  const debouncedGenerateFrames = useDebounceFn(generateFrames, 500)
+
+  videoElement.addEventListener('loadeddata', () => {
+    dataLoaded.value = true
+    generateFrames()
+  })
+
+  watch([width, height], () => {
+    if (!dataLoaded.value)
+      return
+
+    debouncedGenerateFrames()
   })
 
   return {
