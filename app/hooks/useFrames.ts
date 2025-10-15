@@ -43,9 +43,15 @@ export const useFrames = (src: MaybeRefOrGetter<string>, containerElement: Reado
 
   const debouncedGenerateFrames = useDebounceFn(generateFrames, 500)
 
-  videoElement.addEventListener('loadeddata', () => {
+  videoElement.addEventListener('loadeddata', async () => {
     dataLoaded.value = true
+
+    await nextTick() // sometimes container with is 0 for some reason, so i added this
     generateFrames()
+  })
+
+  watchEffect(() => {
+    videoElement.src = toValue(src)
   })
 
   watch([width, height], () => {
@@ -53,10 +59,6 @@ export const useFrames = (src: MaybeRefOrGetter<string>, containerElement: Reado
       return
 
     debouncedGenerateFrames()
-  })
-
-  watchEffect(() => {
-    videoElement.src = toValue(src)
   })
 
   return {
