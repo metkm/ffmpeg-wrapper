@@ -12,7 +12,9 @@ const emit = defineEmits<{
 }>()
 
 const modelValueCurrentTime = defineModel<number>({ default: 0 })
-const modelValueRange = defineModel<[number, number]>('range', { default: [0, 0] })
+const modelValueRange = defineModel<[number, number]>('range', {
+  default: [0, 0],
+})
 
 const leftThumb = useTemplateRef('leftThumb')
 const leftThumbElement = computed(() => leftThumb.value?.$el as HTMLElement)
@@ -23,24 +25,32 @@ const rightThumbElement = computed(() => rightThumb.value?.$el as HTMLElement)
 const containerElement = useTemplateRef('container')
 const innerContainerElement = useTemplateRef('innerContainer')
 
-const { width: innerContainerWidth } = useElementSize(innerContainerElement)
+const { width: innerContainerWidth } = useElementBounding(innerContainerElement)
 
 const { offsetX: leftThumbx } = useThumb(leftThumbElement, {
   containerElement,
   onMove: (x) => {
-    const diff = rightThumbx.value - x - leftThumbElement.value.clientWidth
+    modelValueCurrentTime.value = x / innerContainerWidth.value * props.duration
+    emit('seek')
 
+    modelValueRange.value[0] = modelValueCurrentTime.value
+
+    const diff = rightThumbx.value - x - leftThumbElement.value.clientWidth
     if (diff <= 0)
       return false
   },
 })
 
-const { offsetX: rightThumbx } = useThumb(rightThumbElement, {
+const { offsetX: rightThumbx, width: rightThumbWidth } = useThumb(rightThumbElement, {
   containerElement,
   initialValue: { x: 1 },
   onMove: (x) => {
-    const diff = x - leftThumbx.value - rightThumbElement.value.clientWidth
+    modelValueCurrentTime.value = (x - rightThumbWidth.value) / innerContainerWidth.value * props.duration
+    emit('seek')
 
+    modelValueRange.value[1] = modelValueCurrentTime.value
+
+    const diff = x - leftThumbx.value - rightThumbElement.value.clientWidth
     if (diff <= 0)
       return false
   },
@@ -49,7 +59,7 @@ const { offsetX: rightThumbx } = useThumb(rightThumbElement, {
 const { frameUrls } = useFrames(props.src, innerContainerElement)
 
 const seekToTime = (event: PointerEvent) => {
-  modelValueCurrentTime.value = event.offsetX / innerContainerWidth.value * props.duration
+  modelValueCurrentTime.value = clamp(event.offsetX / innerContainerWidth.value * props.duration, 0, props.duration)
   emit('seek')
 
   event.preventDefault()
@@ -67,13 +77,13 @@ useEventListener(innerContainerElement, 'pointermove', (event) => {
 
 useEventListener(innerContainerElement, 'click', seekToTime)
 
-const indicatorOffset = computed(() => (modelValueCurrentTime.value / props.duration) * innerContainerWidth.value)
+const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props.duration) * innerContainerWidth.value)
 </script>
 
 <template>
   <div
     ref="container"
-    class="relative w-full h-14 px-4 rounded"
+    class="relative w-full h-14 px-5 rounded border border-(--ui-bg-elevated)"
   >
     <TimelineThumb
       ref="leftThumb"
@@ -103,7 +113,7 @@ const indicatorOffset = computed(() => (modelValueCurrentTime.value / props.dura
       />
 
       <div
-        class="absolute h-full w-0.5 bg-white z-50 pointer-events-none select-none -translate-x-1/2"
+        class="absolute h-full w-1 bg-white/80 z-50 pointer-events-none select-none -translate-x-1/2"
         :style="{ left: `${indicatorOffset}px` }"
       />
 

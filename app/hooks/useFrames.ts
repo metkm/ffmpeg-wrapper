@@ -19,7 +19,6 @@ export const useFrames = (src: string, containerElement: Readonly<ShallowRef<HTM
     frameUrls.value = []
     videoElement.currentTime = 0
 
-    console.log(frameUrls.value)
     const videoRatio = videoElement.videoWidth / videoElement.videoHeight
 
     const thumbHeight = height.value

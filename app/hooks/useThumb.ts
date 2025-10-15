@@ -4,7 +4,7 @@ export const useThumb = (
     containerElement: MaybeRefOrGetter<HTMLElement | null>
     initialValue?: { x: number } // these values should be between 0 and 1
     // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-    onMove?: (x: number) => boolean | void // returning false doesn't move the element
+    onMove?: (x: number, event: PointerEvent) => boolean | void // returning false doesn't move the element
   },
 ) => {
   const { width: containerWidth } = useElementSize(options.containerElement, undefined, { box: 'border-box' })
@@ -36,9 +36,9 @@ export const useThumb = (
     if (event.buttons === 0)
       return
 
-    const x = event.clientX - pressDelta.value.x
+    const x = clamp(event.clientX - pressDelta.value.x, 0, containerWidth.value)
 
-    if (options.onMove?.(x) === false)
+    if (options.onMove?.(x, event) === false)
       return
 
     positionNormalized.value.x = x / containerWidth.value
@@ -52,5 +52,7 @@ export const useThumb = (
 
   return {
     offsetX,
+    positionNormalized,
+    width: targetWidth,
   }
 }

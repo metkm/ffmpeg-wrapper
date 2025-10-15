@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <div class="flex items-center justify-center w-4 h-full bg-accented absolute">
+  <div class="flex items-center justify-center w-5 h-full bg-accented outline-2 outline-(--ui-bg-elevated) absolute">
     <div class="bg-inverted h-3 rounded-lg w-0.5" />
   </div>
 </template>

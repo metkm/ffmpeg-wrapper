@@ -114,6 +114,10 @@ const volumeIcon = computed(
         />
 
         <div class="w-full">
+          <p class="text-xs mb-1.5">
+            {{ rangeStart }} / {{ rangeEnd }}
+          </p>
+
           <VideoTimeline
             v-model="videoModel.currentTime"
             v-model:range="videoModel.durationRange"
@@ -121,29 +125,6 @@ const volumeIcon = computed(
             :src="src"
             @seek="handleSeek"
           />
-
-          <!-- <p class="text-xs mb-1.5">
-            {{ rangeStart }} / {{ rangeEnd }}
-          </p> -->
-
-          <!-- <div
-            ref="indicatorElementContainer"
-            class="flex-1 relative bg-green-800 h-14 mx-4"
-          >
-            <div
-              ref="indicatorElement"
-              class="absolute w-2 h-full bg-white z-50"
-              :style="[indicatorElementStyle]"
-              :class="{ 'transition-all ease-linear duration-300': shouldTransitionIndicator }"
-            >
-              <div class="flex justify-center absolute top-full left-0 right-0 select-none" />
-            </div>
-
-            <VideoTimeline
-              :duration="videoModel.duration"
-              :src="src"
-            />
-          </div> -->
         </div>
 
         <div class="w-32 -mt-1">
