@@ -1,6 +1,4 @@
-import type { ShallowRef } from 'vue'
-
-export const useFrames = (src: MaybeRefOrGetter<string>, containerElement: Readonly<ShallowRef<HTMLElement | null>>) => {
+export const useFrames = (src: MaybeRefOrGetter<string>, containerElement: MaybeRefOrGetter<Readonly<HTMLElement | null>>) => {
   const { height, width } = useElementSize(containerElement)
 
   const frameUrls = ref<string[]>([])

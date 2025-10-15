@@ -105,27 +105,35 @@ const volumeIcon = computed(
         />
       </div>
 
-      <div class="flex items-center gap-4 w-full">
+      <div class="grid grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr] items-center gap-2 w-full">
         <UButton
           :icon="videoPlaying ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
           size="xl"
-          class="shadow shadow-black"
+          class="shadow shadow-black row-start-2 h-full aspect-square justify-center"
           @click="togglePlay"
         />
 
-        <div class="w-full">
-          <p class="text-xs mb-1.5">
-            {{ rangeStart }} / {{ rangeEnd }}
+        <div class="flex justify-between col-start-2">
+          <p
+            v-if="videoElement?.currentTime"
+            class="text-xs"
+          >
+            {{ formatSeconds(videoElement!.currentTime) }}
           </p>
 
-          <VideoTimeline
-            v-model="videoModel.currentTime"
-            v-model:range="videoModel.durationRange"
-            :duration="videoModel.duration"
-            :src="src"
-            @seek="handleSeek"
-          />
+          <p class="text-xs col-start-2">
+            {{ rangeStart }} / {{ rangeEnd }}
+          </p>
         </div>
+
+        <VideoTimeline
+          v-model="videoModel.currentTime"
+          v-model:range="videoModel.durationRange"
+          :duration="videoModel.duration"
+          :src="src"
+          class="col-start-2"
+          @seek="handleSeek"
+        />
 
         <div class="w-32 -mt-1">
           <UIcon
