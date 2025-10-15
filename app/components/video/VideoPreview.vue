@@ -18,37 +18,8 @@ const videoModel = defineModel<Video>({
   default: defaultVideoValues,
 })
 
-const indicatorElement = useTemplateRef('indicatorElement')
-const indicatorElementSize = useElementSize(indicatorElement)
-
-const indicatorElementContainer = useTemplateRef('indicatorElementContainer')
-const indicatorElementContainerSize = useElementSize(indicatorElementContainer)
-
 const videoElement = useTemplateRef('videoElement')
 const videoPlaying = ref(false)
-
-const { x: indicatorX, style: indicatorElementStyle, isDragging } = useDraggable(indicatorElement, {
-  axis: 'x',
-  containerElement: indicatorElementContainer,
-  preventDefault: true,
-  onMove: ({ x }) => {
-    if (!videoElement.value) return
-    videoElement.value.currentTime = range(0, indicatorElementContainerSize.width.value - indicatorElementSize.width.value, 0, videoModel.value.duration, x)
-  },
-})
-
-const isMovingRange = ref(false)
-
-const setMovingToFalseDebounced = useDebounceFn(() => {
-  isMovingRange.value = false
-}, 250)
-
-const shouldTransitionIndicator = computed(
-  () => !isMovingRange.value && !isDragging.value,
-)
-
-const rangeStart = computed(() => formatSeconds(videoModel.value.durationRange[0]!))
-const rangeEnd = computed(() => formatSeconds(videoModel.value.durationRange[1]!))
 
 const handleLoad = (event: Event) => {
   const element = videoElement.value ?? event.target as HTMLVideoElement
@@ -77,58 +48,15 @@ const togglePlay = () => {
   }
 }
 
-// const indicatorOffset = computed(() => {
-//   const x = indicatorX.value || 0 // indicatorX is NAN on mount for some reason
+const handleSeek = () => {
+  if (!videoElement.value)
+    return
 
-//   const thumbWidthHalf = 12 / 2
-//   const indicatorWidthHalf = indicatorElementSize.width.value / 2
-
-//   const indicatorContainerWidth = indicatorElementContainerSize.width.value
-//   const indicatorContainerWidthHalf = indicatorElementContainerSize.width.value / 2
-
-//   const targetOffset = thumbWidthHalf - indicatorWidthHalf
-
-//   if (x <= indicatorContainerWidthHalf) {
-//     return range(0, indicatorContainerWidthHalf, targetOffset, 0, x)
-//   }
-
-//   return range(indicatorContainerWidthHalf, indicatorContainerWidth, 0, -targetOffset, x)
-// })
-
-const updateIndicatorX = (time: number) => {
-  const containerWidthWithoutIndicator = indicatorElementContainerSize.width.value - indicatorElementSize.width.value
-  indicatorX.value = range(0, videoModel.value.duration, 0, containerWidthWithoutIndicator, time)
+  videoElement.value.currentTime = videoModel.value.currentTime
 }
 
-watch(
-  [
-    () => indicatorElementContainerSize.width.value,
-    () => videoModel.value.currentTime,
-  ],
-  () => {
-    if (isDragging.value) return
-    updateIndicatorX(videoModel.value.currentTime)
-  })
-
-watch(
-  () => videoModel.value.durationRange,
-  ([start, end], [oldStart, oldEnd]) => {
-    if (!videoElement.value || oldEnd === 1)
-      return
-
-    isMovingRange.value = true
-
-    if (start !== oldStart) {
-      videoElement.value.currentTime = start
-      updateIndicatorX(start)
-    } else if (end !== oldEnd) {
-      videoElement.value.currentTime = end
-      updateIndicatorX(end)
-    }
-
-    setMovingToFalseDebounced()
-  },
-)
+const rangeStart = computed(() => formatSeconds(videoModel.value.durationRange[0]!))
+const rangeEnd = computed(() => formatSeconds(videoModel.value.durationRange[1]!))
 
 watch(() => videoModel.value.volume, () => {
   if (!videoElement.value)
@@ -166,6 +94,7 @@ const volumeIcon = computed(
           ref="videoElement"
           :src="src"
           class="rounded-(--ui-radius) shadow shadow-black aspect-video"
+          crossorigin="anonymous"
           @loadeddata="handleLoad"
           @timeupdate="handleTimeUpdate"
         />
@@ -184,32 +113,18 @@ const volumeIcon = computed(
           @click="togglePlay"
         />
 
-        <div class="w-full -mt-1">
+        <div class="w-full">
           <p class="text-xs mb-1.5">
             {{ rangeStart }} / {{ rangeEnd }}
           </p>
 
-          <div
-            ref="indicatorElementContainer"
-            class="flex-1 relative"
-          >
-            <div
-              ref="indicatorElement"
-              class="absolute flex flex-col items-center mt-2"
-              :style="[indicatorElementStyle]"
-              :class="{ 'transition-all ease-linear duration-300': shouldTransitionIndicator }"
-            >
-              <div class="relative h-2 w-1 bg-primary sq" />
-              <div class="size-4 bg-primary rounded-b-full rounded-t-full" />
-            </div>
-
-            <USlider
-              v-model="videoModel.durationRange"
-              :min="0"
-              :max="videoModel.duration"
-              :min-steps-between-thumbs="1"
-            />
-          </div>
+          <VideoTimeline
+            v-model="videoModel.currentTime"
+            v-model:range="videoModel.durationRange"
+            :duration="videoModel.duration"
+            :src="src"
+            @seek="handleSeek"
+          />
         </div>
 
         <div class="w-32 -mt-1">
