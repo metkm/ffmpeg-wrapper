@@ -56,7 +56,7 @@ const { offsetX: rightThumbx, width: rightThumbWidth } = useThumb(rightThumbElem
   },
 })
 
-const { frameUrls } = useFrames(props.src, innerContainerElement)
+const { frameUrls } = useFrames(() => props.src, innerContainerElement)
 
 const seekToTime = (event: PointerEvent) => {
   modelValueCurrentTime.value = clamp(event.offsetX / innerContainerWidth.value * props.duration, 0, props.duration)
@@ -122,7 +122,7 @@ const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props
           v-for="img in frameUrls"
           :key="img"
           :src="img"
-          class="h-full aspect-square object-cover pointer-events-none select-none"
+          class="h-full object-cover pointer-events-none select-none"
         >
       </div>
     </div>

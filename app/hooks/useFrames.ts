@@ -1,6 +1,6 @@
 import type { ShallowRef } from 'vue'
 
-export const useFrames = (src: string, containerElement: Readonly<ShallowRef<HTMLElement | null>>) => {
+export const useFrames = (src: MaybeRefOrGetter<string>, containerElement: Readonly<ShallowRef<HTMLElement | null>>) => {
   const { height, width } = useElementSize(containerElement)
 
   const frameUrls = ref<string[]>([])
@@ -11,9 +11,6 @@ export const useFrames = (src: string, containerElement: Readonly<ShallowRef<HTM
   const canvasContext = canvasElement.getContext('2d')
 
   videoElement.crossOrigin = 'anonymous'
-  videoElement.src = src
-
-  const frameCount = computed(() => Math.floor(width.value / height.value) + 1)
 
   const generateFrames = () => {
     frameUrls.value = []
@@ -27,10 +24,11 @@ export const useFrames = (src: string, containerElement: Readonly<ShallowRef<HTM
     canvasElement.width = thumbWidth
     canvasElement.height = thumbHeight
 
-    const durationInterval = videoElement.duration / frameCount.value
+    const frameCount = Math.floor(width.value / thumbWidth) + 1
+    const durationInterval = videoElement.duration / frameCount
 
     const extractFrame = async () => {
-      if (frameUrls.value.length === frameCount.value)
+      if (frameUrls.value.length === frameCount)
         return
 
       canvasContext?.drawImage(videoElement, 0, 0, thumbWidth, thumbHeight)
@@ -55,6 +53,10 @@ export const useFrames = (src: string, containerElement: Readonly<ShallowRef<HTM
       return
 
     debouncedGenerateFrames()
+  })
+
+  watchEffect(() => {
+    videoElement.src = toValue(src)
   })
 
   return {
