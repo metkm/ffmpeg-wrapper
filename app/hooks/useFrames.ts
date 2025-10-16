@@ -1,65 +1,73 @@
-export const useFrames = (src: MaybeRefOrGetter<string>, containerElement: MaybeRefOrGetter<Readonly<HTMLElement | null>>) => {
-  const { height, width } = useElementSize(containerElement)
+export const useFrames = (
+  framesContainer: MaybeRefOrGetter<HTMLCanvasElement | null>,
+  src: MaybeRefOrGetter<string>,
+) => {
+  const videoLoaded = ref(false)
 
-  const frameUrls = ref<string[]>([])
-  const dataLoaded = ref(false)
+  const { height: framesContainerHeight, width: framesContainerWidth } = useElementSize(framesContainer)
 
   const videoElement = document.createElement('video')
-  const canvasElement = document.createElement('canvas')
-  const canvasContext = canvasElement.getContext('2d')
-
   videoElement.crossOrigin = 'anonymous'
 
+  const context = computed(() => toValue(framesContainer)?.getContext('2d'))
+
   const generateFrames = () => {
-    frameUrls.value = []
     videoElement.currentTime = 0
 
-    const videoRatio = videoElement.videoWidth / videoElement.videoHeight
+    const ratio = videoElement.videoWidth / videoElement.videoHeight
 
-    const thumbHeight = height.value
-    const thumbWidth = height.value * videoRatio
+    const frameHeight = framesContainerHeight.value
+    const frameWidth = framesContainerHeight.value * ratio
 
-    canvasElement.width = thumbWidth
-    canvasElement.height = thumbHeight
+    const frameCount = Math.floor(framesContainerWidth.value / frameWidth) + 1
+    const interval = videoElement.duration / frameCount
 
-    const frameCount = Math.floor(width.value / thumbWidth) + 1
-    const durationInterval = videoElement.duration / frameCount
+    toValue(framesContainer)!.width = frameWidth * frameCount
+    toValue(framesContainer)!.height = frameHeight
 
-    const extractFrame = async () => {
-      if (frameUrls.value.length === frameCount)
+    let index = 0
+
+    const extractFrame = () => {
+      if (index === frameCount)
         return
 
-      canvasContext?.drawImage(videoElement, 0, 0, thumbWidth, thumbHeight)
-      frameUrls?.value.push(canvasElement.toDataURL())
+      if (!context.value)
+        return
 
-      videoElement.currentTime += durationInterval
+      context.value.drawImage(videoElement, index * frameWidth, 0, frameWidth, frameHeight)
+
+      videoElement.currentTime += interval
+
+      index++
       videoElement.requestVideoFrameCallback(extractFrame)
     }
 
     videoElement.requestVideoFrameCallback(extractFrame)
   }
 
-  const debouncedGenerateFrames = useDebounceFn(generateFrames, 500)
-
-  videoElement.addEventListener('loadeddata', async () => {
-    dataLoaded.value = true
-
-    await nextTick() // sometimes container with is 0 for some reason, so i added this
+  useEventListener(videoElement, 'loadeddata', () => {
+    videoLoaded.value = true
     generateFrames()
   })
 
-  watchEffect(() => {
+  watchPostEffect(() => {
+    videoLoaded.value = false
     videoElement.src = toValue(src)
   })
 
-  watch([width, height], () => {
-    if (!dataLoaded.value)
+  watchDebounced([framesContainerWidth, framesContainerHeight], (
+    [_w, _h],
+    [oldWidth, oldHeight],
+  ) => {
+    if (!videoLoaded.value)
       return
 
-    debouncedGenerateFrames()
-  })
+    if (oldWidth === 0 || oldHeight === 0)
+      return
 
-  return {
-    frameUrls,
-  }
+    generateFrames()
+  }, {
+    debounce: 500,
+    immediate: false,
+  })
 }

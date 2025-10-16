@@ -24,6 +24,7 @@ const rightThumbElement = computed(() => rightThumb.value?.$el as HTMLElement)
 
 const containerElement = useTemplateRef('container')
 const innerContainerElement = useTemplateRef('innerContainer')
+const frameCanvasElement = useTemplateRef('frameCanvas')
 
 const { width: innerContainerWidth } = useElementBounding(innerContainerElement)
 
@@ -56,7 +57,7 @@ const { offsetX: rightThumbx, width: rightThumbWidth } = useThumb(rightThumbElem
   },
 })
 
-const { frameUrls } = useFrames(() => props.src, innerContainerElement)
+useFrames(frameCanvasElement, () => props.src)
 
 const seekToTime = (event: PointerEvent) => {
   modelValueCurrentTime.value = clamp(event.offsetX / innerContainerWidth.value * props.duration, 0, props.duration)
@@ -103,8 +104,13 @@ const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props
 
     <div
       ref="innerContainer"
-      class="relative h-full bg-elevated overflow-hidden"
+      class="relative h-full w-full bg-elevated"
     >
+      <canvas
+        ref="frameCanvas"
+        class="absolute w-full h-full"
+      />
+
       <div
         class="absolute inset-0 bg-black pointer-events-none"
         :style="{
@@ -115,15 +121,12 @@ const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props
       <div
         class="absolute h-full w-1 bg-white/80 z-50 pointer-events-none select-none -translate-x-1/2"
         :style="{ left: `${indicatorOffset}px` }"
-      />
-
-      <div class="flex h-full w-full overflow-hidden pointer-events-none select-none">
-        <img
-          v-for="img in frameUrls"
-          :key="img"
-          :src="img"
-          class="h-full object-cover pointer-events-none select-none"
-        >
+      >
+        <div class="h-full flex justify-center items-end">
+          <p class="translate-y-8 text-xs text-inverted bg-inverted/80 px-2 py-0.5 rounded-full">
+            {{ formatSeconds(modelValueCurrentTime) }}
+          </p>
+        </div>
       </div>
     </div>
   </div>

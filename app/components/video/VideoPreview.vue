@@ -114,15 +114,15 @@ const volumeIcon = computed(
         />
 
         <div class="flex justify-between col-start-2">
-          <p
-            v-if="videoElement?.currentTime"
+          <!-- <p
+            v-if="videoElement?.currentTime !== undefined"
             class="text-xs"
           >
             {{ formatSeconds(videoElement!.currentTime) }}
-          </p>
+          </p> -->
 
           <p class="text-xs col-start-2">
-            {{ rangeStart }} / {{ rangeEnd }}
+            {{ rangeStart }} - {{ rangeEnd }}
           </p>
         </div>
 
