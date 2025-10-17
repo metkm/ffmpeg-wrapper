@@ -4,6 +4,7 @@ import type { Video } from '~/types/video'
 
 defineProps<{
   src: string
+  path: string
 }>()
 
 const showCrop = ref(false)
@@ -78,15 +79,7 @@ const volumeIcon = computed(
 
 <template>
   <section class="space-y-4">
-    <div class="font-medium text-muted w-full mx-auto">
-      <p class="truncate z-10">
-        {{ decodeURI(src).split('\\').at(-1) }}
-      </p>
-
-      <p class="text-xs">
-        (press <UKbd>C</UKbd> to toggle crop)
-      </p>
-    </div>
+    <VideoInfo :path="path" />
 
     <div class="flex flex-col items-center gap-4">
       <div class="relative w-full aspect-video">

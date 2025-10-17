@@ -28,6 +28,7 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
     <VideoPreview
       v-model="video"
       :src="src"
+      :path="route.query.path!.toString()"
     />
 
     <VideoExportOptions
