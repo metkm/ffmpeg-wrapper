@@ -27,7 +27,9 @@ export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
       progress[key] = value as Exclude<undefined, FFmpegProgress[typeof key]>
     }
 
-    const speed = progress.speed ? parseFloat(progress.speed?.toString().slice(0, -1)) : 0
+    const speed = progress.speed
+      ? parseFloat(progress.speed?.toString().slice(0, -1))
+      : 0
 
     if (progress.time) {
       const seconds = formatTimeToSeconds(progress.time)
@@ -36,13 +38,14 @@ export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
         progress.eta = (toValue(duration) - seconds) / speed
       }
 
-      progress.percent = parseInt((seconds * 100 / toValue(duration)).toFixed(0))
+      progress.percent = parseInt(
+        ((seconds * 100) / toValue(duration)).toFixed(0),
+      )
 
-      getCurrentWindow()
-        .setProgressBar({
-          status: ProgressBarStatus.Normal,
-          progress: progress.percent,
-        })
+      getCurrentWindow().setProgressBar({
+        status: ProgressBarStatus.Normal,
+        progress: progress.percent,
+      })
     }
 
     return {
@@ -70,14 +73,12 @@ export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
     command.value.stdout.on('data', onData)
     command.value.stderr.on('data', onData)
 
-    const promise = new Promise<void>(
-      (resolve) => {
-        command.value?.once('close', () => {
-          resolve()
-          kill()
-        })
-      },
-    )
+    const promise = new Promise<void>((resolve) => {
+      command.value?.once('close', () => {
+        resolve()
+        kill()
+      })
+    })
 
     commandChild.value = await command.value.spawn()
 
@@ -98,10 +99,9 @@ export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
       progress.value.percent = 0
     }
 
-    getCurrentWindow()
-      .setProgressBar({
-        status: ProgressBarStatus.None,
-      })
+    getCurrentWindow().setProgressBar({
+      status: ProgressBarStatus.None,
+    })
   }
 
   const clear = () => {
