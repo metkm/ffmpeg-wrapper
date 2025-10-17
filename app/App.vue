@@ -26,16 +26,4 @@ onMounted(() => {
 .scrollbar::-webkit-scrollbar {
   display: none;
 }
-
-.page-enter-active,
-.page-leave-active {
-  transition-duration: var(--default-transition-duration);
-  transition-timing-function: var(--default-transition-timing-function);
-  transition-property: all;
-}
-
-.page-enter-from,
-.page-leave-to {
-  opacity: 0;
-}
 </style>

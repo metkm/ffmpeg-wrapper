@@ -8,9 +8,6 @@ export default defineNuxtConfig({
   ],
   ssr: false,
   devtools: { enabled: false },
-  app: {
-    pageTransition: { name: 'page', mode: 'out-in' },
-  },
   css: ['~/assets/main.css'],
   future: {
     compatibilityVersion: 4,
