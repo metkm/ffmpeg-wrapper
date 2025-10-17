@@ -40,7 +40,7 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
 
 <style>
 :root {
-  --video-max-height: calc(100vh - var(--spacing) * 72);
+  --video-max-height: calc(100vh - var(--spacing) * 79);
 }
 
 /* .max-h-video {
@@ -48,6 +48,6 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
 } */
 
 .max-w-video {
-  max-width: max(var(--container-lg), calc(var(--video-max-height) * 16 / 9));
+  max-width: max(var(--container-2xl), calc(var(--video-max-height) * 16 / 9));
 }
 </style>

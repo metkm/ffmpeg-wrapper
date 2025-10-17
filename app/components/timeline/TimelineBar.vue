@@ -119,11 +119,11 @@ const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props
       />
 
       <div
-        class="absolute h-full w-1 bg-white/80 z-50 pointer-events-none select-none -translate-x-1/2"
+        class="absolute h-full w-0.5 bg-white z-50 pointer-events-none select-none -translate-x-1/2"
         :style="{ left: `${indicatorOffset}px` }"
       >
         <div class="h-full flex justify-center items-end">
-          <p class="translate-y-8 text-xs text-inverted bg-inverted/80 px-2 py-0.5 rounded-full">
+          <p class="translate-y-6 text-xs text-inverted bg-inverted px-2 py-0.5 rounded-full">
             {{ formatSeconds(modelValueCurrentTime) }}
           </p>
         </div>
