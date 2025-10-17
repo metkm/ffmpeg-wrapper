@@ -22,7 +22,7 @@ const twoPass = ref<boolean>(false)
 const removeAudio = ref<boolean>(false)
 const args = ref<string[]>([])
 
-const output = reactive({
+const outputOptions = reactive({
   savePath: null as string | null,
   targetFileSize: 10,
   speed: 1,
@@ -30,22 +30,22 @@ const output = reactive({
 })
 
 const duration = computed(() => {
-  return (props.video.durationRange[1] - props.video.durationRange[0]) / output.speed
+  return (props.video.durationRange[1] - props.video.durationRange[0]) / outputOptions.speed
 })
 
 const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg(duration)
 
 const targetBitrate = computed(() => {
-  return output.targetFileSize * 8192 / duration.value - 196
+  return outputOptions.targetFileSize * 8192 / duration.value - 196
 })
 
 const process = async () => {
-  output.savePath = await save({
-    defaultPath: 'output.mp4',
+  outputOptions.savePath = await save({
+    defaultPath: 'outputOptions.mp4',
     filters: videoFilters,
   })
 
-  if (!output.savePath) return
+  if (!outputOptions.savePath) return
 
   const argsBase = [
     '-y',
@@ -56,14 +56,14 @@ const process = async () => {
     // '-b:v', `${targetBitrate.value}k`,
     '-maxrate', `${targetBitrate.value}k`,
     '-bufsize', `${targetBitrate.value / 2}k`,
-    '-vf', `crop=${props.video.crop.width}:${props.video.crop.height}:${props.video.crop.left}:${props.video.crop.top},fps=${output.fps}`,
+    '-vf', `crop=${props.video.crop.width}:${props.video.crop.height}:${props.video.crop.left}:${props.video.crop.top},fps=${outputOptions.fps}`,
     '-rc', 'vbr',
     ...args.value,
   ]
 
-  if (output.speed !== 1) {
-    argsBase.push('-filter:v', `setpts=PTS/${output.speed}`)
-    argsBase.push('-filter:a', `atempo=${output.speed}`)
+  if (outputOptions.speed !== 1) {
+    argsBase.push('-filter:v', `setpts=PTS/${outputOptions.speed}`)
+    argsBase.push('-filter:a', `atempo=${outputOptions.speed}`)
   }
 
   if (removeAudio.value) {
@@ -87,7 +87,7 @@ const process = async () => {
     argsBase.push('-pass', '2')
   }
 
-  argsBase.push(output.savePath)
+  argsBase.push(outputOptions.savePath)
   await spawn(argsBase)
 
   kill()
@@ -119,7 +119,7 @@ const encoderItems = Object.keys(parametersPerEncoders)
           :description="`${targetBitrate.toFixed(0)} bitrate`"
         >
           <UInputNumber
-            v-model="output.targetFileSize"
+            v-model="outputOptions.targetFileSize"
             :min="0"
             variant="soft"
           />
@@ -130,7 +130,7 @@ const encoderItems = Object.keys(parametersPerEncoders)
           description="speed of video"
         >
           <UInputNumber
-            v-model="output.speed"
+            v-model="outputOptions.speed"
             :min="0.5"
             :max="100"
             :step="0.05"
@@ -143,7 +143,7 @@ const encoderItems = Object.keys(parametersPerEncoders)
           description="Frames per second"
         >
           <USelect
-            v-model="output.fps"
+            v-model="outputOptions.fps"
             :items="[30, 60, 144, 180, 240]"
             color="neutral"
             variant="soft"
@@ -199,7 +199,7 @@ const encoderItems = Object.keys(parametersPerEncoders)
             </Motion>
 
             <Motion
-              v-if="output.savePath"
+              v-if="outputOptions.savePath"
               layout
               :exit="{ opacity: 0 }"
               :animate="{ opacity: 1 }"
@@ -211,9 +211,9 @@ const encoderItems = Object.keys(parametersPerEncoders)
                 color="neutral"
                 square
                 class="-ml-0.5"
-                @click="revealItemInDir(output.savePath)"
+                @click="revealItemInDir(outputOptions.savePath)"
               >
-                {{ output.savePath }}
+                {{ outputOptions.savePath }}
               </UButton>
             </Motion>
 
