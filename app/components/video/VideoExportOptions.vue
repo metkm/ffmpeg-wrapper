@@ -98,78 +98,85 @@ const encoderItems = Object.keys(parametersPerEncoders)
 </script>
 
 <template>
-  <section class="@container mb-[calc(var(--spacing)*4+50px)] z-50 w-full">
-    <div class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6">
-      <UFormField
-        label="Encoder"
-        description="h264 is recommended"
-      >
-        <USelect
-          v-model="encoder"
-          :items="encoderItems"
-          variant="soft"
+  <section class="@container">
+    <UPageHeader title="Export Settings" />
+
+    <UPageBody class="pb-16">
+      <div class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 @7xl:grid-cols-7">
+        <UFormField
+          label="Encoder"
+          description="h264 is recommended"
+        >
+          <USelect
+            v-model="encoder"
+            :items="encoderItems"
+            variant="soft"
+          />
+        </UFormField>
+
+        <UFormField
+          label="target file size"
+          :description="`${targetBitrate.toFixed(0)} bitrate`"
+        >
+          <UInputNumber
+            v-model="output.targetFileSize"
+            :min="0"
+            variant="soft"
+          />
+        </UFormField>
+
+        <UFormField
+          label="Video speed"
+          description="speed of video"
+        >
+          <UInputNumber
+            v-model="output.speed"
+            :min="0.5"
+            :max="100"
+            :step="0.05"
+            variant="soft"
+          />
+        </UFormField>
+
+        <UFormField
+          label="FPS"
+          description="Frames per second"
+        >
+          <USelect
+            v-model="output.fps"
+            :items="[30, 60, 144, 180, 240]"
+            color="neutral"
+            variant="soft"
+          />
+        </UFormField>
+
+        <CommandParameters
+          v-model="args"
+          :encoder="encoder"
         />
-      </UFormField>
 
-      <UFormField
-        label="target file size"
-        :description="`${targetBitrate.toFixed(0)} bitrate`"
-      >
-        <UInputNumber
-          v-model="output.targetFileSize"
-          :min="0"
-          variant="soft"
+        <UCheckbox
+          v-model="twoPass"
+          label="Two pass"
+          description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
         />
-      </UFormField>
 
-      <UFormField
-        label="Video speed"
-        description="speed of video"
-      >
-        <UInputNumber
-          v-model="output.speed"
-          :min="0.5"
-          :max="100"
-          :step="0.05"
-          variant="soft"
+        <UCheckbox
+          v-model="removeAudio"
+          label="Remove audio"
         />
-      </UFormField>
+      </div>
 
-      <UFormField
-        label="FPS"
-        description="Frames per second"
+      <pre
+        v-if="stdoutLines.length > 0"
+        ref="stdoutElement"
+        layout
+        class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
+        style="overflow-wrap: break-word;"
       >
-        <USelect
-          v-model="output.fps"
-          :items="[30, 60, 144, 180, 240]"
-          color="neutral"
-          variant="soft"
-        />
-      </UFormField>
-
-      <CommandParameters
-        v-model="args"
-        :encoder="encoder"
-      />
-
-      <UCheckbox
-        v-model="twoPass"
-        label="Two pass"
-        description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
-      />
-
-      <UCheckbox
-        v-model="removeAudio"
-        label="Remove audio"
-      />
-    </div>
-
-    <pre
-      v-if="stdoutLines.length > 0"
-      ref="stdoutElement"
-      class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
-      style="overflow-wrap: break-word;"
-    >{{ stdoutLines.join('\n') }}</pre>
+          {{ stdoutLines.join('\n') }}
+        </pre>
+    </UPageBody>
 
     <LayoutGroup>
       <section

@@ -103,6 +103,14 @@ const volumeIcon = computed(
           class="absolute inset-0"
           @click="togglePlay"
         />
+
+        <VideoCrop
+          v-if="showCrop"
+          v-model="videoModel.crop"
+          :width="videoElement?.videoWidth"
+          :height="videoElement?.videoHeight"
+          class="z-10"
+        />
       </div>
 
       <div class="grid grid-cols-[1fr_10fr_1fr] grid-rows-[auto_1fr] items-center gap-2 w-full">
@@ -117,7 +125,7 @@ const volumeIcon = computed(
           {{ rangeStart }} - {{ rangeEnd }}
         </p>
 
-        <VideoTimeline
+        <TimelineBar
           v-model="videoModel.currentTime"
           v-model:range="videoModel.durationRange"
           :duration="videoModel.duration"

@@ -19,7 +19,7 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col gap-12 max-w-video w-full mx-auto">
+  <div class="flex-1 flex flex-col gap-8 max-w-video w-full mx-auto">
     <FileDrop
       class="fixed inset-0 z-50 pointer-events-none opacity-0"
       @select="(path) => navigateTo({ name: 'export', query: { path } })"
@@ -30,7 +30,7 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
       :src="src"
     />
 
-    <VideoExport
+    <VideoExportOptions
       :video="video"
       :path="route.query.path!.toString()"
     />
