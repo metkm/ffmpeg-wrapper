@@ -12,6 +12,10 @@ onMounted(() => {
     <div class="flex flex-col h-screen w-screen overflow-x-hidden">
       <Suspense>
         <AppWindowOverlay />
+
+        <template #fallback>
+          <div class="h-8" />
+        </template>
       </Suspense>
 
       <main class="relative flex flex-col grow p-4 overflow-x-hidden overflow-y-auto scrollbar">
