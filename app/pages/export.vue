@@ -19,7 +19,7 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col gap-14 max-w-video w-full mx-auto">
+  <div class="flex-1 flex flex-col gap-12 max-w-video w-full mx-auto">
     <FileDrop
       class="fixed inset-0 z-50 pointer-events-none opacity-0"
       @select="(path) => navigateTo({ name: 'export', query: { path } })"
@@ -39,14 +39,14 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
 
 <style>
 :root {
-  --video-max-height: calc(100vh - var(--spacing) * 78);
+  --video-max-height: calc(100vh - var(--spacing) * 72);
 }
 
-.max-h-video {
+/* .max-h-video {
   max-height: var(--video-max-height);
-}
+} */
 
 .max-w-video {
-  max-width: calc(var(--video-max-height) * 16 / 9);
+  max-width: max(var(--container-lg), calc(var(--video-max-height) * 16 / 9));
 }
 </style>

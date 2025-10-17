@@ -98,9 +98,8 @@ const encoderItems = Object.keys(parametersPerEncoders)
 </script>
 
 <template>
-  <section class="mb-[calc(var(--spacing)*4+50px)] z-50">
-    <!-- <div class="*:grid *:grid-cols-2 *:lg:grid-cols-4 *:gap-4 *:items-start space-y-4 mb-4"> -->
-    <div class="space-y-4 *:capitalize grid grid-cols-4 gap-4">
+  <section class="@container mb-[calc(var(--spacing)*4+50px)] z-50 w-full">
+    <div class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6">
       <UFormField
         label="Encoder"
         description="h264 is recommended"

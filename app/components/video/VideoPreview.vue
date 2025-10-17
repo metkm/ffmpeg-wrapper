@@ -88,7 +88,7 @@ const volumeIcon = computed(
       </p>
     </div>
 
-    <div class="flex flex-col items-center space-y-4">
+    <div class="flex flex-col items-center gap-4">
       <div class="relative w-full aspect-video">
         <video
           ref="videoElement"
@@ -105,26 +105,17 @@ const volumeIcon = computed(
         />
       </div>
 
-      <div class="grid grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr] items-center gap-2 w-full">
+      <div class="grid grid-cols-[1fr_10fr_1fr] grid-rows-[auto_1fr] items-center gap-2 w-full">
         <UButton
           :icon="videoPlaying ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
           size="xl"
-          class="shadow shadow-black row-start-2 h-full aspect-square justify-center"
+          class="shadow shadow-black row-start-2 h-full justify-center"
           @click="togglePlay"
         />
 
-        <div class="flex justify-between col-start-2">
-          <!-- <p
-            v-if="videoElement?.currentTime !== undefined"
-            class="text-xs"
-          >
-            {{ formatSeconds(videoElement!.currentTime) }}
-          </p> -->
-
-          <p class="text-xs col-start-2">
-            {{ rangeStart }} - {{ rangeEnd }}
-          </p>
-        </div>
+        <p class="text-xs col-start-2">
+          {{ rangeStart }} - {{ rangeEnd }}
+        </p>
 
         <VideoTimeline
           v-model="videoModel.currentTime"
@@ -135,7 +126,7 @@ const volumeIcon = computed(
           @seek="handleSeek"
         />
 
-        <div class="w-32 -mt-1">
+        <div class="shrink-1 -mt-1">
           <UIcon
             :name="volumeIcon"
             class="size-4"
@@ -157,38 +148,39 @@ const volumeIcon = computed(
 <style>
 /* for some reason with with more than 8px cause indicator to overflow from container element */
 
-.sq::before, .sq::after {
-  content: "";
+.sq::before,
+.sq::after {
+    content: "";
 
-  width: 6px;
-  height: 16px;
-  position: absolute;
-  bottom: -2px;
-  background-color: inherit;
+    width: 6px;
+    height: 16px;
+    position: absolute;
+    bottom: -2px;
+    background-color: inherit;
 
-  /* mask-image:
+    /* mask-image:
     linear-gradient(to top, black, black),
     radial-gradient(ellipse 24px 24px, green calc(100% - 1px), transparent); */
 
-  mask-image:
-    linear-gradient(to top, black, black),
-    radial-gradient(ellipse 3.5px 8px, green calc(100% - 1px), transparent);
+    mask-image:
+        linear-gradient(to top, black, black),
+        radial-gradient(ellipse 3.5px 8px, green calc(100% - 1px), transparent);
 
-  mask-size: 50% 50%, 100%;
-  mask-repeat: no-repeat;
+    mask-size: 50% 50%, 100%;
+    mask-repeat: no-repeat;
 
-  mask-composite: subtract;
+    mask-composite: subtract;
 
-  pointer-events: none;
+    pointer-events: none;
 }
 
 .sq::before {
-  right: 100%;
-  mask-position: bottom right, center;
+    right: 100%;
+    mask-position: bottom right, center;
 }
 
 .sq::after {
-  left: 100%;
-  mask-position: bottom left, center;
+    left: 100%;
+    mask-position: bottom left, center;
 }
 </style>
