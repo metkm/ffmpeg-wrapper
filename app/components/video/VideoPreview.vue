@@ -138,7 +138,9 @@ const volumeIcon = computed(
             :min="0"
             :max="1"
             :step="0.01"
-            tooltip
+            :tooltip="{
+              delayDuration: 0,
+            }"
           />
         </div>
       </div>

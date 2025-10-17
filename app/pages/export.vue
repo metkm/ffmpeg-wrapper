@@ -11,6 +11,10 @@ definePageMeta({
   },
 })
 
+defineShortcuts({
+  escape: () => navigateTo('/'),
+})
+
 const route = useRoute()
 
 const video = ref<Video>(defaultVideoValues)
