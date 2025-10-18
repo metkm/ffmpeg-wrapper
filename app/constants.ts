@@ -19,7 +19,7 @@ export const encoders = [
   'h264_nvenc',
   'libx264',
   'libx265',
-] as const
+]
 
 // export const defaultEncoderOptions = {
 //   name: 'cq:v',
