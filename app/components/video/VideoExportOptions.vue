@@ -102,7 +102,9 @@ const encoderItems = Object.keys(parametersPerEncoders)
     <UPageHeader title="Export Settings" />
 
     <UPageBody class="pb-16">
-      <div class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 @7xl:grid-cols-7">
+      <div
+        class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 @7xl:grid-cols-7"
+      >
         <UFormField
           label="Encoder"
           description="h264 is recommended"
@@ -174,8 +176,8 @@ const encoderItems = Object.keys(parametersPerEncoders)
         class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
         style="overflow-wrap: break-word;"
       >
-          {{ stdoutLines.join('\n') }}
-        </pre>
+        {{ stdoutLines.join('\n') }}
+      </pre>
     </UPageBody>
 
     <LayoutGroup>
