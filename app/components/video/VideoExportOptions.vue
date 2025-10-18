@@ -1,98 +1,102 @@
 <script setup lang="ts">
-import { appLocalDataDir } from '@tauri-apps/api/path'
-import { save } from '@tauri-apps/plugin-dialog'
-import { revealItemInDir } from '@tauri-apps/plugin-opener'
-import { encoders, videoFilters } from '~/constants'
-import { useFFmpeg } from '~/hooks/useFFmpeg'
-import type { Video } from '~/types/video'
-import { motion } from 'motion-v'
-
 const props = defineProps<{
-  video: Video
-  path: string
+  assetUrl: string
 }>()
 
-const emit = defineEmits<{
-  exportEnd: []
-}>()
+// import { appLocalDataDir } from '@tauri-apps/api/path'
+// import { save } from '@tauri-apps/plugin-dialog'
+// import { revealItemInDir } from '@tauri-apps/plugin-opener'
+// import { encoders, videoFilters } from '~/constants'
+// import { useFFmpeg } from '~/hooks/useFFmpeg'
+// import type { Video } from '~/types/video'
+// import { motion } from 'motion-v'
 
-const encoder = ref<typeof encoders[number]>('h264_nvenc')
-const twoPass = ref<boolean>(false)
-const removeAudio = ref<boolean>(false)
+// const props = defineProps<{
+//   video: Video
+//   path: string
+// }>()
 
-const outputOptions = reactive({
-  savePath: null as string | null,
-  targetFileSize: 10,
-  speed: 1,
-  fps: 60,
-})
+// const emit = defineEmits<{
+//   exportEnd: []
+// }>()
 
-const duration = computed(() => {
-  return (props.video.durationRange[1] - props.video.durationRange[0]) / outputOptions.speed
-})
+// const encoder = ref<typeof encoders[number]>('h264_nvenc')
+// const twoPass = ref<boolean>(false)
+// const removeAudio = ref<boolean>(false)
 
-const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg(duration)
+// const outputOptions = reactive({
+//   savePath: null as string | null,
+//   targetFileSize: 10,
+//   speed: 1,
+//   fps: 60,
+// })
 
-const targetBitrate = computed(() => {
-  return outputOptions.targetFileSize * 8192 / duration.value - 196
-})
+// const duration = computed(() => {
+//   return (props.video.durationRange[1] - props.video.durationRange[0]) / outputOptions.speed
+// })
 
-const process = async () => {
-  outputOptions.savePath = await save({
-    defaultPath: 'output.mp4',
-    filters: videoFilters,
-  })
+// const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg(duration)
 
-  if (!outputOptions.savePath) return
+// const targetBitrate = computed(() => {
+//   return outputOptions.targetFileSize * 8192 / duration.value - 196
+// })
 
-  const argsBase = [
-    '-y',
-    '-ss', formatSeconds(props.video.durationRange[0] || 0),
-    '-to', formatSeconds(props.video.durationRange[1] || 1),
-    '-i', props.path,
-    '-vcodec', encoder.value,
-    '-maxrate', `${targetBitrate.value}k`,
-    '-bufsize', `${targetBitrate.value / 2}k`,
-    '-vf', `crop=${props.video.crop.width}:${props.video.crop.height}:${props.video.crop.left}:${props.video.crop.top},fps=${outputOptions.fps}`,
-    '-rc', 'vbr',
-  ]
+// const process = async () => {
+//   outputOptions.savePath = await save({
+//     defaultPath: 'output.mp4',
+//     filters: videoFilters,
+//   })
 
-  if (outputOptions.speed !== 1) {
-    argsBase.push('-filter:v', `setpts=PTS/${outputOptions.speed}`)
-    argsBase.push('-filter:a', `atempo=${outputOptions.speed}`)
-  }
+//   if (!outputOptions.savePath) return
 
-  if (removeAudio.value) {
-    argsBase.push('-an')
-  }
+//   const argsBase = [
+//     '-y',
+//     '-ss', formatSeconds(props.video.durationRange[0] || 0),
+//     '-to', formatSeconds(props.video.durationRange[1] || 1),
+//     '-i', props.path,
+//     '-vcodec', encoder.value,
+//     '-maxrate', `${targetBitrate.value}k`,
+//     '-bufsize', `${targetBitrate.value / 2}k`,
+//     '-vf', `crop=${props.video.crop.width}:${props.video.crop.height}:${props.video.crop.left}:${props.video.crop.top},fps=${outputOptions.fps}`,
+//     '-rc', 'vbr',
+//   ]
 
-  if (twoPass.value) {
-    argsBase.push('-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`)
-  }
+//   if (outputOptions.speed !== 1) {
+//     argsBase.push('-filter:v', `setpts=PTS/${outputOptions.speed}`)
+//     argsBase.push('-filter:a', `atempo=${outputOptions.speed}`)
+//   }
 
-  if (twoPass.value) {
-    const args = [
-      ...argsBase,
-      '-an',
-      '-pass', '1',
-      '-f', 'mp4',
-      'NUL',
-    ]
+//   if (removeAudio.value) {
+//     argsBase.push('-an')
+//   }
 
-    await spawn(args)
-    argsBase.push('-pass', '2')
-  }
+//   if (twoPass.value) {
+//     argsBase.push('-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`)
+//   }
 
-  argsBase.push(outputOptions.savePath)
-  await spawn(argsBase)
+//   if (twoPass.value) {
+//     const args = [
+//       ...argsBase,
+//       '-an',
+//       '-pass', '1',
+//       '-f', 'mp4',
+//       'NUL',
+//     ]
 
-  kill()
-  emit('exportEnd')
-}
+//     await spawn(args)
+//     argsBase.push('-pass', '2')
+//   }
+
+//   argsBase.push(outputOptions.savePath)
+//   await spawn(argsBase)
+
+//   kill()
+//   emit('exportEnd')
+// }
 </script>
 
 <template>
-  <section class="@container">
+  <!-- <section class="@container">
     <UPageHeader title="Export Settings" />
 
     <UPageBody class="pb-16">
@@ -256,5 +260,5 @@ const process = async () => {
         </motion.div>
       </section>
     </LayoutGroup>
-  </section>
+  </section> -->
 </template>

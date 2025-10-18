@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useFrames } from '~/hooks/useFrames'
 import { useThumb } from '~/hooks/useThumb'
+import type { VideoTrimOptions } from '~/hooks/useVideo'
 
 const props = defineProps<{
   duration: number
-  src: string
+  assetUrl: string
 }>()
 
 const emit = defineEmits<{
@@ -12,7 +13,7 @@ const emit = defineEmits<{
 }>()
 
 const modelValueCurrentTime = defineModel<number>({ default: 0 })
-const modelValueRange = defineModel<[number, number]>('range', {
+const modelValueTrim = defineModel<VideoTrimOptions>('trim', {
   default: [0, 0],
 })
 
@@ -34,7 +35,7 @@ const { offsetX: leftThumbx } = useThumb(leftThumbElement, {
     modelValueCurrentTime.value = x / innerContainerWidth.value * props.duration
     emit('seek')
 
-    modelValueRange.value[0] = modelValueCurrentTime.value
+    modelValueTrim.value.start = modelValueCurrentTime.value
 
     const diff = rightThumbx.value - x - leftThumbElement.value.clientWidth
     if (diff <= 0)
@@ -49,7 +50,7 @@ const { offsetX: rightThumbx, width: rightThumbWidth } = useThumb(rightThumbElem
     modelValueCurrentTime.value = (x - rightThumbWidth.value) / innerContainerWidth.value * props.duration
     emit('seek')
 
-    modelValueRange.value[1] = modelValueCurrentTime.value
+    modelValueTrim.value.end = modelValueCurrentTime.value
 
     const diff = x - leftThumbx.value - rightThumbElement.value.clientWidth
     if (diff <= 0)
@@ -57,7 +58,7 @@ const { offsetX: rightThumbx, width: rightThumbWidth } = useThumb(rightThumbElem
   },
 })
 
-useFrames(frameCanvasElement, () => props.src)
+useFrames(frameCanvasElement, () => props.assetUrl)
 
 const seekToTime = (event: PointerEvent) => {
   modelValueCurrentTime.value = clamp(event.offsetX / innerContainerWidth.value * props.duration, 0, props.duration)

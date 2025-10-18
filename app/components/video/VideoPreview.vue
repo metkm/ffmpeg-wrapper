@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { defaultVideoValues } from '~/constants'
-import type { Video } from '~/types/video'
+import { useVideo } from '~/hooks/useVideo'
 
 defineProps<{
-  src: string
-  path: string
+  assetUrl: string
 }>()
 
 const showCrop = ref(false)
+const playing = ref(false)
 
 defineShortcuts({
   c: () => {
@@ -15,134 +14,93 @@ defineShortcuts({
   },
 })
 
-const videoModel = defineModel<Video>({
-  default: defaultVideoValues,
-})
-
 const videoElement = useTemplateRef('videoElement')
-const videoPlaying = ref(false)
-
-const handleLoad = (event: Event) => {
-  const element = videoElement.value ?? event.target as HTMLVideoElement
-
-  videoModel.value.duration = element.duration
-  videoModel.value.durationRange = [0, Math.round(element.duration)]
-
-  videoModel.value.crop.width = element.videoWidth
-  videoModel.value.crop.height = element.videoHeight
-  videoModel.value.currentTime = 0
-
-  videoModel.value.volume = element.volume
-}
-
-const handleTimeUpdate = () => {
-  videoModel.value.currentTime = videoElement.value ? videoElement.value.currentTime : videoModel.value.currentTime
-}
+const { video, trim, crop } = useVideo(videoElement)
 
 const togglePlay = () => {
-  if (videoPlaying.value) {
+  if (playing.value) {
     videoElement.value?.pause()
-    videoPlaying.value = false
+    playing.value = false
   } else {
     videoElement.value?.play()
-    videoPlaying.value = true
+    playing.value = true
   }
 }
 
-const handleSeek = () => {
-  if (!videoElement.value)
-    return
-
-  videoElement.value.currentTime = videoModel.value.currentTime
-}
-
-const rangeStart = computed(() => formatSeconds(videoModel.value.durationRange[0]!))
-const rangeEnd = computed(() => formatSeconds(videoModel.value.durationRange[1]!))
-
-watch(() => videoModel.value.volume, () => {
-  if (!videoElement.value)
-    return
-
-  videoElement.value.volume = videoModel.value.volume
-})
+const trimStartFormatted = computed(() => formatSeconds(trim.value.start))
+const trimEndFormatted = computed(() => formatSeconds(trim.value.end || video.value.duration || 0))
 
 const volumeIcon = computed(
-  () => videoModel.value.volume === 0
+  () => video.value.volume === 0
     ? 'i-lucide-volume-x'
-    : videoModel.value.volume < 0.33
+    : video.value.volume < 0.33
       ? 'i-lucide-volume'
-      : videoModel.value.volume < 0.66
+      : video.value.volume < 0.66
         ? 'i-lucide-volume-1'
         : 'i-lucide-volume-2',
 )
 </script>
 
 <template>
-  <section class="space-y-4">
-    <VideoInfo :path="path" />
+  <section class="flex flex-col items-center gap-4">
+    <div class="relative w-full aspect-video">
+      <video
+        ref="videoElement"
+        :src="assetUrl"
+        class="rounded-(--ui-radius) shadow shadow-black aspect-video"
+        crossorigin="anonymous"
+      />
 
-    <div class="flex flex-col items-center gap-4">
-      <div class="relative w-full aspect-video">
-        <video
-          ref="videoElement"
-          :src="src"
-          class="rounded-(--ui-radius) shadow shadow-black aspect-video"
-          crossorigin="anonymous"
-          @loadeddata="handleLoad"
-          @timeupdate="handleTimeUpdate"
+      <div
+        class="absolute inset-0"
+        @click="togglePlay"
+      />
+
+      <VideoCropOverlay
+        v-if="showCrop"
+        v-model="crop"
+        :width="video.width"
+        :height="video.height"
+        class="z-10"
+      />
+    </div>
+
+    <div class="grid grid-cols-[1fr_10fr_1fr] grid-rows-[auto_1fr] items-center gap-2 w-full">
+      <UButton
+        :icon="playing ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
+        size="xl"
+        class="shadow shadow-black row-start-2 h-full justify-center"
+        @click="togglePlay"
+      />
+
+      <p class="text-xs col-start-2">
+        {{ trimStartFormatted }} - {{ trimEndFormatted }}
+      </p>
+
+      <TimelineBar
+        v-if="video.duration"
+        v-model="video.currentTime"
+        v-model:trim="trim"
+        :duration="video.duration"
+        :asset-url="assetUrl"
+        class="col-start-2"
+      />
+
+      <div class="shrink-1 -mt-1">
+        <UIcon
+          :name="volumeIcon"
+          class="size-4"
         />
 
-        <div
-          class="absolute inset-0"
-          @click="togglePlay"
+        <USlider
+          v-model="video.volume"
+          :min="0"
+          :max="1"
+          :step="0.01"
+          :tooltip="{
+            delayDuration: 0,
+          }"
         />
-
-        <VideoCrop
-          v-if="showCrop"
-          v-model="videoModel.crop"
-          :width="videoElement?.videoWidth"
-          :height="videoElement?.videoHeight"
-          class="z-10"
-        />
-      </div>
-
-      <div class="grid grid-cols-[1fr_10fr_1fr] grid-rows-[auto_1fr] items-center gap-2 w-full">
-        <UButton
-          :icon="videoPlaying ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
-          size="xl"
-          class="shadow shadow-black row-start-2 h-full justify-center"
-          @click="togglePlay"
-        />
-
-        <p class="text-xs col-start-2">
-          {{ rangeStart }} - {{ rangeEnd }}
-        </p>
-
-        <TimelineBar
-          v-model="videoModel.currentTime"
-          v-model:range="videoModel.durationRange"
-          :duration="videoModel.duration"
-          :src="src"
-          class="col-start-2"
-          @seek="handleSeek"
-        />
-
-        <div class="shrink-1 -mt-1">
-          <UIcon
-            :name="volumeIcon"
-            class="size-4"
-          />
-
-          <USlider
-            v-model="videoModel.volume"
-            :min="0"
-            :max="1"
-            :step="0.01"
-            :tooltip="{
-              delayDuration: 0,
-            }"
-          />
-        </div>
       </div>
     </div>
   </section>

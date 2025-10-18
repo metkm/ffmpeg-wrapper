@@ -5,6 +5,8 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     'motion-v/nuxt',
     '@vueuse/nuxt',
+    '@pinia/nuxt',
+    'pinia-plugin-persistedstate/nuxt',
   ],
   ssr: false,
   devtools: { enabled: false },
