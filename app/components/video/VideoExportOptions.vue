@@ -1,102 +1,86 @@
 <script setup lang="ts">
+import { revealItemInDir } from '@tauri-apps/plugin-opener'
+import { encoders, videoFilters } from '~/constants'
+import { injectVideoRootContext } from './VideoRoot.vue'
+import { useFFmpeg } from '~/hooks/useFFmpeg'
+import { motion } from 'motion-v'
+import { save } from '@tauri-apps/plugin-dialog'
+import { appLocalDataDir } from '@tauri-apps/api/path'
+
 const props = defineProps<{
-  assetUrl: string
+  path: string
 }>()
 
-// import { appLocalDataDir } from '@tauri-apps/api/path'
-// import { save } from '@tauri-apps/plugin-dialog'
-// import { revealItemInDir } from '@tauri-apps/plugin-opener'
-// import { encoders, videoFilters } from '~/constants'
-// import { useFFmpeg } from '~/hooks/useFFmpeg'
-// import type { Video } from '~/types/video'
-// import { motion } from 'motion-v'
+const { encoderOptions } = useOptionsStore()
+const videoRootContext = injectVideoRootContext()
 
-// const props = defineProps<{
-//   video: Video
-//   path: string
-// }>()
+const savePath = ref('')
 
-// const emit = defineEmits<{
-//   exportEnd: []
-// }>()
+const duration = computed(() =>
+  ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!) - videoRootContext.trim.value.start) / encoderOptions.speed,
+)
 
-// const encoder = ref<typeof encoders[number]>('h264_nvenc')
-// const twoPass = ref<boolean>(false)
-// const removeAudio = ref<boolean>(false)
+const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg(duration)
 
-// const outputOptions = reactive({
-//   savePath: null as string | null,
-//   targetFileSize: 10,
-//   speed: 1,
-//   fps: 60,
-// })
+const targetBitrate = computed(() => {
+  return encoderOptions.fileSizeMb * 8192 / duration.value - 196
+})
 
-// const duration = computed(() => {
-//   return (props.video.durationRange[1] - props.video.durationRange[0]) / outputOptions.speed
-// })
+const process = async () => {
+  const path = await save({
+    defaultPath: 'output.mp4',
+    filters: videoFilters,
+  })
 
-// const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg(duration)
+  if (!path)
+    return
 
-// const targetBitrate = computed(() => {
-//   return outputOptions.targetFileSize * 8192 / duration.value - 196
-// })
+  savePath.value = path
 
-// const process = async () => {
-//   outputOptions.savePath = await save({
-//     defaultPath: 'output.mp4',
-//     filters: videoFilters,
-//   })
+  const argsBase = [
+    '-y',
+    '-ss', formatSeconds(videoRootContext.trim.value.start),
+    '-to', formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!),
+    '-i', props.path,
+    '-vcodec', encoderOptions.encoder,
+    '-maxrate', `${targetBitrate.value}k`,
+    '-bufsize', `${targetBitrate.value / 2}k`,
+    '-vf', `crop=${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top},fps=${encoderOptions.fps}`,
+    '-rc', 'vbr',
+  ]
 
-//   if (!outputOptions.savePath) return
+  if (encoderOptions.speed !== 1) {
+    argsBase.push('-filter:v', `setpts=PTS/${encoderOptions.speed}`)
+    argsBase.push('-filter:a', `atempo=${encoderOptions.speed}`)
+  }
 
-//   const argsBase = [
-//     '-y',
-//     '-ss', formatSeconds(props.video.durationRange[0] || 0),
-//     '-to', formatSeconds(props.video.durationRange[1] || 1),
-//     '-i', props.path,
-//     '-vcodec', encoder.value,
-//     '-maxrate', `${targetBitrate.value}k`,
-//     '-bufsize', `${targetBitrate.value / 2}k`,
-//     '-vf', `crop=${props.video.crop.width}:${props.video.crop.height}:${props.video.crop.left}:${props.video.crop.top},fps=${outputOptions.fps}`,
-//     '-rc', 'vbr',
-//   ]
+  if (encoderOptions.noAudio) {
+    argsBase.push('-an')
+  }
+  if (encoderOptions.twoPass) {
+    argsBase.push('-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`)
 
-//   if (outputOptions.speed !== 1) {
-//     argsBase.push('-filter:v', `setpts=PTS/${outputOptions.speed}`)
-//     argsBase.push('-filter:a', `atempo=${outputOptions.speed}`)
-//   }
+    const args = [
+      ...argsBase,
+      '-an',
+      '-pass', '1',
+      '-f', 'mp4',
+      'NUL',
+    ]
 
-//   if (removeAudio.value) {
-//     argsBase.push('-an')
-//   }
+    await spawn(args)
+    argsBase.push('-pass', '2')
+  }
 
-//   if (twoPass.value) {
-//     argsBase.push('-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`)
-//   }
+  argsBase.push(path)
+  await spawn(argsBase)
 
-//   if (twoPass.value) {
-//     const args = [
-//       ...argsBase,
-//       '-an',
-//       '-pass', '1',
-//       '-f', 'mp4',
-//       'NUL',
-//     ]
-
-//     await spawn(args)
-//     argsBase.push('-pass', '2')
-//   }
-
-//   argsBase.push(outputOptions.savePath)
-//   await spawn(argsBase)
-
-//   kill()
-//   emit('exportEnd')
-// }
+  kill()
+}
 </script>
 
 <template>
-  <!-- <section class="@container">
+  <section class="@container">
     <UPageHeader title="Export Settings" />
 
     <UPageBody class="pb-16">
@@ -108,7 +92,7 @@ const props = defineProps<{
           description="h264 is recommended"
         >
           <USelect
-            v-model="encoder"
+            v-model="encoderOptions.encoder"
             :items="encoders"
             variant="soft"
           />
@@ -119,7 +103,7 @@ const props = defineProps<{
           :description="`${targetBitrate.toFixed(0)} bitrate`"
         >
           <UInputNumber
-            v-model="outputOptions.targetFileSize"
+            v-model="encoderOptions.fileSizeMb"
             :min="0"
             variant="soft"
           />
@@ -130,7 +114,7 @@ const props = defineProps<{
           description="speed of video"
         >
           <UInputNumber
-            v-model="outputOptions.speed"
+            v-model="encoderOptions.speed"
             :min="0.5"
             :max="100"
             :step="0.05"
@@ -143,7 +127,7 @@ const props = defineProps<{
           description="Frames per second"
         >
           <USelect
-            v-model="outputOptions.fps"
+            v-model="encoderOptions.fps"
             :items="[30, 60, 144, 180, 240]"
             color="neutral"
             variant="soft"
@@ -151,13 +135,13 @@ const props = defineProps<{
         </UFormField>
 
         <UCheckbox
-          v-model="twoPass"
+          v-model="encoderOptions.twoPass"
           label="Two pass"
           description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
         />
 
         <UCheckbox
-          v-model="removeAudio"
+          v-model="encoderOptions.noAudio"
           label="Remove audio"
         />
       </div>
@@ -194,7 +178,7 @@ const props = defineProps<{
             </Motion>
 
             <Motion
-              v-if="outputOptions.savePath"
+              v-if="savePath"
               layout
               :exit="{ opacity: 0 }"
               :animate="{ opacity: 1 }"
@@ -206,9 +190,9 @@ const props = defineProps<{
                 color="neutral"
                 square
                 class="-ml-0.5"
-                @click="revealItemInDir(outputOptions.savePath)"
+                @click="revealItemInDir(savePath)"
               >
-                {{ outputOptions.savePath }}
+                {{ savePath }}
               </UButton>
             </Motion>
 
@@ -260,5 +244,5 @@ const props = defineProps<{
         </motion.div>
       </section>
     </LayoutGroup>
-  </section> -->
+  </section>
 </template>

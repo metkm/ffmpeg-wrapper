@@ -33,6 +33,11 @@ const videoAssetUrl = computed(() => convertFileSrc(videoPath.value))
 
       <VideoPreview
         :asset-url="videoAssetUrl"
+        :path="videoPath"
+      />
+
+      <VideoExportOptions
+        :path="videoPath"
       />
 
     <!-- <VideoExportOptions
