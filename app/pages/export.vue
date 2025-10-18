@@ -39,11 +39,6 @@ const videoAssetUrl = computed(() => convertFileSrc(videoPath.value))
       <VideoExportOptions
         :path="videoPath"
       />
-
-    <!-- <VideoExportOptions
-      :video="video"
-      :path="route.query.path!.toString()"
-    /> -->
     </VideoRoot>
   </div>
 </template>
@@ -52,10 +47,6 @@ const videoAssetUrl = computed(() => convertFileSrc(videoPath.value))
 :root {
   --video-max-height: calc(100vh - var(--spacing) * 79);
 }
-
-/* .max-h-video {
-  max-height: var(--video-max-height);
-} */
 
 .max-w-video {
   max-width: max(var(--container-2xl), calc(var(--video-max-height) * 16 / 9));

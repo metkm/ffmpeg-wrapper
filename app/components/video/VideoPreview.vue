@@ -63,7 +63,7 @@ onMounted(() => {
 
       <VideoCropOverlay
         v-if="showCrop"
-        v-model="videoRootContext.crop"
+        v-model="videoRootContext.crop.value"
         :width="videoRootContext.video.value.width"
         :height="videoRootContext.video.value.height"
         class="z-10"

@@ -36,6 +36,7 @@ const process = async () => {
     return
 
   savePath.value = path
+  console.log(videoRootContext.crop.value)
 
   const argsBase = [
     '-y',
