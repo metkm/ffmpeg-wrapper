@@ -2,9 +2,8 @@
 import { appLocalDataDir } from '@tauri-apps/api/path'
 import { save } from '@tauri-apps/plugin-dialog'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
-import { parametersPerEncoders, videoFilters } from '~/constants'
+import { encoders, videoFilters } from '~/constants'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
-import type { Encoder } from '~/types/parameters'
 import type { Video } from '~/types/video'
 import { motion } from 'motion-v'
 
@@ -17,10 +16,9 @@ const emit = defineEmits<{
   exportEnd: []
 }>()
 
-const encoder = ref<Encoder>('h264_nvenc')
+const encoder = ref<typeof encoders[number]>('h264_nvenc')
 const twoPass = ref<boolean>(false)
 const removeAudio = ref<boolean>(false)
-const args = ref<string[]>([])
 
 const outputOptions = reactive({
   savePath: null as string | null,
@@ -41,7 +39,7 @@ const targetBitrate = computed(() => {
 
 const process = async () => {
   outputOptions.savePath = await save({
-    defaultPath: 'outputOptions.mp4',
+    defaultPath: 'output.mp4',
     filters: videoFilters,
   })
 
@@ -53,12 +51,10 @@ const process = async () => {
     '-to', formatSeconds(props.video.durationRange[1] || 1),
     '-i', props.path,
     '-vcodec', encoder.value,
-    // '-b:v', `${targetBitrate.value}k`,
     '-maxrate', `${targetBitrate.value}k`,
     '-bufsize', `${targetBitrate.value / 2}k`,
     '-vf', `crop=${props.video.crop.width}:${props.video.crop.height}:${props.video.crop.left}:${props.video.crop.top},fps=${outputOptions.fps}`,
     '-rc', 'vbr',
-    ...args.value,
   ]
 
   if (outputOptions.speed !== 1) {
@@ -93,8 +89,6 @@ const process = async () => {
   kill()
   emit('exportEnd')
 }
-
-const encoderItems = Object.keys(parametersPerEncoders)
 </script>
 
 <template>
@@ -111,7 +105,7 @@ const encoderItems = Object.keys(parametersPerEncoders)
         >
           <USelect
             v-model="encoder"
-            :items="encoderItems"
+            :items="encoders"
             variant="soft"
           />
         </UFormField>
@@ -151,11 +145,6 @@ const encoderItems = Object.keys(parametersPerEncoders)
             variant="soft"
           />
         </UFormField>
-
-        <CommandParameters
-          v-model="args"
-          :encoder="encoder"
-        />
 
         <UCheckbox
           v-model="twoPass"
