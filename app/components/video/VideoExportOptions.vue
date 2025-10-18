@@ -15,6 +15,7 @@ const { encoderOptions } = useOptionsStore()
 const videoRootContext = injectVideoRootContext()
 
 const savePath = ref('')
+const showLogs = ref(false)
 
 const duration = computed(() =>
   ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!) - videoRootContext.trim.value.start) / encoderOptions.speed,
@@ -81,6 +82,215 @@ const process = async () => {
 
 <template>
   <section class="@container">
+    <UPageHeader title="Export Settings" />
+
+    <UPageBody>
+      <div class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 @7xl:grid-cols-7">
+        <UFormField
+          label="Encoder"
+          description="h264 is recommended"
+        >
+          <USelect
+            v-model="encoderOptions.encoder"
+            :items="encoders"
+            variant="soft"
+          />
+        </UFormField>
+
+        <UFormField
+          label="target file size"
+          :description="`${targetBitrate.toFixed(0)} bitrate`"
+        >
+          <UInputNumber
+            v-model="encoderOptions.fileSizeMb"
+            :min="0"
+            variant="soft"
+          />
+        </UFormField>
+
+        <UFormField
+          label="Video speed"
+          description="speed of video"
+        >
+          <UInputNumber
+            v-model="encoderOptions.speed"
+            :min="0.5"
+            :max="100"
+            :step="0.05"
+            variant="soft"
+          />
+        </UFormField>
+
+        <UFormField
+          label="FPS"
+          description="Frames per second"
+        >
+          <USelect
+            v-model="encoderOptions.fps"
+            :items="[30, 60, 144, 180, 240]"
+            color="neutral"
+            variant="soft"
+          />
+        </UFormField>
+
+        <UCheckbox
+          v-model="encoderOptions.twoPass"
+          label="Two pass"
+          description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
+        />
+
+        <UCheckbox
+          v-model="encoderOptions.noAudio"
+          label="Remove audio"
+        />
+      </div>
+    </UPageBody>
+  </section>
+
+  <section class="fixed bottom-4 inset-x-2 flex justify-center pointer-events-none z-50">
+    <LayoutGroup>
+      <motion.div
+        layout
+        class="p-2 pointer-events-auto backdrop-blur-2xl border border-muted overflow-hidden"
+        :style="{ borderRadius: '12px' }"
+      >
+        <AnimatePresence>
+          <motion.p
+            v-if="showLogs"
+            layout="position"
+            class="flex flex-col-reverse max-w-6xl mb-2 max-h-96 overflow-x-hidden scrollbar text-sm border border-dashed border-muted rounded-md p-4"
+            :exit="{ opacity: 0 }"
+            :animate="{ opacity: 1 }"
+            :initial="{ opacity: 0 }"
+            style="overflow-wrap: break-word;"
+          >
+            {{ stdoutLines.join('\n') }}
+          </motion.p>
+
+          <motion.div
+            layout
+            class="flex items-center gap-2 w-full"
+          >
+            <Motion layout>
+              <UButton
+                to="/"
+                icon="i-lucide-x"
+                variant="soft"
+                square
+              />
+            </Motion>
+
+            <Motion
+              v-if="savePath"
+              layout
+              :exit="{ opacity: 0 }"
+              :animate="{ opacity: 1 }"
+              :initial="{ opacity: 0 }"
+            >
+              <UButton
+                icon="i-lucide-folder-symlink"
+                variant="link"
+                color="neutral"
+                square
+                class="-ml-0.5"
+                @click="revealItemInDir(savePath)"
+              >
+                {{ savePath }}
+              </UButton>
+            </Motion>
+
+            <Motion
+              v-if="processing"
+              layout
+              :exit="{ opacity: 0 }"
+              :animate="{ opacity: 1 }"
+              :initial="{ opacity: 0 }"
+            >
+              <UButton
+                icon="i-lucide-circle-stop"
+                color="warning"
+                variant="subtle"
+                @click="stop"
+              >
+                Stop
+              </UButton>
+
+            <!-- <pre
+                v-if="stdoutLines.length > 0"
+                ref="stdoutElement"
+                layout
+                class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
+                style="overflow-wrap: break-word;"
+              >
+                {{ stdoutLines.join('\n') }}
+              </pre> -->
+            </Motion>
+
+            <Motion
+              layout
+              as-child
+              :style="{ borderRadius: '999px' }"
+            >
+              <UButton
+                icon="i-lucide-folder-down"
+                :loading="processing"
+                block
+                @click="process"
+              >
+                <motion.p
+                  layout="position"
+                  class="text-center w-11"
+                >
+                  {{ processing && progress?.eta ? `${progress.eta.toFixed(0)}s` : 'Export' }}
+                </motion.p>
+
+                <template #leading>
+                  <Motion
+                    layout="position"
+                    class="size-5"
+                  >
+                    <UIcon
+                      name="i-lucide-folder-down"
+                      class="iconify shrink-0 size-5"
+                    />
+                  </Motion>
+                </template>
+              </UButton>
+            </Motion>
+
+            <!-- v-if="stdoutLines.length > 0" -->
+            <Motion
+              layout
+              :exit="{ opacity: 0 }"
+              :animate="{ opacity: 1 }"
+              :initial="{ opacity: 0 }"
+            >
+              <UButton
+                icon="i-lucide-arrow-up-narrow-wide"
+                variant="subtle"
+                @click="showLogs = !showLogs"
+              />
+            </Motion>
+
+            <motion.div
+              v-if="processing"
+              class="absolute bottom-0 w-full bg-accented transition-all"
+              :exit="{ transform: `translateY(100%)` }"
+              :initial="{ transform: `translateY(100%)` }"
+              :animate="{ transform: `translateY(0)` }"
+            >
+              <div
+                class="h-0.5 bg-primary transition-all"
+                :style="{ width: `${progress?.percent}%` }"
+              />
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
+    </LayoutGroup>
+  </section>
+
+  <!-- <section class="@container">
     <UPageHeader title="Export Settings" />
 
     <UPageBody class="pb-16">
@@ -244,5 +454,5 @@ const process = async () => {
         </motion.div>
       </section>
     </LayoutGroup>
-  </section>
+  </section> -->
 </template>
