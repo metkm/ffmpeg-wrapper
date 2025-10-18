@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useVideo } from '~/hooks/useVideo'
+import { injectVideoRootContext } from './VideoRoot.vue'
 
 defineProps<{
   assetUrl: string
@@ -15,7 +15,8 @@ defineShortcuts({
 })
 
 const videoElement = useTemplateRef('videoElement')
-const { video, trim, crop } = useVideo(videoElement)
+
+const videoRootContext = injectVideoRootContext()
 
 const togglePlay = () => {
   if (playing.value) {
@@ -27,18 +28,22 @@ const togglePlay = () => {
   }
 }
 
-const trimStartFormatted = computed(() => formatSeconds(trim.value.start))
-const trimEndFormatted = computed(() => formatSeconds(trim.value.end || video.value.duration || 0))
+const trimStartFormatted = computed(() => formatSeconds(videoRootContext.trim.value.start))
+const trimEndFormatted = computed(() => formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration || 0))
 
 const volumeIcon = computed(
-  () => video.value.volume === 0
+  () => videoRootContext.video.value.volume === 0
     ? 'i-lucide-volume-x'
-    : video.value.volume < 0.33
+    : videoRootContext.video.value.volume < 0.33
       ? 'i-lucide-volume'
-      : video.value.volume < 0.66
+      : videoRootContext.video.value.volume < 0.66
         ? 'i-lucide-volume-1'
         : 'i-lucide-volume-2',
 )
+
+onMounted(() => {
+  videoRootContext.videoElement.value = videoElement.value
+})
 </script>
 
 <template>
@@ -58,9 +63,9 @@ const volumeIcon = computed(
 
       <VideoCropOverlay
         v-if="showCrop"
-        v-model="crop"
-        :width="video.width"
-        :height="video.height"
+        v-model="videoRootContext.crop"
+        :width="videoRootContext.video.value.width"
+        :height="videoRootContext.video.value.height"
         class="z-10"
       />
     </div>
@@ -78,10 +83,10 @@ const volumeIcon = computed(
       </p>
 
       <TimelineBar
-        v-if="video.duration"
-        v-model="video.currentTime"
-        v-model:trim="trim"
-        :duration="video.duration"
+        v-if="videoRootContext.video.value.duration !== undefined"
+        v-model="videoRootContext.video.value.currentTime"
+        v-model:trim="videoRootContext.trim.value"
+        :duration="videoRootContext.video.value.duration"
         :asset-url="assetUrl"
         class="col-start-2"
       />
@@ -93,7 +98,7 @@ const volumeIcon = computed(
         />
 
         <USlider
-          v-model="video.volume"
+          v-model="videoRootContext.video.value.volume"
           :min="0"
           :max="1"
           :step="0.01"
