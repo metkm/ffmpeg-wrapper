@@ -1,131 +1,55 @@
-import { getCurrentWindow, ProgressBarStatus } from '@tauri-apps/api/window'
-import { Command, type Child } from '@tauri-apps/plugin-shell'
 import type { FFmpegProgress } from '~/types/ffmpeg'
+import { useCommand } from './useCommand'
+import { getCurrentWindow, ProgressBarStatus } from '@tauri-apps/api/window'
 
 const regex = /(?<name>\w+)=\s*(?<value>.*?)\s/gm
 
 export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
-  const stdoutLines = ref<string[]>([])
-  const stdoutLinesDebounced = refDebounced(stdoutLines, 200, { maxWait: 200 })
+  const progress = ref<FFmpegProgress>({})
 
-  const processing = ref(false)
-  const progress = ref<FFmpegProgress>()
+  const onLine = (line: string) => {
+    const matches = line.matchAll(regex)
 
-  const command = shallowRef<Command<string>>()
-  const commandChild = shallowRef<Child>()
+    for (const match of matches) {
+      if (!match.groups)
+        continue
 
-  const parseProgress = (line: string): FFmpegProgress => {
-    const progress: FFmpegProgress = {}
+      const name = match.groups.name
+      const value = match.groups.value
 
-    let match: RegExpExecArray | null = null
+      if (value === 'N/A' || !value)
+        continue
 
-    while ((match = regex.exec(line)) !== null) {
-      if (!match.groups) break
+      if (name === 'speed') {
+        progress.value.speed = parseFloat(value?.slice(0, -1) || '1')
+      } else if (name === 'time') {
+        const seconds = formatTimeToSeconds(value)
+        const durationLeft = toValue(duration) - seconds
 
-      const { name, value } = match.groups
-      if (!name) break
+        progress.value.eta = durationLeft / (progress.value.speed || 1)
+        progress.value.percent = seconds / toValue(duration) * 100
 
-      const key = name as keyof FFmpegProgress
-      progress[key] = value as Exclude<undefined, FFmpegProgress[typeof key]>
-    }
-
-    const speed = progress.speed
-      ? parseFloat(progress.speed?.toString().slice(0, -1))
-      : 0
-
-    if (progress.time) {
-      const seconds = formatTimeToSeconds(progress.time)
-
-      if (speed) {
-        progress.eta = (toValue(duration) - seconds) / speed
+        getCurrentWindow().setProgressBar({
+          status: ProgressBarStatus.Normal,
+          progress: Math.round(progress.value.percent),
+        })
       }
-
-      progress.percent = parseInt(
-        ((seconds * 100) / toValue(duration)).toFixed(0),
-      )
-
-      getCurrentWindow().setProgressBar({
-        status: ProgressBarStatus.Normal,
-        progress: progress.percent,
-      })
-    }
-
-    return {
-      ...progress,
-      frame: progress.frame ? parseInt(progress.frame.toString()) : 0,
-      fps: progress.fps ? parseInt(progress.fps.toString()) : 0,
-      q: progress.q ? parseFloat(progress.q.toString()) : 0,
-      speed: speed,
     }
   }
 
-  const spawn = async (args: string[], listener?: (arg: string) => void) => {
-    kill()
-
-    command.value = Command.sidecar('binaries/ffmpeg', args)
-
-    const onData = (_line: string) => {
-      const line = _line.trim()
-
-      stdoutLines.value = [...stdoutLines.value, line]
-
-      listener?.(line)
-      progress.value = parseProgress(line)
-    }
-
-    command.value.stdout.on('data', onData)
-    command.value.stderr.on('data', onData)
-
-    const promise = new Promise<void>((resolve) => {
-      command.value?.once('close', () => {
-        resolve()
-        kill()
-      })
-    })
-
-    commandChild.value = await command.value.spawn()
-
-    processing.value = true
-    await promise
-  }
-
-  const kill = () => {
-    commandChild.value?.kill()
-    command.value?.removeAllListeners()
-
-    command.value = undefined
-    commandChild.value = undefined
-    processing.value = false
-
-    if (progress.value) {
-      progress.value.eta = 0
-      progress.value.percent = 0
-    }
-
+  const onClose = () => {
     getCurrentWindow().setProgressBar({
       status: ProgressBarStatus.None,
     })
   }
 
-  const clear = () => {
-    stdoutLines.value = []
-    kill()
-  }
-
-  const stop = () => {
-    clear()
-  }
-
-  onUnmounted(() => clear())
+  const command = useCommand({
+    onLine,
+    onClose,
+  })
 
   return {
-    stdoutLines,
-    spawn,
-    kill,
-    clear,
-    stop,
-    processing,
+    ...command,
     progress,
-    stdoutLinesDebounced,
   }
 }

@@ -20,7 +20,7 @@ const duration = computed(() =>
   ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!) - videoRootContext.trim.value.start) / encoderOptions.speed,
 )
 
-const { processing, progress, spawn, kill, stop, stdoutLinesDebounced } = useFFmpeg(duration)
+const { running, spawn, linesDebounced, kill, progress } = useFFmpeg(duration)
 
 const targetBitrate = computed(() => {
   return encoderOptions.fileSizeMb * 8192 / duration.value - 196
@@ -68,14 +68,12 @@ const process = async () => {
       'NUL',
     ]
 
-    await spawn(args)
+    await spawn('binaries/ffmpeg', args)
     argsBase.push('-pass', '2')
   }
 
   argsBase.push(path)
-  await spawn(argsBase)
-
-  kill()
+  await spawn('binaries/ffmpeg', argsBase)
 }
 </script>
 
@@ -147,13 +145,13 @@ const process = async () => {
       </div>
 
       <pre
-        v-if="stdoutLinesDebounced.length > 0"
+        v-if="linesDebounced.length > 0"
         ref="stdoutElement"
         layout
         class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
         style="overflow-wrap: break-word;"
       >
-        {{ stdoutLinesDebounced.join('\n') }}
+        {{ linesDebounced.join('\n') }}
       </pre>
     </UPageBody>
 
@@ -197,7 +195,7 @@ const process = async () => {
             </Motion>
 
             <Motion
-              v-if="processing"
+              v-if="running"
               layout
               :exit="{ opacity: 0 }"
               :animate="{ opacity: 1 }"
@@ -207,7 +205,7 @@ const process = async () => {
                 icon="i-lucide-circle-stop"
                 color="warning"
                 variant="subtle"
-                @click="stop"
+                @click="kill"
               >
                 Stop
               </UButton>
@@ -216,20 +214,20 @@ const process = async () => {
             <Motion layout>
               <UButton
                 icon="i-lucide-folder-down"
-                :loading="processing"
+                :loading="running"
                 @click="process"
               >
                 <motion.p
                   layout="position"
                   class="text-center w-11"
                 >
-                  {{ processing && progress?.eta ? `${progress.eta.toFixed(0)}s` : 'Export' }}
+                  {{ running && progress?.eta ? `${progress.eta.toFixed(0)}s` : 'Export' }}
                 </motion.p>
               </UButton>
             </Motion>
 
             <motion.div
-              v-if="processing"
+              v-if="running"
               class="absolute bottom-0 w-full bg-accented transition-all"
               :exit="{ transform: `translateY(100%)` }"
               :initial="{ transform: `translateY(100%)` }"
