@@ -79,9 +79,12 @@ const process = async () => {
 
 <template>
   <section class="@container">
-    <UPageHeader title="Export Settings" />
+    <UPageHeader
+      title="Export Settings"
+      :ui="{ wrapper: '!justify-center' }"
+    />
 
-    <UPageBody class="pb-16">
+    <UPageBody class="pb-20">
       <div
         class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 @7xl:grid-cols-7"
       >
