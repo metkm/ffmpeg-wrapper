@@ -19,5 +19,7 @@ export const usePathsStore = defineStore('paths', () => {
     addPathHistory,
   }
 }, {
-  persist: piniaPluginPersistedstate.localStorage(),
+  persist: {
+    storage: piniaPluginPersistedstate.localStorage(),
+  },
 })

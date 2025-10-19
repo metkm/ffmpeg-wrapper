@@ -49,7 +49,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 grow relative">
+  <div class="flex flex-col gap-4 grow relative -m-4">
     <AppColorMode class="right-0 top-0 absolute" />
 
     <LayoutGroup>
@@ -60,13 +60,13 @@ onMounted(async () => {
         >
           <FileDrop
             v-model="videoPath"
-            class="grow"
+            class="grow rounded-none"
             :disabled="isUpdating"
             @select="onSelect"
           />
         </Motion>
 
-        <FileHistory class="absolute max-w-full" />
+        <FileHistory class="absolute" />
 
         <motion.div
           v-if="isUpdating"
