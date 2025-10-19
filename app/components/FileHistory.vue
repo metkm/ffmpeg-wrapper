@@ -16,10 +16,10 @@ const isHistoryEmpty = computed(() => pathHistory.length === 0)
 </script>
 
 <template>
-  <section class="p-4 pl-0 rounded-(--ui-radius) w-full max-w-xl">
+  <section class="p-4 rounded-(--ui-radius) w-full max-w-xl">
     <div
       v-if="isHistoryEmpty"
-      class="flex items-center justify-center rounded-(--ui-radius) bg-muted h-32 ml-4 border border-muted w-full"
+      class="flex items-center justify-center rounded-(--ui-radius) bg-muted h-32 border border-muted w-full"
     >
       <p class="text-sm text-muted font-medium">
         File is history is currently empty.
@@ -27,11 +27,11 @@ const isHistoryEmpty = computed(() => pathHistory.length === 0)
     </div>
 
     <template v-else>
-      <h1 class="text-sm ml-4 mb-2 font-medium">
+      <h1 class="text-sm mb-2 font-medium">
         Recently opened folders & files {{ isHistoryEmpty ? 'will show up here' : '' }}
       </h1>
 
-      <ol class="bg-muted ml-4 min-h-24 w-full rounded-(--ui-radius) border border-muted">
+      <ol class="bg-muted w-full rounded-(--ui-radius) border border-muted">
         <li
           v-for="path in pathHistory"
           :key="path"

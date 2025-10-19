@@ -49,8 +49,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 grow relative -m-4">
-    <AppColorMode class="right-0 top-0 absolute" />
+  <div class="flex flex-col grow relative -m-4">
+    <AppColorMode class="right-4 top-4 absolute" />
 
     <LayoutGroup>
       <AnimatePresence>
@@ -69,12 +69,11 @@ onMounted(async () => {
         <FileHistory class="absolute" />
 
         <motion.div
-          v-if="isUpdating"
+          v-if="!isUpdating"
           layout
           :initial="{ opacity: 0 }"
           :animate="{ opacity: 1 }"
           :exit="{ opacity: 0 }"
-          class="-m-4"
         >
           <p class="text-muted text-sm font-medium p-2">
             Installing update ({{ progress.toFixed(0) }}%)
