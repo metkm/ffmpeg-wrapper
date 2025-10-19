@@ -49,8 +49,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col grow">
-    <AppColorMode class="right-4 top-4 absolute" />
+  <div class="flex flex-col grow relative">
+    <AppColorMode class="right-0 top-0 absolute" />
 
     <LayoutGroup>
       <AnimatePresence>
