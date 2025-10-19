@@ -21,5 +21,12 @@ export const useOptionsStore = defineStore('options', () => {
     encoderOptions,
   }
 }, {
-  persist: true,
+  persist: {
+    storage: piniaPluginPersistedstate.localStorage(),
+    beforeHydrate: (context) => {
+      window.addEventListener('storage', () => {
+        context.store.$hydrate({ runHooks: false })
+      })
+    },
+  },
 })
