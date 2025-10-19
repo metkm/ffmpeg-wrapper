@@ -33,8 +33,8 @@ const isHistoryEmpty = computed(() => pathHistory.length === 0)
 
       <ol class="bg-muted w-full rounded-(--ui-radius) border border-muted">
         <li
-          v-for="path in pathHistory"
-          :key="path"
+          v-for="history in pathHistory"
+          :key="history.path"
           class="grid grid-cols-[1fr_min-content_1fr_min-content] p-2 hover:bg-muted rounded-full"
         >
           <UButton
@@ -42,13 +42,13 @@ const isHistoryEmpty = computed(() => pathHistory.length === 0)
             size="sm"
             variant="ghost"
             class="min-w-0"
-            @click="openFolder(path)"
+            @click="openFolder(history.path)"
           >
             <span
               class="truncate text-left text-rtl"
               style="direction: rtl;"
             >
-              {{ path.split('\\').slice(0, -1).join('\\') }}
+              {{ history.path.split('\\').slice(0, -1).join('\\') }}
             </span>
           </UButton>
 
@@ -59,10 +59,10 @@ const isHistoryEmpty = computed(() => pathHistory.length === 0)
             size="sm"
             variant="ghost"
             class="min-w-0"
-            @click="openPath(path)"
+            @click="openPath(history.path)"
           >
             <span class="truncate">
-              {{ path.split('\\').at(-1) }}
+              {{ history.path.split('\\').at(-1) }}
             </span>
           </UButton>
 
@@ -73,13 +73,18 @@ const isHistoryEmpty = computed(() => pathHistory.length === 0)
             :to="{
               name: 'export',
               query: {
-                path,
+                path: history.path,
               },
             }"
             block
+            variant="soft"
           >
             Edit
           </UButton>
+
+          <p class="text-xs text-muted font-medium ml-2">
+            {{ history.date.toLocaleString() }}
+          </p>
         </li>
       </ol>
     </template>

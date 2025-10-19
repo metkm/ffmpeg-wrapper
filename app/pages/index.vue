@@ -69,7 +69,7 @@ onMounted(async () => {
         <FileHistory class="absolute" />
 
         <motion.div
-          v-if="!isUpdating"
+          v-if="isUpdating"
           layout
           :initial="{ opacity: 0 }"
           :animate="{ opacity: 1 }"
