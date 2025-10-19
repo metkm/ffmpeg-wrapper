@@ -42,7 +42,6 @@ export default defineNuxtConfig({
         'lucide:sun',
         'heroicons:pause-solid',
         'heroicons:play-solid',
-        'lucide:arrow-up-narrow-wide',
       ],
       scan: true,
     },
