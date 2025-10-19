@@ -83,10 +83,9 @@ onMounted(() => {
       </p>
 
       <TimelineBar
-        v-if="videoRootContext.video.value.duration !== undefined"
         v-model="videoRootContext.video.value.currentTime"
         v-model:trim="videoRootContext.trim.value"
-        :duration="videoRootContext.video.value.duration"
+        :duration="videoRootContext.video.value.duration || 0"
         :asset-url="assetUrl"
         class="col-start-2"
       />

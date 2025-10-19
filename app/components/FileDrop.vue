@@ -4,6 +4,7 @@ import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { open } from '@tauri-apps/plugin-dialog'
 import { motion } from 'motion-v'
 import { videoFilters } from '~/constants'
+import { usePathsStore } from '~/stores/usePathsStore'
 
 defineProps<{
   disabled?: boolean
@@ -12,6 +13,8 @@ defineProps<{
 const emit = defineEmits<{
   select: [path: string]
 }>()
+
+const { addPathHistory } = usePathsStore()
 
 const modelValue = defineModel<string>()
 
@@ -29,6 +32,7 @@ const openFile = async () => {
 
   if (modelValue.value) {
     emit('select', modelValue.value)
+    addPathHistory(modelValue.value)
   }
 }
 

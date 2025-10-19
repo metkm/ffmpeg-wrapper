@@ -39,6 +39,14 @@
         }
       ]
     },
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        {
+          "path": "**/*"
+        }
+      ]
+    },
     "core:window:allow-set-progress-bar",
     "shell:allow-open",
     "shell:allow-kill",
