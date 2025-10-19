@@ -8,9 +8,21 @@ const HISTORY_LIMIT = 3
 export const usePathsStore = defineStore('paths', () => {
   const pathHistory = ref<PathHistory[]>([])
 
-  const addPathHistory = (path: string) => {
-    if (pathHistory.value.find(h => h.path === path))
+  const updateHistory = (index: number) => {
+    const deletedHistory = pathHistory.value.splice(index, 1).at(0)
+    if (!deletedHistory)
       return
+
+    deletedHistory.date = new Date()
+    pathHistory.value.push(deletedHistory)
+  }
+
+  const addPathHistory = (path: string) => {
+    const index = pathHistory.value.findIndex(h => h.path === path)
+    if (index !== -1) {
+      updateHistory(index)
+      return
+    }
 
     const history: PathHistory = {
       path,
@@ -30,6 +42,7 @@ export const usePathsStore = defineStore('paths', () => {
   return {
     pathHistory,
     addPathHistory,
+    updateHistory,
   }
 }, {
   persist: {

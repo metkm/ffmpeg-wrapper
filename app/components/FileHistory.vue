@@ -37,34 +37,38 @@ const isHistoryEmpty = computed(() => pathHistory.length === 0)
           :key="history.path"
           class="grid grid-cols-[1fr_min-content_1fr_min-content] p-2 hover:bg-muted rounded-full"
         >
-          <UButton
-            icon="i-lucide-folder"
-            size="sm"
-            variant="ghost"
-            class="min-w-0"
-            @click="openFolder(history.path)"
-          >
-            <span
-              class="truncate text-left text-rtl"
-              style="direction: rtl;"
+          <UTooltip :text="history.path.split('\\').slice(0, -1).join('\\')">
+            <UButton
+              icon="i-lucide-folder"
+              size="sm"
+              variant="ghost"
+              class="min-w-0"
+              @click="openFolder(history.path)"
             >
-              {{ history.path.split('\\').slice(0, -1).join('\\') }}
-            </span>
-          </UButton>
+              <span
+                class="truncate text-left text-rtl"
+                style="direction: rtl;"
+              >
+                {{ history.path.split('\\').slice(0, -1).join('\\') }}
+              </span>
+            </UButton>
+          </UTooltip>
 
           <span class="mr-2 text-muted font-semibold">\</span>
 
-          <UButton
-            icon="i-lucide-file"
-            size="sm"
-            variant="ghost"
-            class="min-w-0"
-            @click="openPath(history.path)"
-          >
-            <span class="truncate">
-              {{ history.path.split('\\').at(-1) }}
-            </span>
-          </UButton>
+          <UTooltip :text="history.path.split('\\').at(-1)">
+            <UButton
+              icon="i-lucide-file"
+              size="sm"
+              variant="ghost"
+              class="min-w-0"
+              @click="openPath(history.path)"
+            >
+              <span class="truncate">
+                {{ history.path.split('\\').at(-1) }}
+              </span>
+            </UButton>
+          </UTooltip>
 
           <UButton
             icon="i-lucide-chevron-right"
