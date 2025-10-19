@@ -6,6 +6,8 @@ const regex = /(?<name>\w+)=\s*(?<value>.*?)\s/gm
 
 export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
   const stdoutLines = ref<string[]>([])
+  const stdoutLinesDebounced = refDebounced(stdoutLines, 200, { maxWait: 200 })
+
   const processing = ref(false)
   const progress = ref<FFmpegProgress>()
 
@@ -64,7 +66,8 @@ export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
 
     const onData = (_line: string) => {
       const line = _line.trim()
-      stdoutLines.value.push(line)
+
+      stdoutLines.value = [...stdoutLines.value, line]
 
       listener?.(line)
       progress.value = parseProgress(line)
@@ -123,5 +126,6 @@ export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
     stop,
     processing,
     progress,
+    stdoutLinesDebounced,
   }
 }

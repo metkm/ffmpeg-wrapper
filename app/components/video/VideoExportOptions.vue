@@ -20,7 +20,7 @@ const duration = computed(() =>
   ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!) - videoRootContext.trim.value.start) / encoderOptions.speed,
 )
 
-const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg(duration)
+const { processing, progress, spawn, kill, stop, stdoutLinesDebounced } = useFFmpeg(duration)
 
 const targetBitrate = computed(() => {
   return encoderOptions.fileSizeMb * 8192 / duration.value - 196
@@ -147,13 +147,13 @@ const process = async () => {
       </div>
 
       <pre
-        v-if="stdoutLines.length > 0"
+        v-if="stdoutLinesDebounced.length > 0"
         ref="stdoutElement"
         layout
         class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
         style="overflow-wrap: break-word;"
       >
-        {{ stdoutLines.join('\n') }}
+        {{ stdoutLinesDebounced.join('\n') }}
       </pre>
     </UPageBody>
 
