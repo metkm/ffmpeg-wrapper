@@ -20,7 +20,7 @@ const videoAssetUrl = computed(() => convertFileSrc(videoPath.value))
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col gap-8 max-w-video w-full mx-auto">
+  <div class="flex-1 flex flex-col gap-4 max-w-video w-full mx-auto">
     <FileDrop
       class="fixed inset-0 z-50 pointer-events-none opacity-0"
       @select="(path) => navigateTo({ name: 'export', query: { path } })"
