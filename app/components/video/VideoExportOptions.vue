@@ -1,76 +1,65 @@
 <script setup lang="ts">
-import { appLocalDataDir } from '@tauri-apps/api/path'
-import { save } from '@tauri-apps/plugin-dialog'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { encoders, videoFilters } from '~/constants'
+import { injectVideoRootContext } from './VideoRoot.vue'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
-import type { Video } from '~/types/video'
 import { motion } from 'motion-v'
+import { save } from '@tauri-apps/plugin-dialog'
+import { appLocalDataDir } from '@tauri-apps/api/path'
 
 const props = defineProps<{
-  video: Video
   path: string
 }>()
 
-const emit = defineEmits<{
-  exportEnd: []
-}>()
+const { encoderOptions } = useOptionsStore()
+const videoRootContext = injectVideoRootContext()
 
-const encoder = ref<typeof encoders[number]>('h264_nvenc')
-const twoPass = ref<boolean>(false)
-const removeAudio = ref<boolean>(false)
+const savePath = ref('')
 
-const outputOptions = reactive({
-  savePath: null as string | null,
-  targetFileSize: 10,
-  speed: 1,
-  fps: 60,
-})
+const duration = computed(() =>
+  ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!) - videoRootContext.trim.value.start) / encoderOptions.speed,
+)
 
-const duration = computed(() => {
-  return (props.video.durationRange[1] - props.video.durationRange[0]) / outputOptions.speed
-})
-
-const { processing, progress, spawn, kill, stop, stdoutLines } = useFFmpeg(duration)
+const { running, spawn, linesDebounced, kill, progress } = useFFmpeg(duration)
 
 const targetBitrate = computed(() => {
-  return outputOptions.targetFileSize * 8192 / duration.value - 196
+  return encoderOptions.fileSizeMb * 8192 / duration.value - 196
 })
 
 const process = async () => {
-  outputOptions.savePath = await save({
+  const path = await save({
     defaultPath: 'output.mp4',
     filters: videoFilters,
   })
 
-  if (!outputOptions.savePath) return
+  if (!path)
+    return
+
+  savePath.value = path
 
   const argsBase = [
     '-y',
-    '-ss', formatSeconds(props.video.durationRange[0] || 0),
-    '-to', formatSeconds(props.video.durationRange[1] || 1),
+    '-ss', formatSeconds(videoRootContext.trim.value.start),
+    '-to', formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!),
     '-i', props.path,
-    '-vcodec', encoder.value,
+    '-vcodec', encoderOptions.encoder,
     '-maxrate', `${targetBitrate.value}k`,
     '-bufsize', `${targetBitrate.value / 2}k`,
-    '-vf', `crop=${props.video.crop.width}:${props.video.crop.height}:${props.video.crop.left}:${props.video.crop.top},fps=${outputOptions.fps}`,
+    '-vf', `crop=${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top},fps=${encoderOptions.fps}`,
     '-rc', 'vbr',
   ]
 
-  if (outputOptions.speed !== 1) {
-    argsBase.push('-filter:v', `setpts=PTS/${outputOptions.speed}`)
-    argsBase.push('-filter:a', `atempo=${outputOptions.speed}`)
+  if (encoderOptions.speed !== 1) {
+    argsBase.push('-filter:v', `setpts=PTS/${encoderOptions.speed}`)
+    argsBase.push('-filter:a', `atempo=${encoderOptions.speed}`)
   }
 
-  if (removeAudio.value) {
+  if (encoderOptions.noAudio) {
     argsBase.push('-an')
   }
-
-  if (twoPass.value) {
+  if (encoderOptions.twoPass) {
     argsBase.push('-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`)
-  }
 
-  if (twoPass.value) {
     const args = [
       ...argsBase,
       '-an',
@@ -79,15 +68,12 @@ const process = async () => {
       'NUL',
     ]
 
-    await spawn(args)
+    await spawn('binaries/ffmpeg', args)
     argsBase.push('-pass', '2')
   }
 
-  argsBase.push(outputOptions.savePath)
-  await spawn(argsBase)
-
-  kill()
-  emit('exportEnd')
+  argsBase.push(path)
+  await spawn('binaries/ffmpeg', argsBase)
 }
 </script>
 
@@ -104,7 +90,7 @@ const process = async () => {
           description="h264 is recommended"
         >
           <USelect
-            v-model="encoder"
+            v-model="encoderOptions.encoder"
             :items="encoders"
             variant="soft"
           />
@@ -115,7 +101,7 @@ const process = async () => {
           :description="`${targetBitrate.toFixed(0)} bitrate`"
         >
           <UInputNumber
-            v-model="outputOptions.targetFileSize"
+            v-model="encoderOptions.fileSizeMb"
             :min="0"
             variant="soft"
           />
@@ -126,7 +112,7 @@ const process = async () => {
           description="speed of video"
         >
           <UInputNumber
-            v-model="outputOptions.speed"
+            v-model="encoderOptions.speed"
             :min="0.5"
             :max="100"
             :step="0.05"
@@ -139,7 +125,7 @@ const process = async () => {
           description="Frames per second"
         >
           <USelect
-            v-model="outputOptions.fps"
+            v-model="encoderOptions.fps"
             :items="[30, 60, 144, 180, 240]"
             color="neutral"
             variant="soft"
@@ -147,25 +133,25 @@ const process = async () => {
         </UFormField>
 
         <UCheckbox
-          v-model="twoPass"
+          v-model="encoderOptions.twoPass"
           label="Two pass"
           description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
         />
 
         <UCheckbox
-          v-model="removeAudio"
+          v-model="encoderOptions.noAudio"
           label="Remove audio"
         />
       </div>
 
       <pre
-        v-if="stdoutLines.length > 0"
+        v-if="linesDebounced.length > 0"
         ref="stdoutElement"
         layout
         class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
         style="overflow-wrap: break-word;"
       >
-        {{ stdoutLines.join('\n') }}
+        {{ linesDebounced.join('\n') }}
       </pre>
     </UPageBody>
 
@@ -190,7 +176,7 @@ const process = async () => {
             </Motion>
 
             <Motion
-              v-if="outputOptions.savePath"
+              v-if="savePath"
               layout
               :exit="{ opacity: 0 }"
               :animate="{ opacity: 1 }"
@@ -202,14 +188,14 @@ const process = async () => {
                 color="neutral"
                 square
                 class="-ml-0.5"
-                @click="revealItemInDir(outputOptions.savePath)"
+                @click="revealItemInDir(savePath)"
               >
-                {{ outputOptions.savePath }}
+                {{ savePath }}
               </UButton>
             </Motion>
 
             <Motion
-              v-if="processing"
+              v-if="running"
               layout
               :exit="{ opacity: 0 }"
               :animate="{ opacity: 1 }"
@@ -219,7 +205,7 @@ const process = async () => {
                 icon="i-lucide-circle-stop"
                 color="warning"
                 variant="subtle"
-                @click="stop"
+                @click="kill"
               >
                 Stop
               </UButton>
@@ -228,20 +214,20 @@ const process = async () => {
             <Motion layout>
               <UButton
                 icon="i-lucide-folder-down"
-                :loading="processing"
+                :loading="running"
                 @click="process"
               >
                 <motion.p
                   layout="position"
                   class="text-center w-11"
                 >
-                  {{ processing && progress?.eta ? `${progress.eta.toFixed(0)}s` : 'Export' }}
+                  {{ running && progress?.eta ? `${progress.eta.toFixed(0)}s` : 'Export' }}
                 </motion.p>
               </UButton>
             </Motion>
 
             <motion.div
-              v-if="processing"
+              v-if="running"
               class="absolute bottom-0 w-full bg-accented transition-all"
               :exit="{ transform: `translateY(100%)` }"
               :initial="{ transform: `translateY(100%)` }"

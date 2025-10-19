@@ -5,12 +5,6 @@ export const defaultVideoValues: Video = {
   duration: 0,
   currentTime: 0,
   durationRange: [0, 1],
-  crop: {
-    top: 0,
-    left: 0,
-    height: 0,
-    width: 0,
-  },
   volume: 0,
 }
 

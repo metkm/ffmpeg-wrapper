@@ -72,7 +72,7 @@ onUnmounted(() => unlistenFn?.())
       class="flex flex-col items-center justify-center h-full w-full transition-colors"
       :class="{
         'cursor-no-drop pointer-events-none': disabled,
-        'hover:bg-muted/50': !disabled,
+        'hover:bg-muted': !disabled,
       }"
       @click="openFile"
     >

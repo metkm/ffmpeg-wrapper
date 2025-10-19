@@ -1,20 +1,15 @@
 <script setup lang="ts">
+import type { VideoCropOptions } from '~/hooks/useVideo'
+
 const props = defineProps<{
   width?: number
   height?: number
 }>()
 
-const modelValueCrop = defineModel<{
-  top: number
-  left: number
-  width: number
-  height: number
-}>({
+const modelValueCrop = defineModel<VideoCropOptions>({
   default: {
     top: 0,
     left: 0,
-    width: 0,
-    height: 0,
   },
 })
 

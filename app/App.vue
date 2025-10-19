@@ -18,8 +18,7 @@ onMounted(() => {
         </template>
       </Suspense>
 
-      <main class="relative flex flex-col grow p-4 overflow-x-hidden overflow-y-auto scrollbar">
-        <AppColorMode class="right-4 top-4 absolute" />
+      <main class="flex flex-col grow p-4 overflow-x-hidden overflow-y-auto scrollbar">
         <NuxtPage />
       </main>
     </div>

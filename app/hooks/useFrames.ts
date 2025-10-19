@@ -1,6 +1,6 @@
 export const useFrames = (
   framesContainer: MaybeRefOrGetter<HTMLCanvasElement | null>,
-  src: MaybeRefOrGetter<string>,
+  assetUrl: MaybeRefOrGetter<string>,
 ) => {
   const videoLoaded = ref(false)
 
@@ -52,7 +52,7 @@ export const useFrames = (
 
   watchPostEffect(() => {
     videoLoaded.value = false
-    videoElement.src = toValue(src)
+    videoElement.src = toValue(assetUrl)
   })
 
   watchDebounced([framesContainerWidth, framesContainerHeight], (

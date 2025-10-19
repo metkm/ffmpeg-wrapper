@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { convertFileSrc } from '@tauri-apps/api/core'
-import { defaultVideoValues } from '~/constants'
-import type { Video } from '~/types/video'
 
 definePageMeta({
   middleware: (to) => {
@@ -17,28 +15,31 @@ defineShortcuts({
 
 const route = useRoute()
 
-const video = ref<Video>(defaultVideoValues)
-
-const src = computed(() => convertFileSrc(route.query.path!.toString()))
+const videoPath = computed(() => route.query.path!.toString())
+const videoAssetUrl = computed(() => convertFileSrc(videoPath.value))
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col gap-8 max-w-video w-full mx-auto">
+  <div class="flex-1 flex flex-col gap-4 max-w-video w-full mx-auto">
     <FileDrop
       class="fixed inset-0 z-50 pointer-events-none opacity-0"
       @select="(path) => navigateTo({ name: 'export', query: { path } })"
     />
 
-    <VideoPreview
-      v-model="video"
-      :src="src"
-      :path="route.query.path!.toString()"
-    />
+    <VideoRoot>
+      <VideoInfo
+        :path="videoPath"
+      />
 
-    <VideoExportOptions
-      :video="video"
-      :path="route.query.path!.toString()"
-    />
+      <VideoPreview
+        :asset-url="videoAssetUrl"
+        :path="videoPath"
+      />
+
+      <VideoExportOptions
+        :path="videoPath"
+      />
+    </VideoRoot>
   </div>
 </template>
 
@@ -46,10 +47,6 @@ const src = computed(() => convertFileSrc(route.query.path!.toString()))
 :root {
   --video-max-height: calc(100vh - var(--spacing) * 79);
 }
-
-/* .max-h-video {
-  max-height: var(--video-max-height);
-} */
 
 .max-w-video {
   max-width: max(var(--container-2xl), calc(var(--video-max-height) * 16 / 9));
