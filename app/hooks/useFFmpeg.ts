@@ -1,11 +1,15 @@
 import type { FFmpegProgress } from '~/types/ffmpeg'
 import { useCommand } from './useCommand'
 import { getCurrentWindow, ProgressBarStatus } from '@tauri-apps/api/window'
+import { animate } from 'motion-v'
 
 const regex = /(?<name>\w+)=\s*(?<value>.*?)\s/gm
 
 export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
   const progress = ref<FFmpegProgress>({})
+
+  const _etaAnimated = useMotionValue(0)
+  const etaAnimated = useTransform(() => Math.round(_etaAnimated.get()))
 
   const onLine = (line: string) => {
     const matches = line.matchAll(regex)
@@ -26,7 +30,14 @@ export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
         const seconds = formatTimeToSeconds(value)
         const durationLeft = toValue(duration) - seconds
 
-        progress.value.eta = durationLeft / (progress.value.speed || 1)
+        const eta = durationLeft / (progress.value.speed || 1)
+
+        animate(_etaAnimated, eta, {
+          from: progress.value.eta || 0,
+          ease: 'easeInOut',
+        })
+
+        progress.value.eta = eta
         progress.value.percent = seconds / toValue(duration) * 100
 
         getCurrentWindow().setProgressBar({
@@ -51,5 +62,6 @@ export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
   return {
     ...command,
     progress,
+    etaAnimated,
   }
 }

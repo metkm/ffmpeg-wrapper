@@ -3,7 +3,7 @@ import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { encoders, videoFilters } from '~/constants'
 import { injectVideoRootContext } from './VideoRoot.vue'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
-import { motion } from 'motion-v'
+import { motion, RowValue } from 'motion-v'
 import { save } from '@tauri-apps/plugin-dialog'
 import { appLocalDataDir } from '@tauri-apps/api/path'
 
@@ -20,7 +20,7 @@ const duration = computed(() =>
   ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!) - videoRootContext.trim.value.start) / encoderOptions.speed,
 )
 
-const { running, spawn, linesDebounced, kill, progress } = useFFmpeg(duration)
+const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(duration)
 
 const targetBitrate = computed(() => {
   return encoderOptions.fileSizeMb * 8192 / duration.value - 196
@@ -155,11 +155,11 @@ const process = async () => {
       </pre>
     </UPageBody>
 
-    <LayoutGroup>
-      <section
-        layout
-        class="fixed bottom-4 inset-x-2 flex justify-center pointer-events-none"
-      >
+    <section
+      layout
+      class="fixed bottom-4 inset-x-2 flex justify-center pointer-events-none"
+    >
+      <LayoutGroup>
         <motion.div
           layout
           class="flex items-center gap-2 p-2 backdrop-blur-2xl shadow max-w-max border border-muted overflow-hidden relative pointer-events-auto"
@@ -217,12 +217,25 @@ const process = async () => {
                 :loading="running"
                 @click="process"
               >
-                <motion.p
-                  layout="position"
-                  class="text-center w-11"
-                >
-                  {{ running && progress?.eta ? `${progress.eta.toFixed(0)}s` : 'Export' }}
-                </motion.p>
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    v-if="running && progress.eta"
+                    :initial="{ translateY: -50 }"
+                    :animate="{ translateY: 0 }"
+                    :exit="{ translateY: -50 }"
+                    class="min-w-9 text-center"
+                  >
+                    <RowValue :value="etaAnimated" />s
+                  </motion.p>
+                  <motion.p
+                    v-else
+                    :initial="{ translateY: 50 }"
+                    :animate="{ translateY: 0 }"
+                    :exit="{ translateY: 50 }"
+                  >
+                    Export
+                  </motion.p>
+                </AnimatePresence>
               </UButton>
             </Motion>
 
@@ -240,7 +253,7 @@ const process = async () => {
             </motion.div>
           </AnimatePresence>
         </motion.div>
-      </section>
-    </LayoutGroup>
+      </LayoutGroup>
+    </section>
   </section>
 </template>
