@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: install ffmpeg
-        run: Invoke-WebRequest https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-7.1.1-full_build.7z -OutFile ./ffmpeg.7z
+        run: Invoke-WebRequest https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-7.1.1-full_build.7z -OutFile ffmpeg.7z
       
       - name: unzip ffmpeg
         run: 7z x ffmpeg.7z
