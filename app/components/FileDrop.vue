@@ -61,8 +61,14 @@ onMounted(async () => {
           return
         }
 
-        modelValue.value = event.payload.paths.at(0)
-        emit('select', event.payload.paths.at(0)!)
+        const path = event.payload.paths.at(0)
+
+        if (!path)
+          return
+
+        modelValue.value = path
+        emit('select', path)
+        addPathHistory(path)
       }
     })
 })
