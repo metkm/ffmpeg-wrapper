@@ -31,8 +31,9 @@ jobs:
       - name: move ffmpeg to binaries folder
         run: |
           mkdir src-tauri/binaries
-          mv ffmpeg-8.0-full_build/bin/ffmpeg.exe src-tauri/binaries/ffmpeg-x86_64-pc-windows-msvc.exe
+          ls
 
+        # mv ffmpeg-8.0-full_build/bin/ffmpeg.exe src-tauri/binaries/ffmpeg-x86_64-pc-windows-msvc.exe
       - name: setup node
         uses: actions/setup-node@v4
         with:
