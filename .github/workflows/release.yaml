@@ -29,7 +29,9 @@ jobs:
         run: 7z x ffmpeg.7z
 
       - name: move ffmpeg to binaries folder
-        run: mv ffmpeg-8.0-full_build/bin/ffmpeg.exe src-tauri/binaries/ffmpeg-x86_64-pc-windows-msvc.exe
+        run: |
+          mkdir src-tauri/binaries
+          mv ./ffmpeg-8.0-full_build/bin/ffmpeg.exe src-tauri/binaries/ffmpeg-x86_64-pc-windows-msvc.exe
 
       - name: setup node
         uses: actions/setup-node@v4
