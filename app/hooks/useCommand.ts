@@ -34,12 +34,12 @@ export const useCommand = (options: UseCommandOptions) => {
         command.value = undefined
         child.value = undefined
       })
-
-    lines.value = []
   }
 
   const spawn = async (...args: Parameters<typeof Command.sidecar>) => {
     kill()
+    lines.value = []
+
     command.value = Command.sidecar(...args)
 
     command.value.stdout.on('data', onData)
