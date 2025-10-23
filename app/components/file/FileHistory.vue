@@ -1,22 +1,34 @@
 <script setup lang="ts">
-import { openPath } from '@tauri-apps/plugin-opener'
+import { invoke } from '@tauri-apps/api/core'
 
 const { pathHistory } = usePathsStore()
 
-const openFolder = (path: string) => {
-  const p = path
-    .split('\\')
-    .slice(0, -1)
-    .join('\\')
-
-  openPath(p)
-}
-
-const isHistoryEmpty = computed(() => pathHistory.length === 0)
+const folders = computed(() => {
+  return pathHistory.map((history) => {
+    return history.path
+      .split('\\')
+      .slice(0, -1)
+      .join('\\')
+  })
+})
 </script>
 
 <template>
-  <section class="p-4 rounded-(--ui-radius) w-full max-w-xl">
+  <section class="p-4">
+    <UButton
+      icon="i-lucide-chevron-up"
+      square
+    />
+
+    <section
+      v-for="folder in folders"
+      :key="folder"
+    >
+      <FolderContent :path="folder" />
+    </section>
+  </section>
+
+  <!-- <section class="p-4 rounded-(--ui-radius) w-full max-w-xl">
     <div
       v-if="isHistoryEmpty"
       class="flex items-center justify-center rounded-(--ui-radius) bg-muted h-32 border border-muted w-full"
@@ -92,5 +104,5 @@ const isHistoryEmpty = computed(() => pathHistory.length === 0)
         </li>
       </ol>
     </template>
-  </section>
+  </section> -->
 </template>

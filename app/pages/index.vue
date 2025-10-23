@@ -52,6 +52,8 @@ onMounted(async () => {
   <div class="flex flex-col grow relative -m-4">
     <!-- <AppColorMode class="right-4 top-4 absolute" /> -->
 
+    <FileHistory class="" />
+
     <LayoutGroup>
       <AnimatePresence>
         <Motion
