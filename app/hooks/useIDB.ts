@@ -17,17 +17,19 @@ export const useIDB = <Item>(name: string) => {
     db.value = result
   }
 
+  const getStore = () => {
+    const tx = db.value?.transaction(name, 'readwrite')
+    return tx?.objectStore(name)
+  }
+
   const get = (key: IDBValidKey) => {
-    return new Promise<Item | undefined>((resolve) => {
-      if (!db.value) {
-        resolve(undefined)
-        return
-      }
+    return new Promise<Item>((resolve, reject) => {
+      const store = getStore()
 
-      const tx = db.value.transaction(name, 'readwrite')
-      const st = tx.objectStore(name)
+      if (!store)
+        return reject()
 
-      const g = st.get(key)
+      const g = store.get(key)
 
       g.addEventListener('success', (event) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -38,18 +40,14 @@ export const useIDB = <Item>(name: string) => {
   }
 
   const put = (value: Item, key: IDBValidKey) => {
-    return new Promise((resolve) => {
-      if (!db.value) {
-        resolve(undefined)
-        return
-      }
+    return new Promise<void>((resolve, reject) => {
+      const store = getStore()
 
-      const tx = db.value.transaction(name, 'readwrite')
-      const st = tx.objectStore(name)
+      if (!store)
+        return reject()
 
-      st.put(value, key)
-
-      resolve(undefined)
+      store.put(value, key)
+      resolve()
     })
   }
 
