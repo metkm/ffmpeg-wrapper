@@ -11,7 +11,7 @@ interface FileVideo extends DirEntry {
   thumbnail: string
 }
 
-const { get, put } = useIDB()
+const { get, put } = useIDB<number[]>('thumbnails')
 
 const evaluating = shallowRef(false)
 
@@ -23,10 +23,10 @@ const videoFiles = computedAsync(async () => {
 
     const cached = await get(videoPath)
 
-    const array = cached ? cached.buffer : await invoke<number[]>('create_thumbnail', { videoPath })
+    const array = cached ? cached : await invoke<number[]>('create_thumbnail', { videoPath })
 
     if (!cached) {
-      await put(videoPath, array)
+      await put(array, videoPath)
     }
 
     const buffer = new Uint8Array(array)
