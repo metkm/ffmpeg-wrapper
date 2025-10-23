@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { invoke } from '@tauri-apps/api/core'
-
 const { pathHistory } = usePathsStore()
 
 const folders = computed(() => {
@@ -14,18 +12,18 @@ const folders = computed(() => {
 </script>
 
 <template>
-  <section class="p-4">
+  <section class="flex flex-col gap-4 p-4">
     <UButton
       icon="i-lucide-chevron-up"
       square
+      class="self-center"
     />
 
-    <section
+    <FolderContent
       v-for="folder in folders"
       :key="folder"
-    >
-      <FolderContent :path="folder" />
-    </section>
+      :path="folder"
+    />
   </section>
 
   <!-- <section class="p-4 rounded-(--ui-radius) w-full max-w-xl">

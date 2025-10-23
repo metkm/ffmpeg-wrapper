@@ -8,60 +8,86 @@ const props = defineProps<{
 }>()
 
 interface FileVideo extends DirEntry {
-  thumbnail: string
+  thumbnail?: string
 }
 
 const { get, put } = useIDB<number[]>('thumbnails')
 
-const evaluating = shallowRef(false)
+const videos = ref<FileVideo[]>([])
 
-const videoFiles = computedAsync(async () => {
-  const entries = await readDir(props.path)
+onMounted(async () => {
+  const entries = await readDir(props.path) as FileVideo[]
+  videos.value.push(...entries)
 
-  const promises = entries.map(async (videoFile) => {
-    const videoPath = `${props.path}\\${videoFile.name}`
+  const chunkSize = 10
 
-    const cached = await get(videoPath)
+  for (let index = 0; index < videos.value.length; index += chunkSize) {
+    const chunk = videos.value.slice(index, index + chunkSize)
 
-    const array = cached ? cached : await invoke<number[]>('create_thumbnail', { videoPath })
+    console.log('loading from', index, 'to', index + chunkSize)
 
-    if (!cached) {
-      await put(array, videoPath)
-    }
+    const promises = chunk.map(async (entry) => {
+      const vPath = `${props.path}\\${entry.name}`
 
-    const buffer = new Uint8Array(array)
-    const blob = new Blob([buffer], { type: 'image/jpeg' })
+      const imageBufferCache = await get(vPath)
+      const buffer = imageBufferCache || await invoke<number[]>('create_thumbnail', { videoPath: vPath })
 
-    const url = URL.createObjectURL(blob)
+      if (!imageBufferCache) {
+        await put(buffer, vPath)
+      }
 
-    return {
-      ...videoFile,
-      thumbnail: url,
-    } satisfies FileVideo
-  })
+      const blob = new Blob([new Uint8Array(buffer)], { type: 'image/jpeg' })
+      const url = URL.createObjectURL(blob)
 
-  return await Promise.all(promises)
-}, null, evaluating)
+      return {
+        ...entry,
+        thumbnail: url,
+      } as FileVideo
+    })
+
+    const videosWithThumbnail = await Promise.all(promises)
+    videos.value.splice(index, chunkSize, ...videosWithThumbnail)
+  }
+})
 </script>
 
 <template>
-  <ol
-    v-if="!evaluating"
-    class="grid grid-cols-3 gap-4 mb-10"
-  >
-    <li
-      v-for="entry in videoFiles"
-      :key="entry.name"
-      class="p-2 bg-elevated rounded"
-    >
-      <img
-        :src="entry.thumbnail"
-        class="h-40 aspect-video rounded"
+  <section class="rounded">
+    <div class="sticky -top-4 p-4 bg-muted flex items-center gap-2">
+      <UIcon
+        name="i-lucide-folder"
+        class="size-5"
+      />
+
+      <h1>
+        {{ props.path }}
+      </h1>
+    </div>
+
+    <ol class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+      <li
+        v-for="video in videos"
+        :key="video.name"
       >
-      <p>{{ entry.name }}</p>
-    </li>
-  </ol>
-  <p v-else>
-    Loading {{ props.path }}
-  </p>
+        <div class="aspect-video w-full rounded bg-elevated overflow-hidden">
+          <img
+            v-if="video.thumbnail"
+            :src="video.thumbnail"
+            class="w-full h-full"
+          >
+
+          <div
+            v-else
+            class="h-full w-full flex items-center justify-center"
+          >
+            <p>Loading...</p>
+          </div>
+        </div>
+
+        <p class="text-sm mt-2">
+          {{ video.name }}
+        </p>
+      </li>
+    </ol>
+  </section>
 </template>
