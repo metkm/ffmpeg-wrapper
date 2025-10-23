@@ -50,7 +50,7 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col grow relative -m-4">
-    <AppColorMode class="right-4 top-4 absolute" />
+    <!-- <AppColorMode class="right-4 top-4 absolute" /> -->
 
     <LayoutGroup>
       <AnimatePresence>
@@ -66,7 +66,7 @@ onMounted(async () => {
           />
         </Motion>
 
-        <FileHistory class="absolute" />
+        <!-- <FileHistory class="absolute" /> -->
 
         <motion.div
           v-if="isUpdating"
