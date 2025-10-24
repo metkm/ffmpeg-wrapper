@@ -50,7 +50,10 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col grow relative -m-4">
-    <!-- <AppColorMode class="right-4 top-4 absolute" /> -->
+    <AppDockContainer class="flex items-center p-2 gap-2">
+      <FileHistory />
+      <AppColorMode />
+    </AppDockContainer>
 
     <LayoutGroup>
       <AnimatePresence>
@@ -65,8 +68,6 @@ onMounted(async () => {
             @select="onSelect"
           />
         </Motion>
-
-        <!-- <FileHistory class="absolute" /> -->
 
         <motion.div
           v-if="isUpdating"

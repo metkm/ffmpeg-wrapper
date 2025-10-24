@@ -1,96 +1,53 @@
 <script setup lang="ts">
-import { openPath } from '@tauri-apps/plugin-opener'
-
 const { pathHistory } = usePathsStore()
 
-const openFolder = (path: string) => {
-  const p = path
-    .split('\\')
-    .slice(0, -1)
-    .join('\\')
+const folders = computed(() => {
+  const foldersWithoutDuplicates: string[] = []
 
-  openPath(p)
-}
+  for (let index = 0; index < pathHistory.length; index++) {
+    const element = pathHistory[index]
+    if (!element)
+      return
 
-const isHistoryEmpty = computed(() => pathHistory.length === 0)
+    const folderPath = element.path
+      .split('\\')
+      .slice(0, -1)
+      .join('\\')
+
+    if (foldersWithoutDuplicates.find(path => folderPath === path))
+      continue
+
+    foldersWithoutDuplicates.push(folderPath)
+  }
+
+  foldersWithoutDuplicates.reverse()
+  return foldersWithoutDuplicates
+})
 </script>
 
 <template>
-  <section class="p-4 rounded-(--ui-radius) w-full max-w-xl">
-    <div
-      v-if="isHistoryEmpty"
-      class="flex items-center justify-center rounded-(--ui-radius) bg-muted h-32 border border-muted w-full"
+  <UDrawer
+    title="Recently used folders & contents inside them (last 10 files)"
+    :ui="{
+      body: 'overflow-y-auto relative scrollbar space-y-4 max-h-[80vh]',
+      container: 'p-0',
+      title: 'ml-4',
+    }"
+  >
+    <UButton
+      icon="i-lucide-chevron-up"
+      class="self-center"
+      variant="soft"
     >
-      <p class="text-sm text-muted font-medium">
-        File is history is currently empty.
-      </p>
-    </div>
+      Open Recently Used Folders
+    </UButton>
 
-    <template v-else>
-      <h1 class="text-sm mb-2 font-medium">
-        Recently opened folders & files {{ isHistoryEmpty ? 'will show up here' : '' }}
-      </h1>
-
-      <ol class="bg-muted w-full rounded-(--ui-radius) border border-muted">
-        <li
-          v-for="history in pathHistory"
-          :key="history.path"
-          class="grid grid-cols-[1fr_min-content_1fr_min-content] p-2 hover:bg-muted rounded-full"
-        >
-          <UTooltip :text="history.path.split('\\').slice(0, -1).join('\\')">
-            <UButton
-              icon="i-lucide-folder"
-              size="sm"
-              variant="ghost"
-              class="min-w-0"
-              @click="openFolder(history.path)"
-            >
-              <span
-                class="truncate text-left text-rtl"
-                style="direction: rtl;"
-              >
-                {{ history.path.split('\\').slice(0, -1).join('\\') }}
-              </span>
-            </UButton>
-          </UTooltip>
-
-          <span class="mr-2 text-muted font-semibold">\</span>
-
-          <UTooltip :text="history.path.split('\\').at(-1)">
-            <UButton
-              icon="i-lucide-file"
-              size="sm"
-              variant="ghost"
-              class="min-w-0"
-              @click="openPath(history.path)"
-            >
-              <span class="truncate">
-                {{ history.path.split('\\').at(-1) }}
-              </span>
-            </UButton>
-          </UTooltip>
-
-          <UButton
-            icon="i-lucide-chevron-right"
-            size="sm"
-            class="min-w-0"
-            :to="{
-              name: 'export',
-              query: {
-                path: history.path,
-              },
-            }"
-            block
-            variant="soft"
-          >
-            Edit
-          </UButton>
-
-          <p class="text-xs text-muted font-medium ml-2">
-            {{ history.date.toLocaleString() }}
-          </p>
-        </li>
-      </ol>
+    <template #body>
+      <FolderContent
+        v-for="folder in folders"
+        :key="folder"
+        :path="folder"
+      />
     </template>
-  </section>
+  </UDrawer>
 </template>

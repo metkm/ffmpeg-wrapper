@@ -158,14 +158,11 @@ const process = async () => {
       </pre>
     </UPageBody>
 
-    <section
-      layout
-      class="fixed bottom-4 inset-x-2 flex justify-center pointer-events-none"
-    >
+    <AppDockContainer>
       <LayoutGroup>
         <motion.div
           layout
-          class="flex items-center gap-2 p-2 backdrop-blur-2xl shadow max-w-max border border-muted overflow-hidden relative pointer-events-auto"
+          class="flex items-center gap-2 p-2 backdrop-blur-2xl shadow max-w-max border border-muted overflow-hidden relative"
           :style="{ borderRadius: '999px' }"
         >
           <AnimatePresence>
@@ -257,6 +254,6 @@ const process = async () => {
           </AnimatePresence>
         </motion.div>
       </LayoutGroup>
-    </section>
+    </AppDockContainer>
   </section>
 </template>
