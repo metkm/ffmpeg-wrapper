@@ -68,8 +68,6 @@ onMounted(async () => {
           />
         </Motion>
 
-        <!-- <FileHistory class="absolute" /> -->
-
         <motion.div
           v-if="isUpdating"
           layout

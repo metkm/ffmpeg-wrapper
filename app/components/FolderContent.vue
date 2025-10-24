@@ -1,23 +1,34 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core'
-import { readDir, type DirEntry } from '@tauri-apps/plugin-fs'
+import { readDir, stat, type DirEntry, type FileInfo } from '@tauri-apps/plugin-fs'
 import { useIDB } from '~/hooks/useIDB'
 
 const props = defineProps<{
   path: string
 }>()
 
-interface FileVideo extends DirEntry {
-  thumbnail?: string
-}
+type Video = { thumbnail?: string } & FileInfo & DirEntry
 
 const { get, put } = useIDB<number[]>('thumbnails')
 
-const videos = ref<FileVideo[]>([])
+const videos = ref<Video[]>([])
 
 onMounted(async () => {
-  const entries = await readDir(props.path) as FileVideo[]
-  videos.value.push(...entries)
+  const _entries = await readDir(props.path)
+  const entriesWithStats = await Promise.all(
+    _entries.map(async (entry) => {
+      const stats = await stat(`${props.path}\\${entry.name}`)
+
+      return {
+        ...entry,
+        ...stats,
+      }
+    },
+    ),
+  )
+
+  entriesWithStats.sort((a, b) => (b.mtime?.getTime() || 1) - (a.mtime?.getTime() || 1))
+  videos.value.push(...entriesWithStats)
 
   const chunkSize = 10
 
@@ -40,7 +51,7 @@ onMounted(async () => {
       return {
         ...entry,
         thumbnail: url,
-      } as FileVideo
+      }
     })
 
     const videosWithThumbnail = await Promise.all(promises)
@@ -51,7 +62,7 @@ onMounted(async () => {
 
 <template>
   <section class="rounded">
-    <div class="sticky top-0 p-4 bg-muted flex items-center gap-2 rounded mb-4">
+    <div class="sticky top-0 p-4 flex bg-muted items-center gap-2">
       <UIcon
         name="i-lucide-folder"
         class="size-5"
@@ -62,29 +73,38 @@ onMounted(async () => {
       </h1>
     </div>
 
-    <ol class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+    <ol class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 p-4">
       <li
         v-for="video in videos"
         :key="video.name"
+        class="p-2 hover:bg-muted rounded"
       >
-        <div class="aspect-video w-full rounded bg-elevated overflow-hidden">
-          <img
-            v-if="video.thumbnail"
-            :src="video.thumbnail"
-            class="w-full h-full"
-          >
+        <NuxtLink :to="{ path: '/export', query: { path: `${props.path}\\${video.name}` } }">
+          <div class="aspect-video w-full rounded bg-elevated overflow-hidden">
+            <img
+              v-if="video.thumbnail"
+              :src="video.thumbnail"
+              class="w-full h-full"
+            >
 
-          <div
-            v-else
-            class="h-full w-full flex items-center justify-center"
-          >
-            <p>Loading...</p>
+            <div
+              v-else
+              class="h-full w-full flex items-center justify-center"
+            >
+              <p>Loading...</p>
+            </div>
           </div>
-        </div>
 
-        <p class="text-sm mt-2">
-          {{ video.name }}
-        </p>
+          <div class="text-sm mt-2">
+            <p>
+              {{ video.name }}
+            </p>
+
+            <p class="text-xs text-muted">
+              {{ video.mtime?.toLocaleString() }}
+            </p>
+          </div>
+        </NuxtLink>
       </li>
     </ol>
   </section>

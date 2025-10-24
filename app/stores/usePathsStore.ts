@@ -29,7 +29,6 @@ export const usePathsStore = defineStore('paths', () => {
       date: new Date(),
     }
 
-    console.log(pathHistory.value.length, HISTORY_LIMIT)
     if (pathHistory.value.length >= HISTORY_LIMIT) {
       pathHistory.value.splice(0, pathHistory.value.length - HISTORY_LIMIT + 1)
       pathHistory.value.push(history)
