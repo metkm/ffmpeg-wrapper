@@ -27,9 +27,9 @@ const folders = computed(() => {
 
 <template>
   <UDrawer
-    title="Recently used folders & contents inside them"
+    title="Recently used folders & contents inside them (last 10 files)"
     :ui="{
-      body: 'overflow-y-auto relative scrollbar space-y-4',
+      body: 'overflow-y-auto relative scrollbar space-y-4 max-h-[80vh]',
       container: 'p-0',
       title: 'ml-4',
     }"

@@ -15,8 +15,9 @@ const videos = ref<Video[]>([])
 
 onMounted(async () => {
   const _entries = await readDir(props.path)
+
   const entriesWithStats = await Promise.all(
-    _entries.map(async (entry) => {
+    _entries.slice(-10).map(async (entry) => {
       const stats = await stat(`${props.path}\\${entry.name}`)
 
       return {
