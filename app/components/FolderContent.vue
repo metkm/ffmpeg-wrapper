@@ -24,8 +24,6 @@ onMounted(async () => {
   for (let index = 0; index < videos.value.length; index += chunkSize) {
     const chunk = videos.value.slice(index, index + chunkSize)
 
-    console.log('loading from', index, 'to', index + chunkSize)
-
     const promises = chunk.map(async (entry) => {
       const vPath = `${props.path}\\${entry.name}`
 
@@ -53,7 +51,7 @@ onMounted(async () => {
 
 <template>
   <section class="rounded">
-    <div class="sticky -top-4 p-4 bg-muted flex items-center gap-2">
+    <div class="sticky top-0 p-4 bg-muted flex items-center gap-2 rounded mb-4">
       <UIcon
         name="i-lucide-folder"
         class="size-5"
