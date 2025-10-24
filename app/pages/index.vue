@@ -50,10 +50,10 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col grow relative -m-4">
-    <div class="fixed bottom-4 left-4 right-4 flex justify-center gap-2">
+    <AppDockContainer class="flex items-center p-2 gap-2">
       <FileHistory />
       <AppColorMode />
-    </div>
+    </AppDockContainer>
 
     <LayoutGroup>
       <AnimatePresence>

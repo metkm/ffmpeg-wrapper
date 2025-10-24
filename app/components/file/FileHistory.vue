@@ -39,7 +39,7 @@ const folders = computed(() => {
       class="self-center"
       variant="soft"
     >
-      Recently Used Folders
+      Open Recently Used Folders
     </UButton>
 
     <template #body>
