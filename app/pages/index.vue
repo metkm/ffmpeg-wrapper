@@ -50,9 +50,10 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col grow relative -m-4">
-    <!-- <AppColorMode class="right-4 top-4 absolute" /> -->
-
-    <FileHistory />
+    <div class="fixed bottom-4 left-4 right-4 flex justify-center gap-2">
+      <FileHistory />
+      <AppColorMode />
+    </div>
 
     <LayoutGroup>
       <AnimatePresence>
