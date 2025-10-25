@@ -5,7 +5,8 @@ import { injectVideoRootContext } from './VideoRoot.vue'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import { motion, RowValue } from 'motion-v'
 import { save } from '@tauri-apps/plugin-dialog'
-import { appLocalDataDir } from '@tauri-apps/api/path'
+
+const imageFormats = ['.jpeg', '.png', '.jpg']
 
 const props = defineProps<{
   path: string
@@ -28,7 +29,7 @@ const targetBitrate = computed(() => {
 
 const process = async () => {
   const path = await save({
-    defaultPath: 'output.mp4',
+    defaultPath: encoderOptions.outputName || 'output.mp4',
     filters: videoFilters,
   })
 
@@ -37,43 +38,49 @@ const process = async () => {
 
   savePath.value = path
 
-  const argsBase = [
+  const baseArgs = [
     '-y',
     '-ss', formatSeconds(videoRootContext.trim.value.start),
     '-to', formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!),
     '-i', props.path,
-    '-vcodec', encoderOptions.encoder,
+    '-vf', `crop=${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top},fps=${encoderOptions.fps}`,
     '-maxrate', `${targetBitrate.value}k`,
     '-bufsize', `${targetBitrate.value / 2}k`,
-    '-vf', `crop=${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top},fps=${encoderOptions.fps}`,
     '-rc', 'vbr',
   ]
 
   if (encoderOptions.speed !== 1) {
-    argsBase.push('-filter:v', `setpts=PTS/${encoderOptions.speed}`)
-    argsBase.push('-filter:a', `atempo=${encoderOptions.speed}`)
+    baseArgs.push('-filter:v', `setpts=PTS/${encoderOptions.speed}`)
+    baseArgs.push('-filter:a', `atempo=${encoderOptions.speed}`)
   }
 
   if (encoderOptions.noAudio) {
-    argsBase.push('-an')
-  }
-  if (encoderOptions.twoPass) {
-    argsBase.push('-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`)
-
-    const args = [
-      ...argsBase,
-      '-an',
-      '-pass', '1',
-      '-f', 'mp4',
-      'NUL',
-    ]
-
-    await spawn('binaries/ffmpeg', args)
-    argsBase.push('-pass', '2')
+    baseArgs.push('-an')
   }
 
-  argsBase.push(path)
-  await spawn('binaries/ffmpeg', argsBase)
+  if (imageFormats.some(format => encoderOptions.outputName.endsWith(format))) {
+    baseArgs.push('-frames:v', encoderOptions.frameLimit.toString())
+  } else {
+    baseArgs.push('-vcodec', encoderOptions.encoder)
+  }
+
+  baseArgs.push(path)
+  await spawn('binaries/ffmpeg', baseArgs)
+
+  // if (encoderOptions.twoPass) {
+  //   argsBase.push('-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`)
+
+  //   const args = [
+  //     ...argsBase,
+  //     '-an',
+  //     '-pass', '1',
+  //     '-f', 'mp4',
+  //     'NUL',
+  //   ]
+
+  //   await spawn('binaries/ffmpeg', args)
+  //   argsBase.push('-pass', '2')
+  // }
 }
 </script>
 
@@ -85,9 +92,7 @@ const process = async () => {
     />
 
     <UPageBody class="pb-20">
-      <div
-        class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 @7xl:grid-cols-7"
-      >
+      <div class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end">
         <UFormField
           label="Encoder"
           description="h264 is recommended"
@@ -135,11 +140,23 @@ const process = async () => {
           />
         </UFormField>
 
-        <UCheckbox
+        <UFormField
+          label="Frame limit"
+          :description="`how many frames will be extracted from video (when output name ends with ${imageFormats.toString()}) (example output name %0d3.png)`"
+        >
+          <UInputNumber
+            v-model="encoderOptions.frameLimit"
+            :min="1"
+            :max="1_000_000"
+            variant="soft"
+          />
+        </UFormField>
+
+        <!-- <UCheckbox
           v-model="encoderOptions.twoPass"
           label="Two pass"
           description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
-        />
+        /> -->
 
         <UCheckbox
           v-model="encoderOptions.noAudio"
@@ -192,6 +209,15 @@ const process = async () => {
               >
                 {{ savePath }}
               </UButton>
+            </Motion>
+
+            <Motion layout>
+              <UInput
+                v-model="encoderOptions.outputName"
+                placeholder="output.mp4"
+                variant="soft"
+                class="w-28"
+              />
             </Motion>
 
             <Motion

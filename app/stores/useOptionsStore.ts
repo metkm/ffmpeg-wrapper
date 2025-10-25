@@ -4,7 +4,9 @@ interface EncoderOptions {
   encoder: string
   fps: number
   speed: number
-  twoPass: boolean
+  // twoPass: boolean
+  outputName: string
+  frameLimit: number
 }
 
 export const useOptionsStore = defineStore('options', () => {
@@ -14,7 +16,9 @@ export const useOptionsStore = defineStore('options', () => {
     noAudio: false,
     fps: 60,
     speed: 1,
-    twoPass: false,
+    // twoPass: false,
+    outputName: 'output.mp4',
+    frameLimit: 1,
   })
 
   return {
