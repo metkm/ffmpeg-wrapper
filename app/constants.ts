@@ -1,17 +1,26 @@
 import type { SelectItem } from '@nuxt/ui'
 
-export const encoders = [
+export const videoEncoders = [
   'av1_nvenc',
   'h264_nvenc',
   'libx264',
   'libx265',
 ]
 
+// export const imageEncoders = [
+//   'png',
+//   'jpg',
+// ]
+
+// export const animatedEncoders = [
+//   'av1_nvenc',
+// ]
+
 export const resolutions = ['640x480', '1280x720', '1920x1080', '2560x1440'] as const satisfies string[]
 
 const videoExtensions = ['mp4', 'avi', 'mov'] as const satisfies string[]
 const imageExtensions = ['png', 'jpg'] as const satisfies string[]
-const imageAnimatedExtensions = ['webp'] as const satisfies string[]
+const imageAnimatedExtensions = ['webp', 'avif'] as const satisfies string[]
 
 export const videoImportExtensions = videoExtensions
 export const videoExportExtensions = [...videoExtensions, ...imageExtensions, ...imageAnimatedExtensions]

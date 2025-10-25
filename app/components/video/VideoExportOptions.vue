@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { encoders, resolutions, videoExportExtensions, videoExportItems } from '~/constants'
+import { resolutions, videoEncoders, videoExportExtensions, videoExportItems } from '~/constants'
 import { injectVideoRootContext } from './VideoRoot.vue'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import { motion, RowValue } from 'motion-v'
@@ -23,8 +23,17 @@ const duration = computed(() =>
   ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!) - videoRootContext.trim.value.start) / encoderOptions.speed,
 )
 
-const isExtensionVideo = computed(() => encoderOptions.outputExtension === 'mp4' || encoderOptions.outputExtension === 'avi' || encoderOptions.outputExtension === 'mov')
-const isExtensionAnimated = computed(() => encoderOptions.outputExtension === 'webp')
+const exportType = computed(() => {
+  if (encoderOptions.outputExtension === 'mp4' || encoderOptions.outputExtension === 'avi' || encoderOptions.outputExtension === 'mov') {
+    return 'video'
+  }
+
+  if (encoderOptions.outputExtension === 'webp' || encoderOptions.outputExtension === 'avif') {
+    return 'animated'
+  }
+
+  return 'image'
+})
 
 const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(duration)
 
@@ -74,10 +83,16 @@ const process = async () => {
     baseArgs.push('-s', encoderOptions.resolution)
   }
 
-  if (isExtensionVideo.value) {
+  if (exportType.value === 'video') {
     baseArgs.push('-vcodec', encoderOptions.encoder)
-  } else if (isExtensionAnimated.value) {
-    baseArgs.push('-loop', '0', '-compression_level', `${webpCompressionLevel.value}`, '-quality', `${webpQuality.value}`)
+  } else if (exportType.value === 'animated') {
+    baseArgs.push('-loop', '0')
+
+    if (encoderOptions.outputExtension === 'webp') {
+      baseArgs.push('-compression_level', `${webpCompressionLevel.value}`, '-quality', `${webpQuality.value}`)
+    } else if (encoderOptions.outputExtension === 'avif') {
+      baseArgs.push('-vcodec', 'av1_nvenc')
+    }
   } else {
     baseArgs.push('-frames:v', '1')
   }
@@ -114,9 +129,9 @@ defineShortcuts({
         >
           <USelect
             v-model="encoderOptions.encoder"
-            :items="encoders"
+            :items="videoEncoders"
             variant="soft"
-            :disabled="!isExtensionVideo && !isExtensionAnimated"
+            :disabled="exportType !== 'video'"
           />
         </UFormField>
 
@@ -128,7 +143,7 @@ defineShortcuts({
             v-model="encoderOptions.fileSizeMb"
             :min="0"
             variant="soft"
-            :disabled="!isExtensionVideo"
+            :disabled="exportType === 'image' || encoderOptions.outputExtension === 'webp'"
           />
         </UFormField>
 
@@ -142,7 +157,7 @@ defineShortcuts({
             :max="100"
             :step="0.05"
             variant="soft"
-            :disabled="!isExtensionVideo && !isExtensionAnimated"
+            :disabled="exportType === 'image'"
           />
         </UFormField>
 
@@ -155,7 +170,7 @@ defineShortcuts({
             :items="[10, 20, 24, 30, 60, 144, 180, 240]"
             color="neutral"
             variant="soft"
-            :disabled="!isExtensionVideo && !isExtensionAnimated"
+            :disabled="exportType === 'image'"
           />
         </UFormField>
 
@@ -183,7 +198,7 @@ defineShortcuts({
         <UCheckbox
           v-model="encoderOptions.noAudio"
           label="Remove audio"
-          :disabled="!isExtensionVideo"
+          :disabled="exportType !== 'video'"
         />
 
         <template v-if="encoderOptions.outputExtension === 'webp'">
