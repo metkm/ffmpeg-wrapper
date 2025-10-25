@@ -1,5 +1,3 @@
-import type { DialogFilter } from '@tauri-apps/plugin-dialog'
-
 export const encoders = [
   'av1_nvenc',
   'h264_nvenc',
@@ -7,11 +5,9 @@ export const encoders = [
   'libx265',
 ]
 
-export const imageFormats = ['.jpeg', '.png', '.jpg']
+export const imageExtensions = ['.jpeg', '.png', '.jpg']
 
 export const resolutions = ['640x480', '1280x720', '1920x1080', '2560x1440']
 
-export const videoFilters: DialogFilter[] = [{
-  name: 'video',
-  extensions: ['mp4', 'avi', 'mov', 'webp'],
-}]
+export const videoImportExtensions = ['mp4', 'avi', 'mov']
+export const videoExportExtensions = [...videoImportExtensions, 'webp', 'png']

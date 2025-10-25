@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { encoders, videoFilters, imageFormats, resolutions } from '~/constants'
+import { encoders, imageExtensions, resolutions, videoExportExtensions } from '~/constants'
 import { injectVideoRootContext } from './VideoRoot.vue'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import { motion, RowValue } from 'motion-v'
@@ -28,7 +28,10 @@ const targetBitrate = computed(() => {
 const process = async () => {
   const path = await save({
     defaultPath: encoderOptions.outputName || 'output.mp4',
-    filters: videoFilters,
+    filters: [{
+      name: 'video',
+      extensions: videoExportExtensions,
+    }],
   })
 
   if (!path)
@@ -62,7 +65,7 @@ const process = async () => {
   const crop = `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
   const videoFilter = `crop=${crop},fps=${encoderOptions.fps}`
 
-  if (imageFormats.some(format => encoderOptions.outputName.endsWith(format))) {
+  if (imageExtensions.some(format => encoderOptions.outputName.endsWith(format))) {
     baseArgs.push('-frames:v', '1')
   } else if (encoderOptions.outputName.endsWith('.webp')) {
     baseArgs.push('-loop', '0', '-compression_level', '4', '-quality', '40')
