@@ -11,6 +11,7 @@ const props = defineProps<{
 }>()
 
 const { encoderOptions } = useOptionsStore()
+
 const videoRootContext = injectVideoRootContext()
 
 const savePath = ref('')
@@ -78,6 +79,10 @@ const process = async () => {
 
   await spawn('binaries/ffmpeg', baseArgs)
 }
+
+defineShortcuts({
+  enter: process,
+})
 </script>
 
 <template>
