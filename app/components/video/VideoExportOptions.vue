@@ -13,8 +13,6 @@ const props = defineProps<{
 const { encoderOptions } = useOptionsStore()
 const videoRootContext = injectVideoRootContext()
 
-const toast = useToast()
-
 const savePath = ref('')
 
 const duration = computed(() =>
@@ -65,15 +63,9 @@ const process = async () => {
   const videoFilter = `crop=${crop},fps=${encoderOptions.fps}`
 
   if (imageFormats.some(format => encoderOptions.outputName.endsWith(format))) {
-    baseArgs.push('-frames:v', encoderOptions.frameLimit.toString())
+    baseArgs.push('-frames:v', '1')
   } else if (encoderOptions.outputName.endsWith('.webp')) {
-    baseArgs.push('-loop', '0')
-    baseArgs.push('-vcodec', 'libwebp')
-
-    toast.add({
-      title: 'Changed encoder',
-      description: 'Using libwebp encoder because of .webp extension.',
-    })
+    baseArgs.push('-loop', '0', '-compression_level', '4', '-quality', '40')
   } else {
     baseArgs.push('-vcodec', encoderOptions.encoder)
   }
@@ -161,7 +153,7 @@ const process = async () => {
           </div>
         </UFormField>
 
-        <UFormField
+        <!-- <UFormField
           label="Frame limit"
           :description="`how many frames will be extracted from video (when output name ends with ${imageFormats.toString()}) (example output name %0d3.png)`"
         >
@@ -171,7 +163,7 @@ const process = async () => {
             :max="1_000_000"
             variant="soft"
           />
-        </UFormField>
+        </UFormField> -->
 
         <!-- <UCheckbox
           v-model="encoderOptions.twoPass"
