@@ -43,7 +43,6 @@ const process = async () => {
     '-ss', formatSeconds(videoRootContext.trim.value.start),
     '-to', formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!),
     '-i', props.path,
-    '-vf', `crop=${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top},fps=${encoderOptions.fps}`,
     '-maxrate', `${targetBitrate.value}k`,
     '-bufsize', `${targetBitrate.value / 2}k`,
     '-rc', 'vbr',
@@ -58,29 +57,22 @@ const process = async () => {
     baseArgs.push('-an')
   }
 
+  const crop = `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
+  const videoFilter = `crop=${crop},fps=${encoderOptions.fps}`
+
   if (imageFormats.some(format => encoderOptions.outputName.endsWith(format))) {
     baseArgs.push('-frames:v', encoderOptions.frameLimit.toString())
+  } else if (encoderOptions.outputName.endsWith('.webp')) {
+    baseArgs.push('-loop', '0')
+    baseArgs.push('-vcodec', 'libwebp')
   } else {
     baseArgs.push('-vcodec', encoderOptions.encoder)
   }
 
+  baseArgs.push('-vf', videoFilter)
   baseArgs.push(path)
+
   await spawn('binaries/ffmpeg', baseArgs)
-
-  // if (encoderOptions.twoPass) {
-  //   argsBase.push('-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`)
-
-  //   const args = [
-  //     ...argsBase,
-  //     '-an',
-  //     '-pass', '1',
-  //     '-f', 'mp4',
-  //     'NUL',
-  //   ]
-
-  //   await spawn('binaries/ffmpeg', args)
-  //   argsBase.push('-pass', '2')
-  // }
 }
 </script>
 
@@ -134,7 +126,7 @@ const process = async () => {
         >
           <USelect
             v-model="encoderOptions.fps"
-            :items="[30, 60, 144, 180, 240]"
+            :items="[10, 20, 24, 30, 60, 144, 180, 240]"
             color="neutral"
             variant="soft"
           />
