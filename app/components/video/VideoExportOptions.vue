@@ -52,12 +52,12 @@ const process = async () => {
 
   const crop = `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
 
-  let videoFilter = `crop=${crop},fps=${encoderOptions.fps}`
-  let audioFilter = ''
+  const videoFilters = [`crop=${crop}`, `fps=${encoderOptions.fps}`]
+  const audioFilters = []
 
   if (encoderOptions.speed !== 1) {
-    videoFilter += `,setpts=PTS/${encoderOptions.speed}`
-    audioFilter += `atempo=${encoderOptions.speed}`
+    videoFilters.push(`setpts=PTS/${encoderOptions.speed}`)
+    audioFilters.push(`atempo=${encoderOptions.speed}`)
   }
 
   if (encoderOptions.noAudio) {
@@ -76,9 +76,15 @@ const process = async () => {
     baseArgs.push('-vcodec', encoderOptions.encoder)
   }
 
-  baseArgs.push('-filter:v', videoFilter, '-filter:a', audioFilter)
-  baseArgs.push(path)
+  if (videoFilters.length > 0) {
+    baseArgs.push('-filter:v', videoFilters.join(','))
+  }
 
+  if (audioFilters.length > 0) {
+    baseArgs.push('-filter:a', audioFilters.join(','))
+  }
+
+  baseArgs.push(path)
   await spawn('binaries/ffmpeg', baseArgs)
 }
 
