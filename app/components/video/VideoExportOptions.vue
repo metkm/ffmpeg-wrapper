@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
-import { encoders, videoFilters } from '~/constants'
+import { encoders, videoFilters, imageFormats } from '~/constants'
 import { injectVideoRootContext } from './VideoRoot.vue'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import { motion, RowValue } from 'motion-v'
 import { save } from '@tauri-apps/plugin-dialog'
-
-const imageFormats = ['.jpeg', '.png', '.jpg']
 
 const props = defineProps<{
   path: string
