@@ -28,7 +28,7 @@ const targetBitrate = computed(() => {
 
 const process = async () => {
   const path = await save({
-    defaultPath: encoderOptions.outputName || 'output.mp4',
+    defaultPath: `${encoderOptions.outputName || 'output'}.${encoderOptions.outputExtension}`,
     filters: [{
       name: 'video',
       extensions: videoExportExtensions,
@@ -70,9 +70,7 @@ const process = async () => {
 
   if (imageExtensions.some(format => encoderOptions.outputName.endsWith(format))) {
     baseArgs.push('-frames:v', '1')
-  } else if (encoderOptions.outputName.endsWith('.webp') || encoderOptions.outputName.endsWith('.gif')) {
-    // videoFilters.push('split[s0][s1];[s0]palettegen=max_colors=64[p];[s1][p]paletteuse=dither=bayer')
-
+  } else if (encoderOptions.outputExtension === 'webp') {
     baseArgs.push('-loop', '0', '-compression_level', '5', '-quality', '50')
   } else {
     baseArgs.push('-vcodec', encoderOptions.encoder)
@@ -243,12 +241,21 @@ defineShortcuts({
             </Motion>
 
             <Motion layout>
-              <UInput
-                v-model="encoderOptions.outputName"
-                placeholder="output.mp4"
-                variant="soft"
-                class="w-28"
-              />
+              <UFieldGroup>
+                <UInput
+                  v-model="encoderOptions.outputName"
+                  placeholder="output"
+                  variant="soft"
+                  class="w-26"
+                />
+
+                <USelect
+                  v-model="encoderOptions.outputExtension"
+                  :items="videoExportExtensions"
+                  class="w-24"
+                  variant="soft"
+                />
+              </UFieldGroup>
             </Motion>
 
             <Motion
