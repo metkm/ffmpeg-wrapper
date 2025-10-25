@@ -16,6 +16,9 @@ const videoRootContext = injectVideoRootContext()
 
 const savePath = ref('')
 
+const webpCompressionLevel = ref(4)
+const webpQuality = ref(50)
+
 const duration = computed(() =>
   ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!) - videoRootContext.trim.value.start) / encoderOptions.speed,
 )
@@ -74,7 +77,7 @@ const process = async () => {
   if (isExtensionVideo.value) {
     baseArgs.push('-vcodec', encoderOptions.encoder)
   } else if (isExtensionAnimated.value) {
-    baseArgs.push('-loop', '0', '-compression_level', '5', '-quality', '50')
+    baseArgs.push('-loop', '0', '-compression_level', `${webpCompressionLevel.value}`, '-quality', `${webpQuality.value}`)
   } else {
     baseArgs.push('-frames:v', '1')
   }
@@ -182,6 +185,32 @@ defineShortcuts({
           label="Remove audio"
           :disabled="!isExtensionVideo"
         />
+
+        <template v-if="encoderOptions.outputExtension === 'webp'">
+          <UFormField
+            label="Compression level"
+            description="This is a quality/speed tradeoff. Higher values give better quality for a given size at the cost of increased encoding time. (0 - 6)"
+          >
+            <UInputNumber
+              v-model="webpCompressionLevel"
+              :min="0"
+              :max="6"
+              variant="soft"
+            />
+          </UFormField>
+
+          <UFormField
+            label="Quality"
+            description="0 - 100"
+          >
+            <UInputNumber
+              v-model="webpQuality"
+              :min="0"
+              :max="100"
+              variant="soft"
+            />
+          </UFormField>
+        </template>
       </div>
 
       <pre
