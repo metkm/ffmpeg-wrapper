@@ -1,57 +1,28 @@
-import type { DialogFilter } from '@tauri-apps/plugin-dialog'
-import type { Video } from './types/video'
+import type { SelectItem } from '@nuxt/ui'
 
-export const defaultVideoValues: Video = {
-  duration: 0,
-  currentTime: 0,
-  durationRange: [0, 1],
-  volume: 0,
-}
-
-export const encoders = [
+export const videoEncoders = [
   'av1_nvenc',
   'h264_nvenc',
   'libx264',
   'libx265',
 ]
 
-// export const defaultEncoderOptions = {
-//   name: 'cq:v',
-//   min: 0,
-//   max: 51,
-//   default: 1,
-//   type: 'inputnumber',
-//   description: '0 = auto',
-// }
+// export const imageEncoders = [
+//   'png',
+//   'jpg',
+// ]
 
-// export const parametersPerEncoders = {
-//   av1_nvenc: [
-//     {
-//       id: 1,
-//       ...defaultEncoderOptions,
-//     },
-//   ],
-//   h264_nvenc: [
-//     {
-//       id: 3,
-//       ...defaultEncoderOptions,
-//     },
-//   ],
-//   libx264: [
-//     {
-//       id: 2,
-//       ...defaultEncoderOptions,
-//     },
-//   ],
-//   libx265: [
-//     {
-//       id: 4,
-//       ...defaultEncoderOptions,
-//     },
-//   ],
-// } as const
+// export const animatedEncoders = [
+//   'av1_nvenc',
+// ]
 
-export const videoFilters: DialogFilter[] = [{
-  name: 'video',
-  extensions: ['mp4', 'avi', 'mov', 'webm'],
-}]
+export const resolutions = ['640x480', '1280x720', '1920x1080', '2560x1440'] as const satisfies string[]
+
+const videoExtensions = ['mp4', 'avi', 'mov'] as const satisfies string[]
+const imageExtensions = ['png', 'jpg'] as const satisfies string[]
+const imageAnimatedExtensions = ['webp', 'avif'] as const satisfies string[]
+
+export const videoImportExtensions = videoExtensions
+export const videoExportExtensions = [...videoExtensions, ...imageExtensions, ...imageAnimatedExtensions]
+
+export const videoExportItems = [...videoExtensions, { type: 'separator' }, ...imageExtensions, { type: 'separator' }, ...imageAnimatedExtensions] satisfies SelectItem[]

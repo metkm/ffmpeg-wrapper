@@ -1,24 +1,39 @@
 <script setup lang="ts">
-import { revealItemInDir } from '@tauri-apps/plugin-opener'
-import { encoders, videoFilters } from '~/constants'
+import { resolutions, videoEncoders, videoExportExtensions, videoExportItems } from '~/constants'
 import { injectVideoRootContext } from './VideoRoot.vue'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import { motion, RowValue } from 'motion-v'
 import { save } from '@tauri-apps/plugin-dialog'
-import { appLocalDataDir } from '@tauri-apps/api/path'
+import { openPath } from '@tauri-apps/plugin-opener'
 
 const props = defineProps<{
   path: string
 }>()
 
 const { encoderOptions } = useOptionsStore()
+
 const videoRootContext = injectVideoRootContext()
 
 const savePath = ref('')
 
+const webpCompressionLevel = ref(4)
+const webpQuality = ref(50)
+
 const duration = computed(() =>
   ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!) - videoRootContext.trim.value.start) / encoderOptions.speed,
 )
+
+const exportType = computed(() => {
+  if (encoderOptions.outputExtension === 'mp4' || encoderOptions.outputExtension === 'avi' || encoderOptions.outputExtension === 'mov') {
+    return 'video'
+  }
+
+  if (encoderOptions.outputExtension === 'webp' || encoderOptions.outputExtension === 'avif') {
+    return 'animated'
+  }
+
+  return 'image'
+})
 
 const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(duration)
 
@@ -28,8 +43,11 @@ const targetBitrate = computed(() => {
 
 const process = async () => {
   const path = await save({
-    defaultPath: 'output.mp4',
-    filters: videoFilters,
+    defaultPath: `${encoderOptions.outputName || 'output'}.${encoderOptions.outputExtension}`,
+    filters: [{
+      name: 'video',
+      extensions: videoExportExtensions,
+    }],
   })
 
   if (!path)
@@ -37,44 +55,63 @@ const process = async () => {
 
   savePath.value = path
 
-  const argsBase = [
+  const baseArgs = [
     '-y',
     '-ss', formatSeconds(videoRootContext.trim.value.start),
     '-to', formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!),
     '-i', props.path,
-    '-vcodec', encoderOptions.encoder,
     '-maxrate', `${targetBitrate.value}k`,
     '-bufsize', `${targetBitrate.value / 2}k`,
-    '-vf', `crop=${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top},fps=${encoderOptions.fps}`,
     '-rc', 'vbr',
   ]
 
+  const crop = `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
+
+  const videoFilters = [`crop=${crop}`, `fps=${encoderOptions.fps}`]
+  const audioFilters = []
+
   if (encoderOptions.speed !== 1) {
-    argsBase.push('-filter:v', `setpts=PTS/${encoderOptions.speed}`)
-    argsBase.push('-filter:a', `atempo=${encoderOptions.speed}`)
+    videoFilters.push(`setpts=PTS/${encoderOptions.speed}`)
+    audioFilters.push(`atempo=${encoderOptions.speed}`)
   }
 
   if (encoderOptions.noAudio) {
-    argsBase.push('-an')
-  }
-  if (encoderOptions.twoPass) {
-    argsBase.push('-passlogfile', `${await appLocalDataDir()}\\ffmpeg2pass.log`)
-
-    const args = [
-      ...argsBase,
-      '-an',
-      '-pass', '1',
-      '-f', 'mp4',
-      'NUL',
-    ]
-
-    await spawn('binaries/ffmpeg', args)
-    argsBase.push('-pass', '2')
+    baseArgs.push('-an')
   }
 
-  argsBase.push(path)
-  await spawn('binaries/ffmpeg', argsBase)
+  if (encoderOptions.resolution) {
+    baseArgs.push('-s', encoderOptions.resolution)
+  }
+
+  if (exportType.value === 'video') {
+    baseArgs.push('-vcodec', encoderOptions.encoder)
+  } else if (exportType.value === 'animated') {
+    baseArgs.push('-loop', '0')
+
+    if (encoderOptions.outputExtension === 'webp') {
+      baseArgs.push('-compression_level', `${webpCompressionLevel.value}`, '-quality', `${webpQuality.value}`)
+    } else if (encoderOptions.outputExtension === 'avif') {
+      baseArgs.push('-vcodec', 'av1_nvenc')
+    }
+  } else {
+    baseArgs.push('-frames:v', '1')
+  }
+
+  if (videoFilters.length > 0) {
+    baseArgs.push('-filter:v', videoFilters.join(','))
+  }
+
+  if (audioFilters.length > 0) {
+    baseArgs.push('-filter:a', audioFilters.join(','))
+  }
+
+  baseArgs.push(path)
+  await spawn('binaries/ffmpeg', baseArgs)
 }
+
+defineShortcuts({
+  enter: process,
+})
 </script>
 
 <template>
@@ -85,28 +122,28 @@ const process = async () => {
     />
 
     <UPageBody class="pb-20">
-      <div
-        class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 @7xl:grid-cols-7"
-      >
+      <div class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end">
         <UFormField
           label="Encoder"
           description="h264 is recommended"
         >
           <USelect
             v-model="encoderOptions.encoder"
-            :items="encoders"
+            :items="videoEncoders"
             variant="soft"
+            :disabled="exportType !== 'video'"
           />
         </UFormField>
 
         <UFormField
-          label="target file size"
+          label="Target file size"
           :description="`${targetBitrate.toFixed(0)} bitrate`"
         >
           <UInputNumber
             v-model="encoderOptions.fileSizeMb"
             :min="0"
             variant="soft"
+            :disabled="exportType === 'image' || encoderOptions.outputExtension === 'webp'"
           />
         </UFormField>
 
@@ -120,6 +157,7 @@ const process = async () => {
             :max="100"
             :step="0.05"
             variant="soft"
+            :disabled="exportType === 'image'"
           />
         </UFormField>
 
@@ -129,30 +167,71 @@ const process = async () => {
         >
           <USelect
             v-model="encoderOptions.fps"
-            :items="[30, 60, 144, 180, 240]"
+            :items="[10, 20, 24, 30, 60, 144, 180, 240]"
             color="neutral"
             variant="soft"
+            :disabled="exportType === 'image'"
           />
         </UFormField>
 
-        <UCheckbox
-          v-model="encoderOptions.twoPass"
-          label="Two pass"
-          description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
-        />
+        <UFormField label="Resolution">
+          <div class="flex items-center gap-2">
+            <USelect
+              v-model="encoderOptions.resolution"
+              :items="resolutions"
+              color="neutral"
+              variant="soft"
+              placeholder="default"
+            />
+
+            <UButton
+              v-if="encoderOptions.resolution"
+              icon="i-lucide-x"
+              variant="soft"
+              square
+              :ui="{ base: 'rounded' }"
+              @click="encoderOptions.resolution = undefined"
+            />
+          </div>
+        </UFormField>
 
         <UCheckbox
           v-model="encoderOptions.noAudio"
           label="Remove audio"
+          :disabled="exportType !== 'video'"
         />
+
+        <template v-if="encoderOptions.outputExtension === 'webp'">
+          <UFormField
+            label="Compression level"
+            description="This is a quality/speed tradeoff. Higher values give better quality for a given size at the cost of increased encoding time. (0 - 6)"
+          >
+            <UInputNumber
+              v-model="webpCompressionLevel"
+              :min="0"
+              :max="6"
+              variant="soft"
+            />
+          </UFormField>
+
+          <UFormField
+            label="Quality"
+            description="0 - 100"
+          >
+            <UInputNumber
+              v-model="webpQuality"
+              :min="0"
+              :max="100"
+              variant="soft"
+            />
+          </UFormField>
+        </template>
       </div>
 
       <pre
         v-if="linesDebounced.length > 0"
         ref="stdoutElement"
-        layout
-        class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
-        style="overflow-wrap: break-word;"
+        class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar whitespace-pre-line"
       >
         {{ linesDebounced.join('\n') }}
       </pre>
@@ -188,10 +267,29 @@ const process = async () => {
                 color="neutral"
                 square
                 class="-ml-0.5"
-                @click="revealItemInDir(savePath)"
+                @click="openPath(savePath.split('\\').slice(0, -1).join('\\'))"
               >
-                {{ savePath }}
+                {{ savePath.split('\\').slice(0, -1).join('\\') }}
               </UButton>
+            </Motion>
+
+            <Motion layout>
+              <UFieldGroup>
+                <UInput
+                  v-model="encoderOptions.outputName"
+                  placeholder="output"
+                  variant="soft"
+                  class="w-26"
+                />
+
+                <USelectMenu
+                  v-model="encoderOptions.outputExtension"
+                  :items="videoExportItems"
+                  class="w-24"
+                  variant="soft"
+                  :search-input="false"
+                />
+              </UFieldGroup>
             </Motion>
 
             <Motion
