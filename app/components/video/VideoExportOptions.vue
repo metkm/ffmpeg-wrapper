@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
-import { encoders, videoFilters, imageFormats } from '~/constants'
+import { encoders, videoFilters, imageFormats, resolutions } from '~/constants'
 import { injectVideoRootContext } from './VideoRoot.vue'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import { motion, RowValue } from 'motion-v'
@@ -53,6 +53,10 @@ const process = async () => {
 
   if (encoderOptions.noAudio) {
     baseArgs.push('-an')
+  }
+
+  if (encoderOptions.resolution) {
+    baseArgs.push('-s', encoderOptions.resolution)
   }
 
   const crop = `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
@@ -128,6 +132,26 @@ const process = async () => {
             color="neutral"
             variant="soft"
           />
+        </UFormField>
+
+        <UFormField label="Resolution">
+          <div class="flex items-center gap-2">
+            <USelect
+              v-model="encoderOptions.resolution"
+              :items="resolutions"
+              color="neutral"
+              variant="soft"
+              placeholder="default"
+            />
+
+            <UButton
+              icon="i-lucide-x"
+              variant="soft"
+              square
+              :ui="{ base: 'rounded' }"
+              @click="encoderOptions.resolution = undefined"
+            />
+          </div>
         </UFormField>
 
         <UFormField

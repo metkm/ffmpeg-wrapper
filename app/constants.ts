@@ -9,6 +9,8 @@ export const encoders = [
 
 export const imageFormats = ['.jpeg', '.png', '.jpg']
 
+export const resolutions = ['640x480', '1280x720', '1920x1080', '2560x1440']
+
 export const videoFilters: DialogFilter[] = [{
   name: 'video',
   extensions: ['mp4', 'avi', 'mov', 'webm'],

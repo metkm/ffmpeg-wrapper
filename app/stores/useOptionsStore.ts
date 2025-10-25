@@ -1,3 +1,5 @@
+import type { resolutions } from '~/constants'
+
 interface EncoderOptions {
   noAudio: boolean
   fileSizeMb: number
@@ -7,6 +9,7 @@ interface EncoderOptions {
   // twoPass: boolean
   outputName: string
   frameLimit: number
+  resolution?: typeof resolutions[number]
 }
 
 export const useOptionsStore = defineStore('options', () => {
@@ -16,7 +19,6 @@ export const useOptionsStore = defineStore('options', () => {
     noAudio: false,
     fps: 60,
     speed: 1,
-    // twoPass: false,
     outputName: 'output.mp4',
     frameLimit: 1,
   })
