@@ -1,5 +1,5 @@
 {
-  "name": "ffmpeg-wrapper",
+  "name": "fftrim",
   "private": true,
   "version": "1.3.0",
   "type": "module",

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "ffmpeg-wrapper",
+  "productName": "FFTrim",
   "version": "1.3.5",
-  "identifier": "com.ffmpeg-wrapper",
+  "identifier": "com.fftrim",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:3000",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Ffmpeg Wrapper",
+        "title": "FFTrim",
         "width": 800,
         "height": 600,
         "transparent": true,
@@ -34,10 +34,8 @@
     "active": true,
     "targets": "msi",
     "icon": [
-      "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
-      "icons/icon.icns",
       "icons/icon.ico"
     ],
     "externalBin": ["binaries/ffmpeg"],
