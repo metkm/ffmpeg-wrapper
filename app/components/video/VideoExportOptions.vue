@@ -113,7 +113,7 @@ defineShortcuts({
             v-model="encoderOptions.encoder"
             :items="encoders"
             variant="soft"
-            :disabled="!isExtensionVideo && isExtensionAnimated"
+            :disabled="!isExtensionVideo && !isExtensionAnimated"
           />
         </UFormField>
 
@@ -180,15 +180,14 @@ defineShortcuts({
         <UCheckbox
           v-model="encoderOptions.noAudio"
           label="Remove audio"
+          :disabled="!isExtensionVideo"
         />
       </div>
 
       <pre
         v-if="linesDebounced.length > 0"
         ref="stdoutElement"
-        layout
-        class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar"
-        style="overflow-wrap: break-word;"
+        class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar whitespace-pre-line"
       >
         {{ linesDebounced.join('\n') }}
       </pre>
