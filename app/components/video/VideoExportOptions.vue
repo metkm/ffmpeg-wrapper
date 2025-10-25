@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { encoders, resolutions, videoExportExtensions } from '~/constants'
+import { encoders, resolutions, videoExportExtensions, videoExportItems } from '~/constants'
 import { injectVideoRootContext } from './VideoRoot.vue'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import { motion, RowValue } from 'motion-v'
@@ -267,11 +267,12 @@ defineShortcuts({
                   class="w-26"
                 />
 
-                <USelect
+                <USelectMenu
                   v-model="encoderOptions.outputExtension"
-                  :items="videoExportExtensions"
+                  :items="videoExportItems"
                   class="w-24"
                   variant="soft"
+                  :search-input="false"
                 />
               </UFieldGroup>
             </Motion>
