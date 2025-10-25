@@ -50,9 +50,14 @@ const process = async () => {
     '-rc', 'vbr',
   ]
 
+  const crop = `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
+
+  let videoFilter = `crop=${crop},fps=${encoderOptions.fps}`
+  let audioFilter = ''
+
   if (encoderOptions.speed !== 1) {
-    baseArgs.push('-filter:v', `setpts=PTS/${encoderOptions.speed}`)
-    baseArgs.push('-filter:a', `atempo=${encoderOptions.speed}`)
+    videoFilter += `,setpts=PTS/${encoderOptions.speed}`
+    audioFilter += `atempo=${encoderOptions.speed}`
   }
 
   if (encoderOptions.noAudio) {
@@ -63,9 +68,6 @@ const process = async () => {
     baseArgs.push('-s', encoderOptions.resolution)
   }
 
-  const crop = `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
-  const videoFilter = `crop=${crop},fps=${encoderOptions.fps}`
-
   if (imageExtensions.some(format => encoderOptions.outputName.endsWith(format))) {
     baseArgs.push('-frames:v', '1')
   } else if (encoderOptions.outputName.endsWith('.webp')) {
@@ -74,7 +76,7 @@ const process = async () => {
     baseArgs.push('-vcodec', encoderOptions.encoder)
   }
 
-  baseArgs.push('-vf', videoFilter)
+  baseArgs.push('-filter:v', videoFilter, '-filter:a', audioFilter)
   baseArgs.push(path)
 
   await spawn('binaries/ffmpeg', baseArgs)
