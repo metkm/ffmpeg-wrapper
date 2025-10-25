@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { encoders, videoFilters, imageFormats, resolutions } from '~/constants'
 import { injectVideoRootContext } from './VideoRoot.vue'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import { motion, RowValue } from 'motion-v'
 import { save } from '@tauri-apps/plugin-dialog'
+import { openPath } from '@tauri-apps/plugin-opener'
 
 const props = defineProps<{
   path: string
@@ -12,6 +12,8 @@ const props = defineProps<{
 
 const { encoderOptions } = useOptionsStore()
 const videoRootContext = injectVideoRootContext()
+
+const toast = useToast()
 
 const savePath = ref('')
 
@@ -67,6 +69,11 @@ const process = async () => {
   } else if (encoderOptions.outputName.endsWith('.webp')) {
     baseArgs.push('-loop', '0')
     baseArgs.push('-vcodec', 'libwebp')
+
+    toast.add({
+      title: 'Changed encoder',
+      description: 'Using libwebp encoder because of .webp extension.',
+    })
   } else {
     baseArgs.push('-vcodec', encoderOptions.encoder)
   }
@@ -99,7 +106,7 @@ const process = async () => {
         </UFormField>
 
         <UFormField
-          label="target file size"
+          label="Target file size"
           :description="`${targetBitrate.toFixed(0)} bitrate`"
         >
           <UInputNumber
@@ -219,9 +226,9 @@ const process = async () => {
                 color="neutral"
                 square
                 class="-ml-0.5"
-                @click="revealItemInDir(savePath)"
+                @click="openPath(savePath.split('\\').slice(0, -1).join('\\'))"
               >
-                {{ savePath }}
+                {{ savePath.split('\\').slice(0, -1).join('\\') }}
               </UButton>
             </Motion>
 
