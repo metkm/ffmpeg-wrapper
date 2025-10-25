@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { encoders, imageExtensions, resolutions, videoExportExtensions } from '~/constants'
+import { encoders, resolutions, videoExportExtensions } from '~/constants'
 import { injectVideoRootContext } from './VideoRoot.vue'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import { motion, RowValue } from 'motion-v'
@@ -19,6 +19,9 @@ const savePath = ref('')
 const duration = computed(() =>
   ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!) - videoRootContext.trim.value.start) / encoderOptions.speed,
 )
+
+const isExtensionVideo = computed(() => encoderOptions.outputExtension === 'mp4' || encoderOptions.outputExtension === 'avi' || encoderOptions.outputExtension === 'mov')
+const isExtensionAnimated = computed(() => encoderOptions.outputExtension === 'webp')
 
 const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(duration)
 
@@ -68,12 +71,12 @@ const process = async () => {
     baseArgs.push('-s', encoderOptions.resolution)
   }
 
-  if (imageExtensions.some(format => encoderOptions.outputName.endsWith(format))) {
-    baseArgs.push('-frames:v', '1')
-  } else if (encoderOptions.outputExtension === 'webp') {
+  if (isExtensionVideo.value) {
+    baseArgs.push('-vcodec', encoderOptions.encoder)
+  } else if (isExtensionAnimated.value) {
     baseArgs.push('-loop', '0', '-compression_level', '5', '-quality', '50')
   } else {
-    baseArgs.push('-vcodec', encoderOptions.encoder)
+    baseArgs.push('-frames:v', '1')
   }
 
   if (videoFilters.length > 0) {
@@ -110,6 +113,7 @@ defineShortcuts({
             v-model="encoderOptions.encoder"
             :items="encoders"
             variant="soft"
+            :disabled="!isExtensionVideo && isExtensionAnimated"
           />
         </UFormField>
 
@@ -121,6 +125,7 @@ defineShortcuts({
             v-model="encoderOptions.fileSizeMb"
             :min="0"
             variant="soft"
+            :disabled="!isExtensionVideo"
           />
         </UFormField>
 
@@ -134,6 +139,7 @@ defineShortcuts({
             :max="100"
             :step="0.05"
             variant="soft"
+            :disabled="!isExtensionVideo && !isExtensionAnimated"
           />
         </UFormField>
 
@@ -146,6 +152,7 @@ defineShortcuts({
             :items="[10, 20, 24, 30, 60, 144, 180, 240]"
             color="neutral"
             variant="soft"
+            :disabled="!isExtensionVideo && !isExtensionAnimated"
           />
         </UFormField>
 
@@ -160,6 +167,7 @@ defineShortcuts({
             />
 
             <UButton
+              v-if="encoderOptions.resolution"
               icon="i-lucide-x"
               variant="soft"
               square
@@ -168,24 +176,6 @@ defineShortcuts({
             />
           </div>
         </UFormField>
-
-        <!-- <UFormField
-          label="Frame limit"
-          :description="`how many frames will be extracted from video (when output name ends with ${imageFormats.toString()}) (example output name %0d3.png)`"
-        >
-          <UInputNumber
-            v-model="encoderOptions.frameLimit"
-            :min="1"
-            :max="1_000_000"
-            variant="soft"
-          />
-        </UFormField> -->
-
-        <!-- <UCheckbox
-          v-model="encoderOptions.twoPass"
-          label="Two pass"
-          description="analyze video twice for better compression (might be useful if output file is bigger than target file size)"
-        /> -->
 
         <UCheckbox
           v-model="encoderOptions.noAudio"
