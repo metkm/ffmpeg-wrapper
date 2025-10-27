@@ -62,51 +62,38 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="rounded">
-    <div class="sticky top-0 p-4 flex bg-muted items-center gap-2">
-      <UIcon
-        name="i-lucide-folder"
-        class="size-5"
-      />
+  <ol>
+    <li
+      v-for="video in videos"
+      :key="video.name"
+      class="p-2 hover:bg-muted rounded"
+    >
+      <NuxtLink :to="{ path: '/export', query: { path: `${props.path}\\${video.name}` } }">
+        <div class="aspect-video w-full rounded bg-elevated overflow-hidden">
+          <img
+            v-if="video.thumbnail"
+            :src="video.thumbnail"
+            class="w-full h-full"
+          >
 
-      <h1>
-        {{ props.path }}
-      </h1>
-    </div>
-
-    <ol class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 p-4">
-      <li
-        v-for="video in videos"
-        :key="video.name"
-        class="p-2 hover:bg-muted rounded"
-      >
-        <NuxtLink :to="{ path: '/export', query: { path: `${props.path}\\${video.name}` } }">
-          <div class="aspect-video w-full rounded bg-elevated overflow-hidden">
-            <img
-              v-if="video.thumbnail"
-              :src="video.thumbnail"
-              class="w-full h-full"
-            >
-
-            <div
-              v-else
-              class="h-full w-full flex items-center justify-center"
-            >
-              <p>Loading...</p>
-            </div>
+          <div
+            v-else
+            class="h-full w-full flex items-center justify-center"
+          >
+            <p>Loading...</p>
           </div>
+        </div>
 
-          <div class="text-sm mt-2">
-            <p>
-              {{ video.name }}
-            </p>
+        <div class="text-sm mt-2">
+          <p>
+            {{ video.name }}
+          </p>
 
-            <p class="text-xs text-muted">
-              {{ video.mtime?.toLocaleString() }}
-            </p>
-          </div>
-        </NuxtLink>
-      </li>
-    </ol>
-  </section>
+          <p class="text-xs text-muted mt-1">
+            {{ video.mtime?.toLocaleString() }}
+          </p>
+        </div>
+      </NuxtLink>
+    </li>
+  </ol>
 </template>

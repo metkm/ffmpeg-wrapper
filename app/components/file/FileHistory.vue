@@ -1,6 +1,10 @@
 <script setup lang="ts">
 const { pathHistory } = usePathsStore()
 
+const selectedFolder = ref()
+
+const selectedFolderShownTitle = computed(() => selectedFolder.value?.split('\\').slice(3).join('\\'))
+
 const folders = computed(() => {
   const foldersWithoutDuplicates: string[] = []
 
@@ -26,16 +30,17 @@ const folders = computed(() => {
 </script>
 
 <template>
-  <UDrawer
-    title="Recently used folders & contents inside them (last 10 files)"
+  <USlideover
+    side="left"
     :ui="{
-      body: 'overflow-y-auto relative scrollbar space-y-4 max-h-[80vh]',
-      container: 'p-0',
-      title: 'ml-4',
+      body: 'grid grid-cols-2 max-h-max scrollbar sm:p-3',
+      wrapper: 'flex-1 overflow-hidden',
+      title: 'truncate mx-10 text-sm text-center',
     }"
+    :title="selectedFolderShownTitle"
   >
     <UButton
-      icon="i-lucide-chevron-up"
+      icon="i-lucide-folder"
       class="self-center"
       variant="soft"
     >
@@ -43,11 +48,46 @@ const folders = computed(() => {
     </UButton>
 
     <template #body>
+      <ol
+        v-if="!selectedFolder"
+        class="grid grid-cols-subgrid col-span-full"
+      >
+        <li
+          v-for="folder in folders"
+          :key="folder"
+          class="flex flex-col p-2 hover:bg-muted rounded-(--ui-radius) self-center"
+        >
+          <button @click="selectedFolder = folder">
+            <UIcon
+              name="i-lucide-folder"
+              class=" h-20 w-full"
+            />
+
+            <p class="truncate text-sm">
+              {{ folder.split('\\').slice(4).join('\\') }}
+            </p>
+          </button>
+        </li>
+      </ol>
       <FolderContent
-        v-for="folder in folders"
-        :key="folder"
-        :path="folder"
+        v-else
+        :path="selectedFolder"
+        class="grid grid-cols-subgrid col-span-full"
       />
     </template>
-  </UDrawer>
+
+    <template
+      v-if="selectedFolder"
+      #actions
+    >
+      <UButton
+        icon="i-lucide-arrow-left"
+        variant="ghost"
+        color="neutral"
+        square
+        class="absolute left-4 top-4"
+        @click="selectedFolder = undefined"
+      />
+    </template>
+  </USlideover>
 </template>
