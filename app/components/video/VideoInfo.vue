@@ -60,6 +60,7 @@ command.spawn()
       }"
       size="xl"
       block
+      color="neutral"
     >
       <div class="flex flex-col items-start">
         <p>
