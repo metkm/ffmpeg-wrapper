@@ -242,6 +242,7 @@ defineShortcuts({
         <motion.div
           layout
           class="flex items-center gap-2 p-2 backdrop-blur-2xl shadow max-w-max border border-muted overflow-hidden relative"
+          :class="{ 'pb-2.5': running }"
           :style="{ borderRadius: '999px' }"
         >
           <AnimatePresence>
@@ -321,7 +322,7 @@ defineShortcuts({
                     :initial="{ translateY: -50 }"
                     :animate="{ translateY: 0 }"
                     :exit="{ translateY: -50 }"
-                    class="min-w-9 text-center"
+                    class="min-w-11 text-center"
                   >
                     <RowValue :value="etaAnimated" />s
                   </motion.p>
@@ -339,7 +340,7 @@ defineShortcuts({
 
             <motion.div
               v-if="running"
-              class="absolute bottom-0 w-full bg-accented transition-all"
+              class="absolute bottom-0 w-full h-0.5 bg-accented transition-all"
               :exit="{ transform: `translateY(100%)` }"
               :initial="{ transform: `translateY(100%)` }"
               :animate="{ transform: `translateY(0)` }"
