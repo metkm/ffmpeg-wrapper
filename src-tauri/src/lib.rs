@@ -1,6 +1,19 @@
-use tauri_plugin_shell::{process::CommandEvent, ShellExt};
-use tauri_plugin_window_state::StateFlags;
 use std::path::Path;
+use tauri::async_runtime::Receiver;
+use tauri_plugin_shell::{ShellExt, process::CommandEvent};
+use tauri_plugin_window_state::StateFlags;
+
+async fn read_stdout(mut rx: Receiver<CommandEvent>) -> Result<Vec<u8>, String> {
+    let mut buffer: Vec<u8> = Vec::new();
+
+    while let Some(event) = rx.recv().await {
+        if let CommandEvent::Stdout(line_bytes) = event {
+            buffer.extend_from_slice(&line_bytes);
+        }
+    }
+
+    Ok(buffer)
+}
 
 #[tauri::command]
 async fn create_thumbnail(app: tauri::AppHandle, video_path: String) -> Result<Vec<u8>, String> {
@@ -9,33 +22,25 @@ async fn create_thumbnail(app: tauri::AppHandle, video_path: String) -> Result<V
     }
 
     let sidecar_command = app.shell().sidecar("ffmpeg").unwrap();
-    let sidecar_command = sidecar_command
-        .args([
-            "-y",
-            "-ss", "00:00:04",
-            "-i", &video_path,
-            "-frames:v", "1",
-            "-f", "image2pipe",
-            "-loglevel", "panic",
-            "-s", "480x320",
-            "-"
-        ]);
+    let sidecar_command = sidecar_command.args([
+        "-y",
+        "-ss",
+        "00:00:04",
+        "-i",
+        &video_path,
+        "-frames:v",
+        "1",
+        "-f",
+        "image2pipe",
+        "-loglevel",
+        "panic",
+        "-s",
+        "480x320",
+        "-",
+    ]);
 
-    let (mut rx, mut _child) = sidecar_command.spawn().expect("failed to spawn");
-
-    let buffer = tauri::async_runtime::spawn(async move {
-        let mut buffer: Vec<u8>= Vec::new();
-
-        while let Some(event) = rx.recv().await {
-            if let CommandEvent::Stdout(line_bytes) = event {
-                buffer.extend_from_slice(&line_bytes);
-            }
-        }
-
-        buffer
-    })
-        .await
-        .unwrap();
+    let (rx, mut _child) = sidecar_command.spawn().expect("failed to spawn");
+    let buffer = read_stdout(rx).await?;
 
     Ok(buffer)
 }
@@ -47,33 +52,26 @@ async fn get_audio_graph(app: tauri::AppHandle, video_path: String) -> Result<Ve
     }
 
     let sidecar_command = app.shell().sidecar("ffmpeg").unwrap();
-    let sidecar_command = sidecar_command
-        .args([
-            "-i", &video_path,
-            "-ac", "1",
-            "-filter:a", "aresample=4000",
-            "-map", "0:a",
-            "-c:a", "pcm_s16le",
-            "-loglevel", "panic",
-            "-f",  "data",
-            "-"
-        ]);
+    let sidecar_command = sidecar_command.args([
+        "-i",
+        &video_path,
+        "-ac",
+        "1",
+        "-filter:a",
+        "aresample=4000",
+        "-map",
+        "0:a",
+        "-c:a",
+        "pcm_s16le",
+        "-loglevel",
+        "panic",
+        "-f",
+        "data",
+        "-",
+    ]);
 
-    let (mut rx, mut _child) = sidecar_command.spawn().expect("failed to spawn");
-
-    let buffer = tauri::async_runtime::spawn(async move {
-        let mut buffer: Vec<u8>= Vec::new();
-
-        while let Some(event) = rx.recv().await {
-            if let CommandEvent::Stdout(line_bytes) = event {
-                buffer.extend_from_slice(&line_bytes);
-            }
-        }
-
-        buffer
-    })
-    .await
-    .unwrap();
+    let (rx, mut _child) = sidecar_command.spawn().expect("failed to spawn");
+    let buffer = read_stdout(rx).await?;
 
     Ok(buffer)
 }
@@ -81,15 +79,17 @@ async fn get_audio_graph(app: tauri::AppHandle, video_path: String) -> Result<Ve
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_window_state::Builder::new()
-            .with_state_flags(
-                StateFlags::SIZE
-                | StateFlags::POSITION
-                | StateFlags::MAXIMIZED
-                | StateFlags::DECORATIONS
-                | StateFlags::FULLSCREEN
-            )
-        .build())
+        .plugin(
+            tauri_plugin_window_state::Builder::new()
+                .with_state_flags(
+                    StateFlags::SIZE
+                        | StateFlags::POSITION
+                        | StateFlags::MAXIMIZED
+                        | StateFlags::DECORATIONS
+                        | StateFlags::FULLSCREEN,
+                )
+                .build(),
+        )
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
