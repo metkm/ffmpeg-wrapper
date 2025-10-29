@@ -6,6 +6,7 @@ import type { VideoTrimOptions } from '~/hooks/useVideo'
 const props = defineProps<{
   duration: number
   assetUrl: string
+  path: string
 }>()
 
 const emit = defineEmits<{
@@ -85,7 +86,7 @@ const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props
 <template>
   <div
     ref="container"
-    class="relative w-full h-14 px-5 rounded border border-(--ui-bg-elevated)"
+    class="relative w-full h-24 px-5 rounded border border-(--ui-bg-elevated)"
   >
     <TimelineThumb
       ref="leftThumb"
@@ -107,10 +108,17 @@ const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props
       ref="innerContainer"
       class="relative h-full w-full bg-elevated"
     >
-      <canvas
-        ref="frameCanvas"
-        class="absolute w-full h-full"
-      />
+      <div class="absolute w-full h-full pointer-events-none">
+        <canvas
+          ref="frameCanvas"
+          class="h-14 w-full"
+        />
+
+        <TimelineAudioGraph
+          :path="path"
+          class="h-10 w-full"
+        />
+      </div>
 
       <div
         class="absolute inset-0 bg-black pointer-events-none"
@@ -123,11 +131,11 @@ const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props
         class="absolute h-full w-0.5 bg-white z-50 pointer-events-none select-none -translate-x-1/2"
         :style="{ left: `${indicatorOffset}px` }"
       >
-        <div class="h-full flex justify-center items-end">
+        <!-- <div class="h-full flex justify-center items-end">
           <p class="translate-y-6 text-xs text-inverted bg-inverted px-2 py-0.5 rounded-full">
             {{ formatSeconds(modelValueCurrentTime) }}
           </p>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>

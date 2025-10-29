@@ -40,6 +40,44 @@ async fn create_thumbnail(app: tauri::AppHandle, video_path: String) -> Result<V
     Ok(buffer)
 }
 
+#[tauri::command]
+async fn get_audio_graph(app: tauri::AppHandle, video_path: String) -> Result<Vec<u8>, String> {
+    if !Path::new(&video_path).exists() {
+        return Err("Video not found".to_string());
+    }
+
+    let sidecar_command = app.shell().sidecar("ffmpeg").unwrap();
+    let sidecar_command = sidecar_command
+        .args([
+            "-i", &video_path,
+            "-ac", "1",
+            "-filter:a", "aresample=4000",
+            "-map", "0:a",
+            "-c:a", "pcm_s16le",
+            "-loglevel", "panic",
+            "-f",  "data",
+            "-"
+        ]);
+
+    let (mut rx, mut _child) = sidecar_command.spawn().expect("failed to spawn");
+
+    let buffer = tauri::async_runtime::spawn(async move {
+        let mut buffer: Vec<u8>= Vec::new();
+
+        while let Some(event) = rx.recv().await {
+            if let CommandEvent::Stdout(line_bytes) = event {
+                buffer.extend_from_slice(&line_bytes);
+            }
+        }
+
+        buffer
+    })
+    .await
+    .unwrap();
+
+    Ok(buffer)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -57,7 +95,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![create_thumbnail])
+        .invoke_handler(tauri::generate_handler![create_thumbnail, get_audio_graph])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

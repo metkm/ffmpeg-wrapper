@@ -3,6 +3,7 @@ import { injectVideoRootContext } from './VideoRoot.vue'
 
 defineProps<{
   assetUrl: string
+  path: string
 }>()
 
 const showCrop = ref(false)
@@ -71,23 +72,29 @@ onMounted(() => {
     </div>
 
     <div class="grid grid-cols-[1fr_10fr_1fr] grid-rows-[auto_1fr] items-center gap-2 w-full">
+      <div class="flex items-center gap-4 justify-between col-start-2 text-sm">
+        <p class="text-primary font-medium">
+          {{ formatSeconds(videoRootContext.video.value.currentTime) }}
+        </p>
+
+        <p>
+          {{ trimStartFormatted }} - {{ trimEndFormatted }}
+        </p>
+      </div>
+
       <UButton
         :icon="playing ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
         size="xl"
-        class="shadow shadow-black row-start-2 h-full justify-center"
+        class="shadow shadow-black h-full justify-center col-start-1"
         @click="togglePlay"
       />
-
-      <p class="text-xs col-start-2">
-        {{ trimStartFormatted }} - {{ trimEndFormatted }}
-      </p>
 
       <TimelineBar
         v-model="videoRootContext.video.value.currentTime"
         v-model:trim="videoRootContext.trim.value"
         :duration="videoRootContext.video.value.duration || 0"
         :asset-url="assetUrl"
-        class="col-start-2"
+        :path="path"
       />
 
       <div class="shrink-1 -mt-1">
@@ -106,6 +113,17 @@ onMounted(() => {
           }"
         />
       </div>
+
+      <!-- <Suspense>
+        <TimelineAudioGraph
+          :path="path"
+          class="h-14 col-start-2 px-5"
+        />
+
+        <template #fallback>
+          <p>Loading audio graph</p>
+        </template>
+      </Suspense> -->
     </div>
   </section>
 </template>

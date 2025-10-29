@@ -22,8 +22,12 @@ export const useFrames = (
     const frameCount = Math.floor(framesContainerWidth.value / frameWidth) + 1
     const interval = videoElement.duration / frameCount
 
-    toValue(framesContainer)!.width = frameWidth * frameCount
-    toValue(framesContainer)!.height = frameHeight
+    const container = toValue(framesContainer)
+    if (!container)
+      return
+
+    container.width = frameWidth * frameCount
+    container.height = frameHeight
 
     let index = 0
 

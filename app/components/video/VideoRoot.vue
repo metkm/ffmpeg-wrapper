@@ -9,6 +9,7 @@ export interface VideoRootContext {
   crop: Ref<VideoCropOptions>
   trim: Ref<VideoTrimOptions>
   video: Ref<Video>
+  onDataLoaded: () => void
 }
 
 export const [injectVideoRootContext, provideVideoRootContext] = createContext<VideoRootContext>('VideoRoot')
@@ -68,11 +69,22 @@ const onTimeUpdate = () => {
 useEventListener(videoElement, 'timeupdate', onTimeUpdate)
 useEventListener(videoElement, 'loadeddata', onDataLoaded)
 
+// sometimes loadeddata event is not firing. So we have to do this.
+watch(videoElement, () => {
+  if (!videoElement.value)
+    return
+
+  if (videoElement.value.readyState === 4) {
+    onDataLoaded()
+  }
+})
+
 provideVideoRootContext({
   videoElement,
   crop,
   trim,
   video,
+  onDataLoaded,
 })
 </script>
 

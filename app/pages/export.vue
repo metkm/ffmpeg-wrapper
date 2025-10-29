@@ -45,7 +45,7 @@ const videoAssetUrl = computed(() => convertFileSrc(videoPath.value))
 
 <style>
 :root {
-  --video-max-height: calc(100vh - var(--spacing) * 79);
+  --video-max-height: calc(100vh - var(--spacing) * 88);
 }
 
 .max-w-video {
