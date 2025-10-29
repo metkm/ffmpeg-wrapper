@@ -5,10 +5,17 @@ import { useFFmpeg } from '~/hooks/useFFmpeg'
 import { motion, RowValue } from 'motion-v'
 import { save } from '@tauri-apps/plugin-dialog'
 import { openPath } from '@tauri-apps/plugin-opener'
+import { useKeepScrollBottom } from '~/hooks/useKeepScrollBottom'
 
 const props = defineProps<{
   path: string
 }>()
+
+const stdoutContainer = useTemplateRef('stdoutContainer')
+const { updateScrollPosition } = useKeepScrollBottom({
+  container: stdoutContainer,
+  threshold: 50,
+})
 
 const { encoderOptions } = useOptionsStore()
 
@@ -50,8 +57,9 @@ const process = async () => {
     }],
   })
 
-  if (!path)
+  if (!path) {
     return
+  }
 
   savePath.value = path
 
@@ -109,6 +117,10 @@ const process = async () => {
   await spawn('binaries/ffmpeg', baseArgs)
 }
 
+watch(linesDebounced, () => {
+  updateScrollPosition()
+})
+
 defineShortcuts({
   enter: process,
 })
@@ -121,7 +133,7 @@ defineShortcuts({
       :ui="{ wrapper: '!justify-center' }"
     />
 
-    <UPageBody class="pb-20">
+    <UPageBody class="pb-16">
       <div class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end">
         <UFormField
           label="Encoder"
@@ -230,8 +242,8 @@ defineShortcuts({
 
       <pre
         v-if="linesDebounced.length > 0"
-        ref="stdoutElement"
-        class="flex flex-col-reverse text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar whitespace-pre-line"
+        ref="stdoutContainer"
+        class="text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) scrollbar whitespace-pre-line"
       >
         {{ linesDebounced.join('\n') }}
       </pre>
