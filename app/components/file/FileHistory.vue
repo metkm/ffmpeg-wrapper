@@ -64,7 +64,7 @@ const folders = computed(() => {
             />
 
             <p class="truncate text-sm">
-              {{ folder.split('\\').slice(4).join('\\') }}
+              {{ folder.split('\\').slice(-2).join('\\') }}
             </p>
           </button>
         </li>
