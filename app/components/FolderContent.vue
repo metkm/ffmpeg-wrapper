@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core'
 import { readDir, stat, type DirEntry, type FileInfo } from '@tauri-apps/plugin-fs'
+import { videoImportExtensions } from '~/constants'
 import { useIDB } from '~/hooks/useIDB'
 
 const props = defineProps<{
@@ -17,15 +18,24 @@ onMounted(async () => {
   const _entries = await readDir(props.path)
 
   const entriesWithStats = await Promise.all(
-    _entries.slice(-10).map(async (entry) => {
-      const stats = await stat(`${props.path}\\${entry.name}`)
+    _entries
+      .filter((entry) => {
+        const ext = entry.name.split('\\').at(-1)?.split('.').at(-1)
+        if (!ext)
+          return false
 
-      return {
-        ...entry,
-        ...stats,
-      }
-    },
-    ),
+        return videoImportExtensions.includes(ext)
+      })
+      .slice(-10)
+      .map(async (entry) => {
+        const stats = await stat(`${props.path}\\${entry.name}`)
+
+        return {
+          ...entry,
+          ...stats,
+        }
+      },
+      ),
   )
 
   entriesWithStats.sort((a, b) => (b.mtime?.getTime() || 1) - (a.mtime?.getTime() || 1))
@@ -62,7 +72,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <ol>
+  <ol
+    v-if="videos.length > 0"
+    class="grid grid-cols-2"
+  >
     <li
       v-for="video in videos"
       :key="video.name"
@@ -96,4 +109,11 @@ onMounted(async () => {
       </NuxtLink>
     </li>
   </ol>
+  <UEmpty
+    v-else
+    icon="i-lucide-folder"
+    title="No videos found"
+    class="h-full"
+    variant="naked"
+  />
 </template>

@@ -4,16 +4,13 @@ use tauri_plugin_shell::{ShellExt, process::CommandEvent};
 use tauri_plugin_window_state::StateFlags;
 
 async fn read_stdout(mut rx: Receiver<CommandEvent>) -> Result<Vec<u8>, String> {
-    let mut buffer: Vec<u8> = Vec::with_capacity(18_000);
+    let mut buffer: Vec<u8> = Vec::with_capacity(64_000);
 
-    let now = std::time::Instant::now();
     while let Some(event) = rx.recv().await {
         if let CommandEvent::Stdout(line_bytes) = event {
             buffer.extend_from_slice(&line_bytes);
         }
     }
-
-    println!("Time taken: {:?}", now.elapsed());
 
     Ok(buffer)
 }
@@ -37,8 +34,6 @@ async fn get_frame(
         &video_path,
         "-frames:v",
         "1",
-        "-fflags",
-        "nobuffer",
         "-s",
         &resolution,
         "-c:v",

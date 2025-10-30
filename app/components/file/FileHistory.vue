@@ -33,7 +33,7 @@ const folders = computed(() => {
   <USlideover
     side="left"
     :ui="{
-      body: 'grid grid-cols-2 max-h-max scrollbar sm:p-3',
+      body: 'scrollbar sm:p-3',
       wrapper: 'flex-1 overflow-hidden',
       title: 'truncate mx-10 text-sm text-center',
     }"
@@ -50,7 +50,7 @@ const folders = computed(() => {
     <template #body>
       <ol
         v-if="!selectedFolder"
-        class="grid grid-cols-subgrid col-span-full"
+        class="grid grid-cols-2"
       >
         <li
           v-for="folder in folders"
@@ -72,7 +72,6 @@ const folders = computed(() => {
       <FolderContent
         v-else
         :path="selectedFolder"
-        class="grid grid-cols-subgrid col-span-full"
       />
     </template>
 
