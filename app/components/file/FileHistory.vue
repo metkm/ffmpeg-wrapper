@@ -1,4 +1,8 @@
 <script setup lang="ts">
+defineOptions({
+  inheritAttrs: false,
+})
+
 const { pathHistory } = usePathsStore()
 
 const selectedFolder = ref()
@@ -43,6 +47,7 @@ const folders = computed(() => {
       icon="i-lucide-folder"
       class="self-center"
       variant="soft"
+      v-bind="$attrs"
     >
       Open Recently Used Folders
     </UButton>

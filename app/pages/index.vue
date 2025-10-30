@@ -51,7 +51,7 @@ onMounted(async () => {
 <template>
   <div class="flex flex-col grow relative -m-4">
     <AppDockContainer class="flex items-center p-2 gap-2">
-      <FileHistory />
+      <FileHistory :disabled="isUpdating" />
       <AppColorMode />
     </AppDockContainer>
 
