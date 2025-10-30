@@ -59,7 +59,7 @@ const { offsetX: rightThumbx, width: rightThumbWidth } = useThumb(rightThumbElem
   },
 })
 
-useFrames(frameCanvasElement, () => props.assetUrl)
+const { framesLoading } = useFrames(frameCanvasElement, () => props.path, () => props.duration)
 
 const seekToTime = (event: PointerEvent) => {
   modelValueCurrentTime.value = clamp(event.offsetX / innerContainerWidth.value * props.duration, 0, props.duration)
@@ -111,7 +111,8 @@ const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props
       <div class="absolute w-full h-full pointer-events-none">
         <canvas
           ref="frameCanvas"
-          class="h-14 w-full"
+          class="h-14 w-full bg-default"
+          :class="{ 'animate-pulse': framesLoading }"
         />
 
         <TimelineAudioGraph
@@ -130,13 +131,7 @@ const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props
       <div
         class="absolute h-full w-0.5 bg-white z-50 pointer-events-none select-none -translate-x-1/2"
         :style="{ left: `${indicatorOffset}px` }"
-      >
-        <!-- <div class="h-full flex justify-center items-end">
-          <p class="translate-y-6 text-xs text-inverted bg-inverted px-2 py-0.5 rounded-full">
-            {{ formatSeconds(modelValueCurrentTime) }}
-          </p>
-        </div> -->
-      </div>
+      />
     </div>
   </div>
 </template>

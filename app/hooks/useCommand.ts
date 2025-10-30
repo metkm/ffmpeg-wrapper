@@ -61,6 +61,7 @@ export const useCommand = (options: UseCommandOptions) => {
   return {
     command,
     child,
+    lines,
     linesDebounced,
     kill,
     spawn,
