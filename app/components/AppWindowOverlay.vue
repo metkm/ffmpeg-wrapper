@@ -15,18 +15,23 @@ onUnmounted(resizeListener)
 
 <template>
   <div class="grid grid-cols-[140px_1fr_140px] h-8 text-muted text-xs">
-    <AppVersion class="flex items-center pl-2" />
+    <div
+      data-tauri-drag-region
+      class="flex items-center"
+    >
+      <AppVersion class="flex items-center pl-2 select-none pointer-events-none" />
+    </div>
 
     <div
       data-tauri-drag-region
-      class="flex items-center justify-center pl-2 col-start-2 select-none"
+      class="flex items-center justify-center"
     >
-      <p class="text-xs capitalize pointer-events-none">
+      <p class="text-xs capitalize select-none pointer-events-none">
         {{ route.name }}
       </p>
     </div>
 
-    <div class="flex items-center [&_button]:justify-center col-start-3">
+    <div class="flex items-center [&_button]:justify-center">
       <button
         class="w-12 h-8 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10"
         @click="window.minimize()"
@@ -35,7 +40,7 @@ onUnmounted(resizeListener)
           x="0px"
           y="0px"
           viewBox="0 0 10.2 1"
-          class="size-[10px]"
+          class="size-2.5"
         >
           <rect
             x="0"
