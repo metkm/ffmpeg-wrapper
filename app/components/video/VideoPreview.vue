@@ -114,17 +114,6 @@ defineShortcuts({
           }"
         />
       </div>
-
-      <!-- <Suspense>
-        <TimelineAudioGraph
-          :path="path"
-          class="h-14 col-start-2 px-5"
-        />
-
-        <template #fallback>
-          <p>Loading audio graph</p>
-        </template>
-      </Suspense> -->
     </div>
   </section>
 </template>
