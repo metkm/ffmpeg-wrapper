@@ -18,7 +18,7 @@ onMounted(() => {
         </template>
       </Suspense>
 
-      <main class="flex flex-col grow p-4 overflow-x-hidden overflow-y-auto scrollbar">
+      <main class="flex flex-col grow p-4 overflow-x-hidden overflow-y-auto">
         <NuxtPage />
       </main>
     </div>
@@ -26,7 +26,14 @@ onMounted(() => {
 </template>
 
 <style>
-.scrollbar::-webkit-scrollbar {
-  display: none;
+::-webkit-scrollbar {
+  width: 14px;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 4px solid var(--ui-bg);
+  background-clip: padding-box;
+  border-radius: 9999px;
+  background-color: var(--ui-bg-elevated);
 }
 </style>
