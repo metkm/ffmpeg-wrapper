@@ -98,7 +98,7 @@ defineShortcuts({
         :path="path"
       />
 
-      <div class="shrink-1 -mt-1">
+      <div class="-mt-1">
         <UIcon
           :name="volumeIcon"
           class="size-4"
