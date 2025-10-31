@@ -9,12 +9,6 @@ defineProps<{
 const showCrop = ref(false)
 const playing = ref(false)
 
-defineShortcuts({
-  c: () => {
-    showCrop.value = !showCrop.value
-  },
-})
-
 const videoElement = useTemplateRef('videoElement')
 
 const videoRootContext = injectVideoRootContext()
@@ -44,6 +38,13 @@ const volumeIcon = computed(
 
 onMounted(() => {
   videoRootContext.videoElement.value = videoElement.value
+})
+
+defineShortcuts({
+  'c': () => {
+    showCrop.value = !showCrop.value
+  },
+  ' ': togglePlay,
 })
 </script>
 
