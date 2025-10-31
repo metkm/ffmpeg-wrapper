@@ -8,20 +8,11 @@ defineProps<{
 
 const showCrop = ref(false)
 const playing = ref(false)
+const showVideoState = ref(false)
 
 const videoElement = useTemplateRef('videoElement')
 
 const videoRootContext = injectVideoRootContext()
-
-const togglePlay = () => {
-  if (playing.value) {
-    videoElement.value?.pause()
-    playing.value = false
-  } else {
-    videoElement.value?.play()
-    playing.value = true
-  }
-}
 
 const trimStartFormatted = computed(() => formatSeconds(videoRootContext.trim.value.start))
 const trimEndFormatted = computed(() => formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration || 0))
@@ -35,6 +26,23 @@ const volumeIcon = computed(
         ? 'i-lucide-volume-1'
         : 'i-lucide-volume-2',
 )
+
+const togglePlay = () => {
+  if (playing.value) {
+    videoElement.value?.pause()
+    playing.value = false
+  } else {
+    videoElement.value?.play()
+    playing.value = true
+  }
+
+  showVideoState.value = true
+}
+
+const onAfterEnter = async () => {
+  await sleep(250)
+  showVideoState.value = false
+}
 
 onMounted(() => {
   videoRootContext.videoElement.value = videoElement.value
@@ -51,11 +59,32 @@ defineShortcuts({
 <template>
   <section class="flex flex-col items-center gap-4">
     <div class="relative w-full aspect-video">
+      <Transition
+        enter-active-class="transition-all"
+        leave-active-class="transition-all"
+        enter-from-class="opacity-0"
+        leave-to-class="opacity-0"
+        @after-enter="onAfterEnter"
+      >
+        <div
+          v-if="showVideoState"
+          class="flex items-center justify-center absolute inset-0 z-50 pointer-events-none"
+        >
+          <div class="size-24 p-4 rounded-full bg-default/80">
+            <UIcon
+              :name="`i-heroicons-${playing ? 'play' : 'pause'}-solid`"
+              class="h-full w-full"
+            />
+          </div>
+        </div>
+      </Transition>
+
       <video
         ref="videoElement"
         :src="assetUrl"
         class="rounded-(--ui-radius) shadow shadow-black aspect-video"
         crossorigin="anonymous"
+        @ended="togglePlay"
       />
 
       <div
