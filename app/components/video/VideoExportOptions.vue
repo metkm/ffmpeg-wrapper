@@ -73,10 +73,14 @@ const process = async () => {
     '-rc', 'vbr',
   ]
 
-  const crop = `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
-
-  const videoFilters = [`crop=${crop}`, `fps=${encoderOptions.fps}`]
+  const videoFilters = [`fps=${encoderOptions.fps}`]
   const audioFilters = []
+
+  // in one of the videos for some reason videoHeight is given 2 more pixels. Might be something with the aspect ratio but i don't know
+  if (videoRootContext.crop.value.width || videoRootContext.crop.value.height) {
+    const crop = `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
+    videoFilters.push(`crop=${crop}`)
+  }
 
   if (encoderOptions.speed !== 1) {
     videoFilters.push(`setpts=PTS/${encoderOptions.speed}`)
