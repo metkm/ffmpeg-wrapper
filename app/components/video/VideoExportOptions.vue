@@ -22,6 +22,8 @@ const { encoderOptions } = useOptionsStore()
 const videoRootContext = injectVideoRootContext()
 
 const savePath = ref('')
+const extraVideoArguments = ref('')
+const extraAudioArguments = ref('')
 
 const webpCompressionLevel = ref(4)
 const webpQuality = ref(50)
@@ -108,6 +110,9 @@ const process = async () => {
   } else {
     baseArgs.push('-frames:v', '1')
   }
+
+  videoFilters.push(...extraVideoArguments.value.split(','))
+  audioFilters.push(...extraAudioArguments.value.split(','))
 
   if (videoFilters.length > 0) {
     baseArgs.push('-filter:v', videoFilters.join(','))
@@ -209,6 +214,24 @@ defineShortcuts({
               @click="encoderOptions.resolution = undefined"
             />
           </div>
+        </UFormField>
+
+        <UFormField label="Extra Video Arguments">
+          <UInput
+            v-model="extraVideoArguments"
+            variant="soft"
+            color="neutral"
+            placeholder="eg. transpose=1,transpose=0"
+          />
+        </UFormField>
+
+        <UFormField label="Extra Audio Arguments">
+          <UInput
+            v-model="extraAudioArguments"
+            variant="soft"
+            color="neutral"
+            placeholder="eg. volume=10.0"
+          />
         </UFormField>
 
         <UCheckbox
