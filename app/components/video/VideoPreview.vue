@@ -82,7 +82,7 @@ defineShortcuts({
       <video
         ref="videoElement"
         :src="assetUrl"
-        class="rounded-(--ui-radius) shadow shadow-black aspect-video"
+        class="rounded-(--ui-radius) shadow shadow-black aspect-video w-full"
         crossorigin="anonymous"
         @ended="togglePlay"
       />
