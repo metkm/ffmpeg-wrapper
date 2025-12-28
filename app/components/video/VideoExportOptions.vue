@@ -111,8 +111,13 @@ const process = async () => {
     baseArgs.push('-frames:v', '1')
   }
 
-  videoFilters.push(...extraVideoArguments.value.split(','))
-  audioFilters.push(...extraAudioArguments.value.split(','))
+  if (extraVideoArguments.value.length > 0) {
+    videoFilters.push(...extraVideoArguments.value.split(','))
+  }
+
+  if (extraAudioArguments.value.length > 0) {
+    audioFilters.push(...extraAudioArguments.value.split(','))
+  }
 
   if (videoFilters.length > 0) {
     baseArgs.push('-filter:v', videoFilters.join(','))
