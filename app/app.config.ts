@@ -20,5 +20,14 @@ export default defineAppConfig({
         base: 'rounded-full',
       },
     },
+    slideover: {
+      variants: {
+        side: {
+          left: {
+            content: 'max-w-xl',
+          },
+        },
+      },
+    },
   },
 })

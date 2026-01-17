@@ -6,7 +6,7 @@
 }
 
 :root {
-  --ui-color-primary-50:  #FEFCF9;
+  --ui-color-primary-50: #FEFCF9;
   --ui-color-primary-100: #FCF8F0;
   --ui-color-primary-200: #F9EFDB;
   --ui-color-primary-300: #F2E3C6;
@@ -20,7 +20,7 @@
 }
 
 .dark {
-  --ui-color-primary-50:  #FDFBF7;
+  --ui-color-primary-50: #FDFBF7;
   --ui-color-primary-100: #FBF6EE;
   --ui-color-primary-200: #F9EFDB;
   --ui-color-primary-300: #EEDFC4;
@@ -31,4 +31,8 @@
   --ui-color-primary-800: #615239;
   --ui-color-primary-900: #3D3322;
   --ui-color-primary-950: #1F1A11;
+}
+
+.scrollbar-gutter {
+  scrollbar-gutter: stable both-edges;
 }

@@ -37,7 +37,7 @@ const folders = computed(() => {
   <USlideover
     side="left"
     :ui="{
-      body: 'sm:p-3',
+      body: 'p-0 sm:p-0 sm:py-4 scrollbar-gutter',
       wrapper: 'flex-1 overflow-hidden',
       title: 'truncate mx-10 text-sm text-center',
     }"
