@@ -1,3 +1,5 @@
+mod utils;
+
 use std::path::Path;
 use tauri::async_runtime::Receiver;
 use tauri_plugin_shell::{ShellExt, process::CommandEvent};
@@ -50,33 +52,11 @@ async fn get_frame(
 }
 
 #[tauri::command]
-async fn create_thumbnail(app: tauri::AppHandle, video_path: String) -> Result<Vec<u8>, String> {
-    if !Path::new(&video_path).exists() {
-        return Err("Video not found".to_string());
-    }
+async fn get_file_thumbnail(_app: tauri::AppHandle, path: String) -> Result<Vec<u8>, String> {
+    let bitmap = utils::get_thumbnail_bitmap(&path, 480).map_err(|err| err.message())?;
+    let bytes = utils::get_bitmap_bytes(bitmap)?;
 
-    let sidecar_command = app.shell().sidecar("ffmpeg").unwrap();
-    let sidecar_command = sidecar_command.args([
-        "-y",
-        "-ss",
-        "00:00:04",
-        "-i",
-        &video_path,
-        "-frames:v",
-        "1",
-        "-f",
-        "image2pipe",
-        "-loglevel",
-        "panic",
-        "-s",
-        "480x320",
-        "-",
-    ]);
-
-    let (rx, mut _child) = sidecar_command.spawn().expect("failed to spawn");
-    let buffer = read_stdout(rx).await?;
-
-    Ok(buffer)
+    Ok(bytes)
 }
 
 #[tauri::command]
@@ -130,7 +110,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            create_thumbnail,
+            get_file_thumbnail,
             get_audio_graph,
             get_frame
         ])

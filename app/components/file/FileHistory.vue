@@ -74,10 +74,17 @@ const folders = computed(() => {
           </button>
         </li>
       </ol>
-      <FolderContent
-        v-else
-        :path="selectedFolder"
-      />
+      <Suspense v-else>
+        <FolderContent :path="selectedFolder" />
+        <template #fallback>
+          <div class="flex items-center justify-center h-full w-full">
+            <UIcon
+              name="i-lucide-loader-circle"
+              class="size-10 animate-spin"
+            />
+          </div>
+        </template>
+      </Suspense>
     </template>
 
     <template
