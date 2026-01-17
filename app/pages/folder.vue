@@ -52,7 +52,7 @@ watch(folderPath, getEntries, { immediate: true })
 
 <template>
   <div class="flex flex-col gap-4 grow w-full">
-    <div class="flex items-center justify-between gap-4">
+    <div class="sticky top-0 bg-muted z-50 rounded-full p-1 flex items-center justify-between gap-4">
       <UButton
         to="/"
         icon="i-lucide-home"
@@ -80,7 +80,7 @@ watch(folderPath, getEntries, { immediate: true })
       <li
         v-for="entry in entries"
         :key="entry.name"
-        class="p-2 hover:bg-muted rounded"
+        class="flex items-center justify-center"
       >
         <FolderItem
           v-if="entry.isDirectory"

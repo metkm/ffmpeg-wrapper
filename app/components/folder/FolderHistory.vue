@@ -1,8 +1,4 @@
 <script setup lang="ts">
-defineOptions({
-  inheritAttrs: false,
-})
-
 const { pathHistory } = usePathsStore()
 
 const folders = computed(() => {
@@ -31,7 +27,7 @@ const folders = computed(() => {
 
 <template>
   <div class="flex flex-col gap-4">
-    <h1 class="text-muted pl-1 font-medium text-sm">
+    <h1 class="text-muted text-center p-2 font-medium text-sm">
       Recently Used Folders
     </h1>
 

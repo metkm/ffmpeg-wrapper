@@ -7,7 +7,7 @@ defineProps<{
 <template>
   <NuxtLink
     :to="{ name: 'folder', query: { path } }"
-    class="flex flex-col hover:bg-muted rounded-(--ui-radius) p-2"
+    class="flex flex-col hover:bg-muted rounded-(--ui-radius) p-2 w-40"
   >
     <UIcon
       name="i-lucide-folder"

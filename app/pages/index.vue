@@ -5,19 +5,25 @@ definePageMeta({
 
 const videoPath = ref<string>('')
 
-// const onSelect = async () => {
-//   await navigateTo({
-//     name: 'export',
-//     query: {
-//       path: videoPath.value,
-//     },
-//   })
-// }
+const onSelect = async () => {
+  await navigateTo({
+    name: 'export',
+    query: {
+      path: videoPath.value,
+    },
+  })
+}
 </script>
 
 <template>
-  <div class="flex flex-col grow relative">
-    <FolderHistory />
+  <div class="flex flex-col grow gap-4 relative justify-center">
+    <FolderHistory class="border border-muted/50 border-dashed p-4 rounded-(--ui-radius)" />
+
+    <FileDrop
+      v-model="videoPath"
+      class="border border-muted/50 border-dashed aspect-video w-full"
+      @select="onSelect"
+    />
 
     <AppUpdate />
 

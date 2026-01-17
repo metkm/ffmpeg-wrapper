@@ -31,7 +31,10 @@ const name = props.path.split('\\').slice(-1)
 </script>
 
 <template>
-  <NuxtLink :to="{ name: 'export', query: { path } }">
+  <NuxtLink
+    :to="{ name: 'export', query: { path } }"
+    class="p-2"
+  >
     <div class="aspect-video w-full rounded bg-elevated overflow-hidden">
       <img
         v-if="image"

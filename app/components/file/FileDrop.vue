@@ -78,7 +78,7 @@ onUnmounted(() => unlistenFn?.())
 </script>
 
 <template>
-  <div class="flex flex-col flex-1 gap-2 rounded-(--ui-radius) overflow-hidden">
+  <div class="flex flex-col gap-2 rounded-(--ui-radius) overflow-hidden">
     <button
       class="flex flex-col items-center justify-center h-full w-full transition-colors"
       :class="{
