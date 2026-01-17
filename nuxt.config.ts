@@ -44,6 +44,7 @@ export default defineNuxtConfig({
         'lucide:upload',
         'lucide:chevron-up',
         'lucide:chevron-down',
+        'lucide:refresh-cw',
         'lucide:x',
         'lucide:folder-symlink',
         'lucide:circle-stop',

@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { getCurrentWindow } from '@tauri-apps/api/window'
 
-const route = useRoute()
-
 const window = getCurrentWindow()
 const isWindowMaximized = ref(await window.isMaximized())
 
@@ -19,16 +17,16 @@ onUnmounted(resizeListener)
       data-tauri-drag-region
       class="flex items-center"
     >
-      <AppVersion class="flex items-center pl-2 select-none pointer-events-none" />
+      <!-- <AppVersion class="flex items-center pl-2 select-none pointer-events-none" /> -->
     </div>
 
     <div
       data-tauri-drag-region
       class="flex items-center justify-center"
     >
-      <p class="text-xs capitalize select-none pointer-events-none">
+      <!-- <p class="text-xs capitalize select-none pointer-events-none">
         {{ route.name }}
-      </p>
+      </p> -->
     </div>
 
     <div class="flex items-center [&_button]:justify-center">

@@ -15,8 +15,13 @@ defineShortcuts({
 
 const route = useRoute()
 
+const videoAssetUrl = ref<string | undefined>()
+
 const videoPath = computed(() => route.query.path!.toString())
-const videoAssetUrl = computed(() => convertFileSrc(videoPath.value))
+
+onMounted(() => {
+  videoAssetUrl.value = convertFileSrc(videoPath.value)
+})
 </script>
 
 <template>
@@ -32,6 +37,7 @@ const videoAssetUrl = computed(() => convertFileSrc(videoPath.value))
       />
 
       <VideoPreview
+        v-if="videoAssetUrl"
         :asset-url="videoAssetUrl"
         :path="videoPath"
       />

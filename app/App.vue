@@ -18,7 +18,7 @@ onMounted(() => {
         </template>
       </Suspense>
 
-      <main class="flex flex-col grow p-4 overflow-x-hidden overflow-y-auto relative">
+      <main class="flex flex-col grow p-4 *:max-w-4xl *:w-full *:mx-auto overflow-y-auto relative scrollbar-gutter">
         <NuxtPage />
       </main>
     </div>
