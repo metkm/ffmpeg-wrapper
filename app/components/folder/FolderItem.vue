@@ -9,7 +9,7 @@ const folderName = props.path.split('\\').slice(-1).join('\\')
 <template>
   <NuxtLink
     :to="{ name: 'folder', query: { path } }"
-    class="flex flex-col justify-center rounded-lg p-2 size-28"
+    class="grow flex flex-col justify-center rounded-lg p-2 size-28"
   >
     <UIcon
       name="i-lucide-folder"
