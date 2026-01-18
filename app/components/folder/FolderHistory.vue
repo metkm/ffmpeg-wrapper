@@ -26,12 +26,12 @@ const folders = computed(() => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <h1 class="text-muted text-center p-2 font-medium text-sm">
+  <div class="flex flex-col gap-2">
+    <h1 class="text-muted text-center font-medium text-sm">
       Recently Used Folders
     </h1>
 
-    <ol class="flex flex-wrap">
+    <ol class="flex flex-wrap gap-2">
       <li
         v-for="folder in folders"
         :key="folder"

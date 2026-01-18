@@ -51,8 +51,8 @@ watch(folderPath, getEntries, { immediate: true })
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 grow w-full">
-    <div class="sticky top-0 bg-muted z-50 rounded-full p-1 flex items-center justify-between gap-4">
+  <div class="flex flex-col gap-2 grow w-full">
+    <div class="sticky top-0 bg-muted z-50 rounded-full p-1 flex items-center justify-between gap-2">
       <UButton
         to="/"
         icon="i-lucide-home"
@@ -89,6 +89,7 @@ watch(folderPath, getEntries, { immediate: true })
         <FileVideo
           v-else
           :path="`${folderPath}\\${entry.name}`"
+          class="w-full h-full"
         />
       </li>
     </ol>

@@ -16,8 +16,8 @@ const onSelect = async () => {
 </script>
 
 <template>
-  <div class="flex flex-col grow gap-4 relative justify-center">
-    <FolderHistory class="border border-muted/50 border-dashed p-4 rounded-(--ui-radius)" />
+  <div class="flex flex-col grow gap-2 relative justify-center">
+    <FolderHistory class="border border-muted/50 border-dashed p-2 rounded-(--ui-radius)" />
 
     <FileDrop
       v-model="videoPath"

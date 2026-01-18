@@ -1,21 +1,25 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   path: string
 }>()
+
+const folderName = props.path.split('\\').slice(-1).join('\\')
 </script>
 
 <template>
   <NuxtLink
     :to="{ name: 'folder', query: { path } }"
-    class="flex flex-col hover:bg-muted rounded-(--ui-radius) p-2 w-40"
+    class="flex flex-col justify-center hover:bg-muted rounded-(--ui-radius) p-2 size-28"
   >
     <UIcon
       name="i-lucide-folder"
-      class="size-20 mx-auto"
+      class="w-full h-1/2"
     />
 
-    <p class="truncate text-sm text-center">
-      {{ path.split('\\').slice(-1).join('\\') }}
-    </p>
+    <UTooltip :text="folderName">
+      <p class="truncate text-sm text-center">
+        {{ folderName }}
+      </p>
+    </UTooltip>
   </NuxtLink>
 </template>
