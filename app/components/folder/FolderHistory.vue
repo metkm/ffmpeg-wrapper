@@ -27,17 +27,30 @@ const folders = computed(() => {
 
 <template>
   <div class="flex flex-col gap-2">
-    <h1 class="text-muted text-center font-medium text-sm">
-      Recently Used Folders
-    </h1>
+    <div
+      v-if="folders.length > 0"
+      class="flex flex-col gap-2 rounded-lg"
+    >
+      <h1 class="text-highlighted font-medium">
+        Recently Used Folders
+      </h1>
 
-    <ol class="flex flex-wrap gap-2">
-      <li
-        v-for="folder in folders"
-        :key="folder"
-      >
-        <FolderItem :path="folder" />
-      </li>
-    </ol>
+      <ol class="flex flex-wrap gap-2">
+        <li
+          v-for="folder in folders"
+          :key="folder"
+        >
+          <FolderItem
+            :path="folder"
+            class="ring ring-default"
+          />
+        </li>
+      </ol>
+    </div>
+    <UEmpty
+      v-else
+      title="Recently Used Folders"
+      description="Last used folders will appear here when you open some videos"
+    />
   </div>
 </template>

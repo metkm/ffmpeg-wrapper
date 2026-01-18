@@ -35,11 +35,11 @@ const name = props.path.split('\\').slice(-1)
     :to="{ name: 'export', query: { path } }"
     class="p-2"
   >
-    <div class="aspect-video w-full rounded bg-elevated overflow-hidden">
+    <div class="aspect-video w-full rounded-lg bg-elevated overflow-hidden">
       <img
         v-if="image"
         :src="image"
-        class="w-full h-full"
+        class="w-full h-full rounded-lg"
       >
 
       <div

@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { check } from '@tauri-apps/plugin-updater'
+import { motion } from 'motion-v'
 
-const isUpdating = ref(false)
+defineOptions({
+  inheritAttrs: false,
+})
+
+const modelValueIsUpdating = defineModel<boolean>({ default: false })
+
 const progress = ref(0)
 
 onMounted(async () => {
@@ -15,16 +21,16 @@ onMounted(async () => {
     switch (event.event) {
       case 'Started':
         contentLength = event.data.contentLength ?? 0
-        isUpdating.value = true
+        modelValueIsUpdating.value = true
         break
       case 'Progress':
         downloaded += event.data.chunkLength
         break
       case 'Finished':
-        isUpdating.value = false
+        modelValueIsUpdating.value = false
         break
       default:
-        isUpdating.value = false
+        modelValueIsUpdating.value = false
         break
     }
 
@@ -34,4 +40,25 @@ onMounted(async () => {
 </script>
 
 <template>
+  <AnimatePresence>
+    <motion.div
+      v-if="modelValueIsUpdating"
+      layout
+      :initial="{ opacity: 0 }"
+      :animate="{ opacity: 1 }"
+      :exit="{ opacity: 0 }"
+      v-bind="$attrs"
+    >
+      <p class="text-muted text-sm font-medium p-2">
+        Installing update ({{ progress.toFixed(0) }}%)
+      </p>
+
+      <div class="h-1 w-full bg-muted">
+        <div
+          class="h-full bg-primary transition-all"
+          :style="{ width: `${progress}%` }"
+        />
+      </div>
+    </motion.div>
+  </AnimatePresence>
 </template>

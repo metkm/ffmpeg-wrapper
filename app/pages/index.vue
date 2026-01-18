@@ -3,6 +3,7 @@ definePageMeta({
   name: 'upload',
 })
 
+const isUpdating = ref(false)
 const videoPath = ref<string>('')
 
 const onSelect = async () => {
@@ -17,15 +18,23 @@ const onSelect = async () => {
 
 <template>
   <div class="flex flex-col grow gap-2 relative justify-center">
-    <FolderHistory class="border border-muted/50 border-dashed p-2 rounded-(--ui-radius)" />
+    <FolderHistory />
 
     <FileDrop
       v-model="videoPath"
-      class="border border-muted/50 border-dashed aspect-video w-full"
+      class="aspect-video w-full"
+      :disabled="isUpdating"
       @select="onSelect"
     />
 
-    <AppUpdate />
+    <AppUpdate
+      v-model="isUpdating"
+      class="fixed bottom-0 inset-x-0"
+    />
+
+    <AppDockContainer>
+      <AppColorMode />
+    </AppDockContainer>
 
     <!-- <AppDockContainer class="flex items-center p-2 gap-2">
       <FileHistory :disabled="isUpdating" />
