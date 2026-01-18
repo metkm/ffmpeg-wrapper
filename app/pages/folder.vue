@@ -80,7 +80,7 @@ watch(folderPath, getEntries, { immediate: true })
       <li
         v-for="entry in entries"
         :key="entry.name"
-        class="flex hover:bg-muted/50 rounded-lg w-full h-full overflow-hidden"
+        class="flex hover:bg-muted/50 rounded-lg w-full h-full overflow-hidden *:m-auto"
       >
         <FolderItem
           v-if="entry.isDirectory"
