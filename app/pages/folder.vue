@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { BreadcrumbItem } from '@nuxt/ui'
-import { readDir, type DirEntry } from '@tauri-apps/plugin-fs'
-import { videoImportExtensions } from '~/constants'
+import type { DirEntry } from '@tauri-apps/plugin-fs'
 
 definePageMeta({
   middleware: (to) => {
@@ -14,21 +13,11 @@ definePageMeta({
 
 const folderPath = useRouteQuery('path', '')
 
-const entries = ref<DirEntry[]>([])
+const entries = ref<DirEntry[]>(await getVideoEntries(folderPath.value))
 
-const getEntries = async () => {
+const updateEntries = async () => {
   try {
-    entries.value = (await readDir(folderPath.value))
-      .filter((item) => {
-        if (item.isDirectory)
-          return true
-
-        const ext = item.name.split('\\').at(-1)?.split('.').at(-1)
-        if (!ext)
-          return false
-
-        return videoImportExtensions.includes(ext as typeof videoImportExtensions[number])
-      })
+    entries.value = await getVideoEntries(folderPath.value)
   } catch {
     await navigateTo('/')
   }
@@ -47,7 +36,7 @@ const items = computed(() => {
     .slice(1) as BreadcrumbItem[]
 })
 
-watch(folderPath, getEntries, { immediate: true })
+watch(folderPath, updateEntries)
 </script>
 
 <template>
@@ -67,7 +56,7 @@ watch(folderPath, getEntries, { immediate: true })
       <UButton
         icon="i-lucide-refresh-cw"
         variant="soft"
-        @click="getEntries"
+        @click="updateEntries"
       >
         Refresh
       </UButton>
@@ -108,7 +97,7 @@ watch(folderPath, getEntries, { immediate: true })
         {
           label: 'Refresh',
           icon: 'i-lucide-refresh-cw',
-          onClick: getEntries,
+          onClick: updateEntries,
         },
       ]"
     />
