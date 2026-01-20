@@ -46,6 +46,7 @@ watch(folderPath, updateEntries)
         to="/"
         icon="i-lucide-home"
         variant="soft"
+        color="neutral"
       />
 
       <UBreadcrumb
@@ -56,6 +57,7 @@ watch(folderPath, updateEntries)
       <UButton
         icon="i-lucide-refresh-cw"
         variant="soft"
+        color="neutral"
         @click="updateEntries"
       >
         Refresh
@@ -69,11 +71,12 @@ watch(folderPath, updateEntries)
       <li
         v-for="entry in entries"
         :key="entry.name"
-        class="flex hover:bg-muted/50 rounded-lg *:m-auto"
+        class="*:m-auto"
       >
         <FolderItem
           v-if="entry.isDirectory"
           :path="`${folderPath}\\${entry.name}`"
+          size="xl"
         />
         <FileVideo
           v-else

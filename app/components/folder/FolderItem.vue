@@ -7,19 +7,17 @@ const folderName = props.path.split('\\').slice(-1).join('\\')
 </script>
 
 <template>
-  <NuxtLink
+  <UButton
     :to="{ name: 'folder', query: { path } }"
-    class="grow flex flex-col justify-center rounded-lg p-2 size-28"
+    icon="i-lucide-folder"
+    variant="ghost"
+    color="neutral"
+    block
   >
-    <UIcon
-      name="i-lucide-folder"
-      class="w-full h-1/2"
-    />
-
     <UTooltip :text="folderName">
       <p class="truncate text-sm text-center">
         {{ folderName }}
       </p>
     </UTooltip>
-  </NuxtLink>
+  </UButton>
 </template>

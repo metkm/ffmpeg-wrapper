@@ -27,14 +27,12 @@ const folders = computed(() => {
 
 <template>
   <div class="flex flex-col gap-2">
-    <div
+    <UPageCard
       v-if="folders.length > 0"
-      class="flex flex-col gap-2 rounded-lg"
+      title="Recently used folders"
+      description="The folder the opened video is in will show up here"
+      variant="soft"
     >
-      <h1 class="text-highlighted font-medium">
-        Recently Used Folders
-      </h1>
-
       <ol class="flex flex-wrap gap-2">
         <li
           v-for="folder in folders"
@@ -43,10 +41,11 @@ const folders = computed(() => {
           <FolderItem
             :path="folder"
             class="ring ring-default"
+            variant="soft"
           />
         </li>
       </ol>
-    </div>
+    </UPageCard>
     <UEmpty
       v-else
       title="Recently Used Folders"
