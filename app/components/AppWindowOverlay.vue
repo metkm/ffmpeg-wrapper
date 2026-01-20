@@ -17,9 +17,10 @@ onUnmounted(resizeListener)
   <div class="grid grid-cols-[140px_1fr_140px] h-8 text-muted text-xs z-50 ring ring-default">
     <div
       data-tauri-drag-region
-      class="flex items-center"
+      class="flex items-center gap-1 pl-1"
     >
-      <AppVersion class="flex items-center pl-2 select-none pointer-events-none" />
+      <AppColorMode />
+      <AppVersion class="flex items-center select-none pointer-events-none" />
     </div>
 
     <div

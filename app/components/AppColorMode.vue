@@ -17,6 +17,7 @@ const isDark = computed({
       :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'"
       color="neutral"
       variant="ghost"
+      size="xs"
       @click="isDark = !isDark"
     />
 
