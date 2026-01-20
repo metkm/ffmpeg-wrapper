@@ -48,13 +48,3 @@ onMounted(() => {
     </VideoRoot>
   </div>
 </template>
-
-<style>
-:root {
-  --video-max-height: calc(100vh - var(--spacing) * 88);
-}
-
-.max-w-video {
-  max-width: max(var(--container-2xl), calc(var(--video-max-height) * 16 / 9));
-}
-</style>

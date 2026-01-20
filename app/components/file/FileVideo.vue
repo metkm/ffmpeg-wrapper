@@ -3,12 +3,11 @@ import { stat, type FileInfo } from '@tauri-apps/plugin-fs'
 import { invoke } from '@tauri-apps/api/core'
 
 const props = defineProps<{
-  // entry: DirEntry
   path: string
 }>()
 
 const image = ref<string>()
-const stats = ref<FileInfo>()
+const stats = ref<FileInfo>(await stat(props.path))
 
 // const path = `${props.path}\\${props.entry.name}`
 
@@ -23,19 +22,12 @@ onMounted(async () => {
   }
 })
 
-onMounted(async () => {
-  stats.value = await stat(props.path)
-})
-
 const name = props.path.split('\\').slice(-1)
 </script>
 
 <template>
-  <NuxtLink
-    :to="{ name: 'export', query: { path } }"
-    class="p-2"
-  >
-    <div class="aspect-video w-full rounded-lg bg-elevated overflow-hidden">
+  <NuxtLink :to="{ name: 'export', query: { path } }">
+    <div class="aspect-video bg-elevated rounded-lg">
       <img
         v-if="image"
         :src="image"
@@ -55,7 +47,7 @@ const name = props.path.split('\\').slice(-1)
       </div>
     </div>
 
-    <div class="text-sm mt-2">
+    <div class="text-sm p-2">
       <p>
         {{ name.join() }}
       </p>

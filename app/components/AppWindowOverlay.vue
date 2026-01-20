@@ -32,6 +32,8 @@ onUnmounted(resizeListener)
     </div>
 
     <div class="flex items-center [&_button]:justify-center">
+      <!-- <AppColorMode /> -->
+
       <button
         class="w-12 h-8 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10"
         @click="window.minimize()"

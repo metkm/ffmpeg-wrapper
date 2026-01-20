@@ -18,11 +18,11 @@ const onSelect = async () => {
 
 <template>
   <div class="flex flex-col grow gap-2 relative justify-center">
-    <FolderHistory />
+    <FolderHistory class="max-w-video mx-auto w-full" />
 
     <FileDrop
       v-model="videoPath"
-      class="aspect-video w-full"
+      class="grow"
       :disabled="isUpdating"
       @select="onSelect"
     />
@@ -31,9 +31,5 @@ const onSelect = async () => {
       v-model="isUpdating"
       class="fixed bottom-0 inset-x-0"
     />
-
-    <AppDockContainer>
-      <AppColorMode />
-    </AppDockContainer>
   </div>
 </template>

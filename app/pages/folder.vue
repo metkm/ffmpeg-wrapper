@@ -40,7 +40,7 @@ watch(folderPath, updateEntries)
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 grow">
+  <div class="flex flex-col gap-2 grow max-w-video @container">
     <div class="flex items-center justify-between gap-2 ring ring-default rounded-lg p-2">
       <UButton
         to="/"
@@ -64,12 +64,12 @@ watch(folderPath, updateEntries)
 
     <ol
       v-if="entries.length > 0"
-      class="grid grid-cols-3"
+      class="grid grid-cols-2 @3xl:grid-cols-3 @7xl:grid-cols-4 gap-2"
     >
       <li
         v-for="entry in entries"
         :key="entry.name"
-        class="flex hover:bg-muted/50 rounded-lg w-full h-full overflow-hidden *:m-auto"
+        class="flex hover:bg-muted/50 rounded-lg *:m-auto"
       >
         <FolderItem
           v-if="entry.isDirectory"

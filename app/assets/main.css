@@ -17,6 +17,9 @@
   --ui-color-primary-800: #7C5C37;
   --ui-color-primary-900: #4F3821;
   --ui-color-primary-950: #2A1D11;
+
+
+  --video-max-height: calc(100vh - var(--spacing) * 88);
 }
 
 .dark {
@@ -35,4 +38,8 @@
 
 .scrollbar-gutter {
   scrollbar-gutter: stable;
+}
+
+.max-w-video {
+  max-width: max(var(--container-2xl), calc(var(--video-max-height) * 16 / 9));
 }
