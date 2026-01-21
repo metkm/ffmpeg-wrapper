@@ -6,34 +6,33 @@
 }
 
 :root {
-  --ui-color-primary-50: #FEFCF9;
-  --ui-color-primary-100: #FCF8F0;
-  --ui-color-primary-200: #F9EFDB;
-  --ui-color-primary-300: #F2E3C6;
-  --ui-color-primary-400: #E9D3AE;
-  --ui-color-primary-500: #D9BB8D;
-  --ui-color-primary-600: #C39D6D;
-  --ui-color-primary-700: #A47D50;
-  --ui-color-primary-800: #7C5C37;
-  --ui-color-primary-900: #4F3821;
-  --ui-color-primary-950: #2A1D11;
-
+  --color-light-brown-50: #FEFCF9;
+  --color-light-brown-100: #FCF8F0;
+  --color-light-brown-200: #F9EFDB;
+  --color-light-brown-300: #F2E3C6;
+  --color-light-brown-400: #E9D3AE;
+  --color-light-brown-500: #D9BB8D;
+  --color-light-brown-600: #C39D6D;
+  --color-light-brown-700: #A47D50;
+  --color-light-brown-800: #7C5C37;
+  --color-light-brown-900: #4F3821;
+  --color-light-brown-950: #2A1D11;
 
   --video-max-height: calc(100vh - var(--spacing) * 88);
 }
 
 .dark {
-  --ui-color-primary-50: #FDFBF7;
-  --ui-color-primary-100: #FBF6EE;
-  --ui-color-primary-200: #F9EFDB;
-  --ui-color-primary-300: #EEDFC4;
-  --ui-color-primary-400: #E0CEAA;
-  --ui-color-primary-500: #CDB890;
-  --ui-color-primary-600: #AE9971;
-  --ui-color-primary-700: #8C7651;
-  --ui-color-primary-800: #615239;
-  --ui-color-primary-900: #3D3322;
-  --ui-color-primary-950: #1F1A11;
+  --color-light-brown-50: #FDFBF7;
+  --color-light-brown-100: #FBF6EE;
+  --color-light-brown-200: #F9EFDB;
+  --color-light-brown-300: #EEDFC4;
+  --color-light-brown-400: #E0CEAA;
+  --color-light-brown-500: #CDB890;
+  --color-light-brown-600: #AE9971;
+  --color-light-brown-700: #8C7651;
+  --color-light-brown-800: #615239;
+  --color-light-brown-900: #3D3322;
+  --color-light-brown-950: #1F1A11;
 }
 
 .scrollbar-gutter {

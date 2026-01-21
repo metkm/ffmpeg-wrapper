@@ -1,7 +1,7 @@
 export default defineAppConfig({
   ui: {
     colors: {
-      primary: 'purple',
+      primary: 'light-brown',
       neutral: 'neutral',
     },
     select: {
@@ -18,15 +18,6 @@ export default defineAppConfig({
     button: {
       slots: {
         base: 'rounded-full',
-      },
-    },
-    slideover: {
-      variants: {
-        side: {
-          left: {
-            content: 'max-w-xl',
-          },
-        },
       },
     },
   },
