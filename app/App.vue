@@ -9,7 +9,7 @@ onMounted(() => {
 
 <template>
   <UApp>
-    <div class="flex flex-col h-screen w-screen overflow-x-hidden">
+    <div class="flex flex-col h-screen w-screen overflow-hidden">
       <Suspense>
         <AppWindowOverlay />
 
@@ -18,7 +18,9 @@ onMounted(() => {
         </template>
       </Suspense>
 
-      <main class="flex flex-col grow p-2 *:@container *:w-full *:mx-auto overflow-y-auto relative">
+      <main class="grow relative overflow-hidden">
+        <!-- <main class="flex flex-col grow *:@container *:w-full *:mx-auto relative"> -->
+        <!-- <main class="flex flex-col grow p-2 *:@container *:w-full *:mx-auto overflow-y-auto relative"> -->
         <NuxtPage />
       </main>
     </div>
