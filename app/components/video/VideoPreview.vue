@@ -27,7 +27,7 @@ const volumeIcon = computed(
         : 'i-lucide-volume-2',
 )
 
-const togglePlay = () => {
+const togglePlay = async () => {
   if (playing.value) {
     videoElement.value?.pause()
     playing.value = false
@@ -36,6 +36,7 @@ const togglePlay = () => {
     playing.value = true
   }
 
+  await nextTick()
   showVideoState.value = true
 }
 
@@ -67,8 +68,8 @@ defineShortcuts({
         @after-enter="onAfterEnter"
       >
         <div
-          v-if="showVideoState"
-          class="flex items-center justify-center absolute inset-0 z-50 pointer-events-none"
+          v-show="showVideoState"
+          class="flex items-center justify-center absolute inset-0 z-50 pointer-events-none will-change-transform"
         >
           <div class="size-24 p-4 rounded-full bg-default/80">
             <UIcon
