@@ -19,9 +19,9 @@ const videoAssetUrl = ref<string | undefined>()
 
 const videoPath = computed(() => route.query.path!.toString())
 
-const onSelect = (path: string) => {
-  navigateTo({ name: 'export', query: { path } })
-}
+// const onSelect = (path: string) => {
+//   navigateTo({ name: 'export', query: { path } })
+// }
 
 onMounted(() => {
   videoAssetUrl.value = convertFileSrc(videoPath.value)
@@ -29,44 +29,30 @@ onMounted(() => {
 </script>
 
 <template>
-  <UDashboardGroup class="absolute flex flex-1 w-full h-full">
-    <UDashboardSidebar resizable>
-      <p>sidebar content</p>
-    </UDashboardSidebar>
-
-    <UDashboardPanel :ui="{ root: 'min-h-full', body: 'max-w-[calc((100vh_-_32px_-_48px)_*_16/9)]' }">
-      <template #body>
-        <VideoRoot>
+  <UDashboardGroup
+    class="absolute flex flex-1 w-full h-full"
+    :unit="'rem'"
+  >
+    <VideoRoot>
+      <UDashboardPanel
+        :ui="{ root: 'min-h-full', body: 'p-2 sm:p-2 pb-(--dock-height-padding) sm:pb-(--dock-height-padding) sm:gap-2' }"
+      >
+        <template #body>
           <VideoPreview
             v-if="videoAssetUrl"
             :asset-url="videoAssetUrl"
             :path="videoPath"
           />
-        </VideoRoot>
-      </template>
-    </UDashboardPanel>
-  </UDashboardGroup>
+        </template>
+      </UDashboardPanel>
 
-  <!-- <div class="flex-1 flex flex-col gap-4 max-w-video w-full mx-auto">
-    <FileDrop
-      class="fixed inset-0 z-50 pointer-events-none opacity-0"
-      @select="onSelect"
-    />
-
-    <VideoRoot>
-      <VideoInfo
-        :path="videoPath"
-      />
-
-      <VideoPreview
-        v-if="videoAssetUrl"
-        :asset-url="videoAssetUrl"
-        :path="videoPath"
-      />
-
-      <VideoExportOptions
-        :path="videoPath"
-      />
+      <UDashboardSidebar
+        side="right"
+        :ui="{ body: 'pb-(--dock-height-padding)', root: 'min-h-full' }"
+        :default-size="20"
+      >
+        <VideoExportOptions :path="videoPath" />
+      </UDashboardSidebar>
     </VideoRoot>
-  </div> -->
+  </UDashboardGroup>
 </template>

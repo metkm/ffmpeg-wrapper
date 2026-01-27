@@ -142,146 +142,146 @@ defineShortcuts({
 
 <template>
   <section class="@container">
-    <UPageHeader
+    <!-- <UPageHeader
       title="Export Settings"
       :ui="{ wrapper: '!justify-center' }"
-    />
+    /> -->
 
-    <UPageBody class="pb-20">
-      <div class="grid gap-4 grid-cols-2 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end">
-        <UFormField
-          label="Encoder"
-          description="h264 is recommended"
-        >
-          <USelect
-            v-model="encoderOptions.encoder"
-            :items="videoEncoders"
-            variant="soft"
-            :disabled="exportType !== 'video'"
-          />
-        </UFormField>
-
-        <UFormField
-          label="Target file size"
-          :description="`${targetBitrate.toFixed(0)} bitrate`"
-        >
-          <UInputNumber
-            v-model="encoderOptions.fileSizeMb"
-            :min="0"
-            variant="soft"
-            :disabled="exportType === 'image' || encoderOptions.outputExtension === 'webp'"
-          />
-        </UFormField>
-
-        <UFormField
-          label="Video speed"
-          description="speed of video"
-        >
-          <UInputNumber
-            v-model="encoderOptions.speed"
-            :min="0.5"
-            :max="100"
-            :step="0.05"
-            variant="soft"
-            :disabled="exportType === 'image'"
-          />
-        </UFormField>
-
-        <UFormField
-          label="FPS"
-          description="Frames per second"
-        >
-          <USelect
-            v-model="encoderOptions.fps"
-            :items="[10, 20, 24, 30, 60, 144, 180, 240]"
-            color="neutral"
-            variant="soft"
-            :disabled="exportType === 'image'"
-          />
-        </UFormField>
-
-        <UFormField label="Resolution">
-          <div class="flex items-center gap-2">
-            <USelect
-              v-model="encoderOptions.resolution"
-              :items="resolutions"
-              color="neutral"
-              variant="soft"
-              placeholder="default"
-            />
-
-            <UButton
-              v-if="encoderOptions.resolution"
-              icon="i-lucide-x"
-              variant="soft"
-              square
-              :ui="{ base: 'rounded' }"
-              @click="encoderOptions.resolution = undefined"
-            />
-          </div>
-        </UFormField>
-
-        <UFormField label="Extra Video Arguments">
-          <UInput
-            v-model="extraVideoArguments"
-            variant="soft"
-            color="neutral"
-            placeholder="eg. transpose=1,transpose=0"
-          />
-        </UFormField>
-
-        <UFormField label="Extra Audio Arguments">
-          <UInput
-            v-model="extraAudioArguments"
-            variant="soft"
-            color="neutral"
-            placeholder="eg. volume=10.0"
-          />
-        </UFormField>
-
-        <UCheckbox
-          v-model="encoderOptions.noAudio"
-          label="Remove audio"
+    <!-- <UPageBody class="pb-20"> -->
+    <div class="grid gap-4 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end">
+      <UFormField
+        label="Encoder"
+        description="h264 is recommended"
+      >
+        <USelect
+          v-model="encoderOptions.encoder"
+          :items="videoEncoders"
+          variant="soft"
           :disabled="exportType !== 'video'"
         />
+      </UFormField>
 
-        <template v-if="encoderOptions.outputExtension === 'webp'">
-          <UFormField
-            label="Compression level"
-            description="This is a quality/speed tradeoff. Higher values give better quality for a given size at the cost of increased encoding time. (0 - 6)"
-          >
-            <UInputNumber
-              v-model="webpCompressionLevel"
-              :min="0"
-              :max="6"
-              variant="soft"
-            />
-          </UFormField>
-
-          <UFormField
-            label="Quality"
-            description="0 - 100"
-          >
-            <UInputNumber
-              v-model="webpQuality"
-              :min="0"
-              :max="100"
-              variant="soft"
-            />
-          </UFormField>
-        </template>
-      </div>
-
-      <pre
-        v-if="linesDebounced.length > 0"
-        ref="stdoutContainer"
-        class="text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) whitespace-pre-line"
+      <UFormField
+        label="Target file size"
+        :description="`${targetBitrate.toFixed(0)} bitrate`"
       >
+        <UInputNumber
+          v-model="encoderOptions.fileSizeMb"
+          :min="0"
+          variant="soft"
+          :disabled="exportType === 'image' || encoderOptions.outputExtension === 'webp'"
+        />
+      </UFormField>
+
+      <UFormField
+        label="Video speed"
+        description="speed of video"
+      >
+        <UInputNumber
+          v-model="encoderOptions.speed"
+          :min="0.5"
+          :max="100"
+          :step="0.05"
+          variant="soft"
+          :disabled="exportType === 'image'"
+        />
+      </UFormField>
+
+      <UFormField
+        label="FPS"
+        description="Frames per second"
+      >
+        <USelect
+          v-model="encoderOptions.fps"
+          :items="[10, 20, 24, 30, 60, 144, 180, 240]"
+          color="neutral"
+          variant="soft"
+          :disabled="exportType === 'image'"
+        />
+      </UFormField>
+
+      <UFormField label="Resolution">
+        <div class="flex items-center gap-2">
+          <USelect
+            v-model="encoderOptions.resolution"
+            :items="resolutions"
+            color="neutral"
+            variant="soft"
+            placeholder="default"
+          />
+
+          <UButton
+            v-if="encoderOptions.resolution"
+            icon="i-lucide-x"
+            variant="soft"
+            square
+            :ui="{ base: 'rounded' }"
+            @click="encoderOptions.resolution = undefined"
+          />
+        </div>
+      </UFormField>
+
+      <UFormField label="Extra Video Arguments">
+        <UInput
+          v-model="extraVideoArguments"
+          variant="soft"
+          color="neutral"
+          placeholder="eg. transpose=1,transpose=0"
+        />
+      </UFormField>
+
+      <UFormField label="Extra Audio Arguments">
+        <UInput
+          v-model="extraAudioArguments"
+          variant="soft"
+          color="neutral"
+          placeholder="eg. volume=10.0"
+        />
+      </UFormField>
+
+      <UCheckbox
+        v-model="encoderOptions.noAudio"
+        label="Remove audio"
+        :disabled="exportType !== 'video'"
+      />
+
+      <template v-if="encoderOptions.outputExtension === 'webp'">
+        <UFormField
+          label="Compression level"
+          description="This is a quality/speed tradeoff. Higher values give better quality for a given size at the cost of increased encoding time. (0 - 6)"
+        >
+          <UInputNumber
+            v-model="webpCompressionLevel"
+            :min="0"
+            :max="6"
+            variant="soft"
+          />
+        </UFormField>
+
+        <UFormField
+          label="Quality"
+          description="0 - 100"
+        >
+          <UInputNumber
+            v-model="webpQuality"
+            :min="0"
+            :max="100"
+            variant="soft"
+          />
+        </UFormField>
+      </template>
+    </div>
+
+    <pre
+      v-if="linesDebounced.length > 0"
+      ref="stdoutContainer"
+      class="text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) whitespace-pre-line"
+    >
         {{ linesDebounced.join('\n') }}
       </pre>
-    </UPageBody>
+    <!-- </UPageBody> -->
 
-    <AppDockContainer>
+    <AppDockContainer side="bottom-center">
       <LayoutGroup>
         <motion.div
           layout

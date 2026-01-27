@@ -13,12 +13,12 @@
     "windows": [
       {
         "title": "FFTrim",
-        "width": 800,
-        "height": 600,
+        "width": 1050,
+        "height": 610,
         "transparent": true,
         "visible": false,
-        "minHeight": 400,
-        "minWidth": 600,
+        "minHeight": 610,
+        "minWidth": 1050,
         "decorations": false
       }
     ],

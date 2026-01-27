@@ -57,51 +57,8 @@ defineShortcuts({
 </script>
 
 <template>
-  <div class="flex relative w-full aspect-video">
-    <!-- <Transition
-      enter-active-class="transition-all"
-      leave-active-class="transition-all"
-      enter-from-class="opacity-0"
-      leave-to-class="opacity-0"
-      @after-enter="onAfterEnter"
-    >
-      <div
-        v-if="showVideoState"
-        class="flex items-center justify-center absolute inset-0 z-50 pointer-events-none"
-      >
-        <div class="size-24 p-4 rounded-full bg-default/80">
-          <UIcon
-            :name="`i-heroicons-${playing ? 'play' : 'pause'}-solid`"
-            class="h-full w-full"
-          />
-        </div>
-      </div>
-    </Transition> -->
-
-    <video
-      ref="videoElement"
-      :src="assetUrl"
-      class="inline rounded-(--ui-radius) shadow shadow-black w-full h-full"
-      crossorigin="anonymous"
-      @ended="togglePlay"
-    />
-
-    <!-- <div
-      class="absolute inset-0"
-      @click="togglePlay"
-    />
-
-    <VideoCropOverlay
-      v-if="showCrop"
-      v-model="videoRootContext.crop.value"
-      :width="videoRootContext.video.value.width"
-      :height="videoRootContext.video.value.height"
-      class="z-10"
-    /> -->
-  </div>
-
-  <!-- <section class="flex-1 flex flex-col items-center gap-4">
-    <div class="relative w-full aspect-video">
+  <div class="flex flex-col gap-2 w-full">
+    <div class="flex relative w-full aspect-video">
       <Transition
         enter-active-class="transition-all"
         leave-active-class="transition-all"
@@ -125,7 +82,7 @@ defineShortcuts({
       <video
         ref="videoElement"
         :src="assetUrl"
-        class="rounded-(--ui-radius) shadow shadow-black aspect-video w-full"
+        class="inline rounded-(--ui-radius) shadow shadow-black w-full h-full"
         crossorigin="anonymous"
         @ended="togglePlay"
       />
@@ -187,7 +144,7 @@ defineShortcuts({
         />
       </div>
     </div>
-  </section> -->
+  </div>
 </template>
 
 <style>

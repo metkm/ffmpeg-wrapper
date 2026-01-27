@@ -18,7 +18,9 @@
   --color-light-brown-900: #4F3821;
   --color-light-brown-950: #2A1D11;
 
-  --video-max-height: calc(100vh - var(--spacing) * 88);
+  --dock-height-padding: calc(50px + 16px * 2);
+
+  /* --video-max-height: calc(100vh - var(--spacing) * 88); */
 }
 
 .dark {
@@ -39,6 +41,6 @@
   scrollbar-gutter: stable;
 }
 
-.max-w-video {
+/* .max-w-video {
   max-width: max(var(--container-2xl), calc(var(--video-max-height) * 16 / 9));
-}
+} */
