@@ -141,13 +141,7 @@ defineShortcuts({
 </script>
 
 <template>
-  <section class="@container">
-    <!-- <UPageHeader
-      title="Export Settings"
-      :ui="{ wrapper: '!justify-center' }"
-    /> -->
-
-    <!-- <UPageBody class="pb-20"> -->
+  <section class="flex flex-col gap-4 @container">
     <div class="grid gap-4 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end">
       <UFormField
         label="Encoder"
@@ -277,9 +271,8 @@ defineShortcuts({
       ref="stdoutContainer"
       class="text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) whitespace-pre-line"
     >
-        {{ linesDebounced.join('\n') }}
-      </pre>
-    <!-- </UPageBody> -->
+      {{ linesDebounced.join('\n') }}
+    </pre>
 
     <AppDockContainer side="bottom-center">
       <LayoutGroup>

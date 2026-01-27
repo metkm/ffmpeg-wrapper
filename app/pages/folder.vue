@@ -40,7 +40,7 @@ watch(folderPath, updateEntries)
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 grow max-w-video @container">
+  <div class="flex flex-col gap-2 grow max-w-7xl w-full mx-auto @container">
     <div class="flex items-center justify-between gap-2 ring ring-default rounded-lg p-2">
       <UButton
         to="/"

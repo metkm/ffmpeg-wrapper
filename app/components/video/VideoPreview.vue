@@ -57,13 +57,13 @@ defineShortcuts({
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 w-full">
-    <div class="flex relative w-full aspect-video">
+  <div class="flex flex-col gap-4 h-[calc(100%)]">
+    <div class="h-[calc(100%-124px-16px)] mx-auto relative">
       <Transition
         enter-active-class="transition-all"
         leave-active-class="transition-all"
-        enter-from-class="opacity-0"
-        leave-to-class="opacity-0"
+        enter-from-class="opacity-0 scale-80"
+        leave-to-class="opacity-0 scale-80"
         @after-enter="onAfterEnter"
       >
         <div
@@ -82,7 +82,7 @@ defineShortcuts({
       <video
         ref="videoElement"
         :src="assetUrl"
-        class="inline rounded-(--ui-radius) shadow shadow-black w-full h-full"
+        class="aspect-video h-full rounded-lg"
         crossorigin="anonymous"
         @ended="togglePlay"
       />

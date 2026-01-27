@@ -18,7 +18,7 @@ const onSelect = async () => {
 
 <template>
   <div class="flex flex-col grow gap-2 relative justify-center">
-    <FolderHistory class="max-w-video mx-auto w-full" />
+    <FolderHistory class="max-w-7xl mx-auto w-full" />
 
     <FileDrop
       v-model="videoPath"

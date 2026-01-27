@@ -19,10 +19,6 @@ const videoAssetUrl = ref<string | undefined>()
 
 const videoPath = computed(() => route.query.path!.toString())
 
-// const onSelect = (path: string) => {
-//   navigateTo({ name: 'export', query: { path } })
-// }
-
 onMounted(() => {
   videoAssetUrl.value = convertFileSrc(videoPath.value)
 })
@@ -34,9 +30,7 @@ onMounted(() => {
     :unit="'rem'"
   >
     <VideoRoot>
-      <UDashboardPanel
-        :ui="{ root: 'min-h-full', body: 'p-2 sm:p-2 pb-(--dock-height-padding) sm:pb-(--dock-height-padding) sm:gap-2' }"
-      >
+      <UDashboardPanel :ui="{ root: 'min-h-0', body: 'sm:p-2 overflow-hidden relative pb-dock-height sm:pb-dock-height' }">
         <template #body>
           <VideoPreview
             v-if="videoAssetUrl"
@@ -48,7 +42,7 @@ onMounted(() => {
 
       <UDashboardSidebar
         side="right"
-        :ui="{ body: 'pb-(--dock-height-padding)', root: 'min-h-full' }"
+        :ui="{ body: 'pb-dock-height p-2', root: 'min-h-full' }"
         :default-size="20"
       >
         <VideoExportOptions :path="videoPath" />
