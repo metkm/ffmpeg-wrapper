@@ -9,8 +9,6 @@ const props = defineProps<{
 const image = ref<string>()
 const stats = ref<FileInfo>(await stat(props.path))
 
-// const path = `${props.path}\\${props.entry.name}`
-
 onMounted(async () => {
   try {
     const buffer = await invoke<number[]>('get_file_thumbnail', { path: props.path })
@@ -27,34 +25,36 @@ const name = props.path.split('\\').slice(-1)
 
 <template>
   <NuxtLink :to="{ name: 'export', query: { path } }">
-    <div class="aspect-video bg-elevated rounded-lg">
-      <img
-        v-if="image"
-        :src="image"
-        class="w-full h-full rounded-lg"
-      >
+    <div class="space-y-2 p-2 relative after:-z-10 after:absolute after:inset-0 after:bg-elevated after:rounded-lg after:opacity-0 after:scale-90 hover:after:scale-100 hover:after:opacity-100 after:transition-all after:will-change-[transform,opacity]">
+      <div class="aspect-video bg-elevated rounded-lg">
+        <img
+          v-if="image"
+          :src="image"
+          class="w-full h-full rounded-lg"
+        >
 
-      <div
-        v-else
-        class="h-full w-full flex items-center justify-center gap-2 text-muted"
-      >
-        <UIcon
-          name="i-lucide-loader-circle"
-          class="size-5 animate-spin"
-        />
+        <div
+          v-else
+          class="h-full w-full flex items-center justify-center gap-2 text-muted"
+        >
+          <UIcon
+            name="i-lucide-loader-circle"
+            class="size-5 animate-spin"
+          />
 
-        <p class="text-xs">Loading...</p>
+          <p class="text-xs">Loading...</p>
+        </div>
       </div>
-    </div>
 
-    <div class="text-sm p-2">
-      <p>
-        {{ name.join() }}
-      </p>
+      <div class="text-sm">
+        <p>
+          {{ name.join() }}
+        </p>
 
-      <p class="text-xs text-muted mt-1">
-        {{ stats?.mtime?.toLocaleString() }}
-      </p>
+        <p class="text-xs text-muted mt-1">
+          {{ stats?.mtime?.toLocaleString() }}
+        </p>
+      </div>
     </div>
   </NuxtLink>
 </template>

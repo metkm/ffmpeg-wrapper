@@ -41,7 +41,7 @@ watch(folderPath, updateEntries)
 
 <template>
   <div class="flex flex-col gap-2 grow max-w-7xl w-full mx-auto @container">
-    <div class="flex items-center justify-between gap-2 ring ring-default rounded-lg p-2">
+    <div class="flex items-center justify-between gap-2 ring ring-default rounded-lg p-2 mx-2 mt-2">
       <UButton
         to="/"
         icon="i-lucide-home"
@@ -66,7 +66,7 @@ watch(folderPath, updateEntries)
 
     <ol
       v-if="entries.length > 0"
-      class="grid grid-cols-2 @3xl:grid-cols-3 @7xl:grid-cols-4 gap-2"
+      class="grid grid-cols-2 @3xl:grid-cols-3 @7xl:grid-cols-4"
     >
       <li
         v-for="entry in entries"
