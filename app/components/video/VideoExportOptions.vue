@@ -221,6 +221,7 @@ defineShortcuts({
           variant="soft"
           color="neutral"
           placeholder="eg. transpose=1,transpose=0"
+          class="w-full"
         />
       </UFormField>
 
@@ -230,6 +231,7 @@ defineShortcuts({
           variant="soft"
           color="neutral"
           placeholder="eg. volume=10.0"
+          class="w-full"
         />
       </UFormField>
 
