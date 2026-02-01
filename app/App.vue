@@ -1,7 +1,20 @@
 <script setup lang="ts">
 import { getCurrentWindow } from '@tauri-apps/api/window'
+// import { listen } from '@tauri-apps/api/event'
 
-onMounted(() => {
+onMounted(async () => {
+  /* @ts-expect-error This argument can be given by rust side when right click open with is used */
+  const file = window.openedFile as undefined | string
+
+  if (file) {
+    await navigateTo({
+      name: 'export',
+      query: {
+        path: file,
+      },
+    })
+  }
+
   getCurrentWindow()
     .show()
 })

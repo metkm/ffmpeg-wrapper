@@ -114,6 +114,36 @@ pub fn run() {
             get_audio_graph,
             get_frame
         ])
+        .setup(|app| {
+            let mut window_builder = tauri::WebviewWindowBuilder::new(
+                app,
+                "main",
+                tauri::WebviewUrl::App("index.html".into()),
+            );
+
+            if let Some(f) = std::env::args()
+                .into_iter()
+                .skip(1)
+                .find(|f| !f.starts_with("-"))
+            {
+                window_builder = window_builder.initialization_script(format!(
+                    "window.openedFile = {:?}",
+                    f
+                ));
+            }
+
+            window_builder
+                .title("FFTrim")
+                .min_inner_size(1050.0, 610.0)
+                .inner_size(1050.0, 610.0)
+                .transparent(true)
+                .decorations(false)
+                .visible(false)
+                .build()
+                .unwrap();
+
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
