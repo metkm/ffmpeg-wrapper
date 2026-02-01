@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <!-- these registry entries should be installed
+     to the target user's machine -->
+    <DirectoryRef Id="TARGETDIR">
+      <!-- groups together the registry entries to be installed -->
+      <!-- Note the unique `Id` we provide here -->
+
+      <!-- MP4 -->
+      <Component Id="ContextDefaultIcon.mp4" Guid="*">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Classes\fftrim.mp4\DefaultIcon"
+          Action="createAndRemoveOnUninstall">
+          <RegistryValue
+            Type="string"
+            Value="[INSTALLDIR]fftrim.exe,1"
+            KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <Component Id="ContextOpenCommand.mp4" Guid="*">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Classes\fftrim.mp4\shell\open\command"
+          Action="createAndRemoveOnUninstall">
+          <RegistryValue
+            Type="string"
+            Value="&quot;[INSTALLDIR]fftrim.exe&quot; &quot;%1&quot;"
+            KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <Component Id="ContextOpenProgids.mp4" Guid="*">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Classes\.mp4\OpenWithProgids"
+          Action="createAndRemoveOnUninstall">
+          <RegistryValue
+            Type="string"
+            Name="fftrim.mp4"
+            Value=""
+            KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <!-- AVI -->
+      <Component Id="ContextDefaultIcon.avi" Guid="*">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Classes\fftrim.avi\DefaultIcon"
+          Action="createAndRemoveOnUninstall">
+          <RegistryValue
+            Type="string"
+            Value="[INSTALLDIR]fftrim.exe,1"
+            KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <Component Id="ContextOpenCommand.avi" Guid="*">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Classes\fftrim.avi\shell\open\command"
+          Action="createAndRemoveOnUninstall">
+          <RegistryValue
+            Type="string"
+            Value="&quot;[INSTALLDIR]fftrim.exe&quot; &quot;%1&quot;"
+            KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <Component Id="ContextOpenProgids.avi" Guid="*">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Classes\.avi\OpenWithProgids"
+          Action="createAndRemoveOnUninstall">
+          <RegistryValue
+            Type="string"
+            Name="fftrim.avi"
+            Value=""
+            KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <!-- MOV -->
+      <Component Id="ContextDefaultIcon.mov" Guid="*">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Classes\fftrim.mov\DefaultIcon"
+          Action="createAndRemoveOnUninstall">
+          <RegistryValue
+            Type="string"
+            Value="[INSTALLDIR]fftrim.exe,1"
+            KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+      
+      <Component Id="ContextOpenCommand.mov" Guid="*">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Classes\fftrim.mov\shell\open\command"
+          Action="createAndRemoveOnUninstall">
+          <RegistryValue
+            Type="string"
+            Value="&quot;[INSTALLDIR]fftrim.exe&quot; &quot;%1&quot;"
+            KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <Component Id="ContextOpenProgids.mov" Guid="*">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Classes\.mov\OpenWithProgids"
+          Action="createAndRemoveOnUninstall">
+          <RegistryValue
+            Type="string"
+            Name="fftrim.mov"
+            Value=""
+            KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <!-- DVR -->
+      <Component Id="ContextDefaultIcon.dvr" Guid="*">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Classes\fftrim.dvr\DefaultIcon"
+          Action="createAndRemoveOnUninstall">
+          <RegistryValue
+            Type="string"
+            Value="[INSTALLDIR]fftrim.exe,1"
+            KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+      
+      <Component Id="ContextOpenCommand.dvr" Guid="*">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Classes\fftrim.dvr\shell\open\command"
+          Action="createAndRemoveOnUninstall">
+          <RegistryValue
+            Type="string"
+            Value="&quot;[INSTALLDIR]fftrim.exe&quot; &quot;%1&quot;"
+            KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+
+      <Component Id="ContextOpenProgids.dvr" Guid="*">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Classes\.dvr\OpenWithProgids"
+          Action="createAndRemoveOnUninstall">
+          <RegistryValue
+            Type="string"
+            Name="fftrim.dvr"
+            Value=""
+            KeyPath="yes" />
+        </RegistryKey>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix>

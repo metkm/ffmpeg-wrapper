@@ -39,7 +39,26 @@
       "icons/icon.ico"
     ],
     "externalBin": ["binaries/ffmpeg"],
-    "createUpdaterArtifacts": true
+    "createUpdaterArtifacts": true,
+    "windows": {
+      "wix": {
+        "fragmentPaths": ["./windows/fragments/registry.wxs"],
+        "componentRefs": [
+          "ContextDefaultIcon.mp4",
+          "ContextOpenCommand.mp4",
+          "ContextOpenProgids.mp4",
+          "ContextDefaultIcon.avi",
+          "ContextOpenCommand.avi",
+          "ContextOpenProgids.avi",
+          "ContextDefaultIcon.mov",
+          "ContextOpenCommand.mov",
+          "ContextOpenProgids.mov",
+          "ContextDefaultIcon.dvr",
+          "ContextOpenCommand.dvr",
+          "ContextOpenProgids.dvr"
+        ]
+      }
+    }
   },
   "plugins": {
     "updater": {
