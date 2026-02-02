@@ -87,12 +87,12 @@ const { parsedArgs, parseArgsFromString } = useCommandArgs(
         ? encoderOptions.encoder
         : undefined,
     ),
-    'loop': computed(() => (encoderOptions.outputExtension === 'webp' ? '0' : undefined)),
-    'quality': computed(() => encoderOptions.outputExtension === 'webp' ? webpQuality.value : undefined),
-    'compression_level': computed(() => encoderOptions.outputExtension === 'webp' ? webpCompressionLevel.value : undefined),
-    'frames:v': computed(() => (exportType.value === 'image' ? '1' : undefined)),
-    'filter:v': computed(() => parsedArgsVideoFilter.value.join(',')),
-    'filter:a': computed(() => parsedArgsAudioFilter.value.join(',')),
+    'loop': computed(() => encoderOptions.outputExtension === 'webp' && '0'),
+    'quality': computed(() => encoderOptions.outputExtension === 'webp' && webpQuality.value),
+    'compression_level': computed(() => encoderOptions.outputExtension === 'webp' && webpCompressionLevel.value),
+    'frames:v': computed(() => exportType.value === 'image' && '1'),
+    'filter:v': computed(() => encoderOptions.encoder !== 'copy' && parsedArgsVideoFilter.value.join(',')),
+    'filter:a': computed(() => encoderOptions.encoder !== 'copy' && parsedArgsAudioFilter.value.join(',')),
   },
   computed(() => parseArgsFromString(extraArguments.value)),
 )

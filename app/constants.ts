@@ -5,16 +5,8 @@ export const videoEncoders = [
   'h264_nvenc',
   'libx264',
   'libx265',
+  'copy',
 ]
-
-// export const imageEncoders = [
-//   'png',
-//   'jpg',
-// ]
-
-// export const animatedEncoders = [
-//   'av1_nvenc',
-// ]
 
 export const resolutions = ['640x480', '1280x720', '1920x1080', '2560x1440'] as const satisfies string[]
 
