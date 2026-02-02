@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { VideoCropOptions } from '~/hooks/useVideo'
+import type { VideoCropOptions } from '~/types/video'
 
 const props = defineProps<{
   width?: number

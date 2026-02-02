@@ -1,8 +1,7 @@
 <script lang="ts">
 import { createContext } from 'motion-v'
 import type { ShallowRef } from 'vue'
-import type { VideoCropOptions, VideoTrimOptions } from '~/hooks/useVideo'
-import type { Video } from '~/types/video'
+import type { VideoCropOptions, VideoTrimOptions, Video } from '~/types/video'
 
 export interface VideoRootContext {
   videoElement: ShallowRef<HTMLVideoElement | null>

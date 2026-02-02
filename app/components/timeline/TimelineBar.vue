@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useFrames } from '~/hooks/useFrames'
 import { useThumb } from '~/hooks/useThumb'
-import type { VideoTrimOptions } from '~/hooks/useVideo'
+import type { VideoTrimOptions } from '~/types/video'
 
 const props = defineProps<{
   duration: number
