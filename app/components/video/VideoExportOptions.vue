@@ -215,7 +215,7 @@ defineShortcuts({
           v-model="extraArguments"
           variant="soft"
           color="neutral"
-          placeholder="eg. -preset p4, -lookahead_level 5"
+          placeholder="eg. -preset p4 -lookahead_level 5"
           class="w-full"
         />
       </UFormField>
