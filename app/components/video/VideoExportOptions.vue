@@ -81,7 +81,6 @@ const { parsedArgs, parseArgsFromString } = useCommandArgs(
     'i': computed(() => props.path),
     'maxrate': computed(() => `${Math.round(targetBitrate.value)}k`),
     'bufsize': computed(() => `${Math.round(targetBitrate.value / 2)}k`),
-    'rc': 'vbr',
     'vcodec': computed(() =>
       exportType.value === 'video' || encoderOptions.outputExtension === 'avif'
         ? encoderOptions.encoder
