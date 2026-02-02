@@ -6,10 +6,13 @@ import { motion, RowValue } from 'motion-v'
 import { save } from '@tauri-apps/plugin-dialog'
 import { openPath } from '@tauri-apps/plugin-opener'
 import { useKeepScrollBottom } from '~/hooks/useKeepScrollBottom'
+import { useArguments } from '~/hooks/useArguments'
 
 const props = defineProps<{
   path: string
 }>()
+
+const videoRootContext = injectVideoRootContext()
 
 const stdoutContainer = useTemplateRef('stdoutContainer')
 const { updateScrollPosition } = useKeepScrollBottom({
@@ -19,7 +22,20 @@ const { updateScrollPosition } = useKeepScrollBottom({
 
 const { encoderOptions } = useOptionsStore()
 
-const videoRootContext = injectVideoRootContext()
+const targetBitrate = computed(() => {
+  return encoderOptions.fileSizeMb * 8192 / duration.value - 196
+})
+
+const { argsParsed, add: addArgument } = useArguments({
+  an: computed(() => encoderOptions.noAudio),
+  s: computed(() => encoderOptions.resolution),
+  ss: computed(() => formatSeconds(videoRootContext.trim.value.start)),
+  to: computed(() => formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!)),
+  i: computed(() => props.path),
+  maxrate: computed(() => `${Math.round(targetBitrate.value)}k`),
+  bufsize: computed(() => `${Math.round(targetBitrate.value / 2)}k`),
+  rc: 'vbr',
+})
 
 const savePath = ref('')
 const extraArguments = ref('')
@@ -47,10 +63,6 @@ const exportType = computed(() => {
 
 const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(duration)
 
-const targetBitrate = computed(() => {
-  return encoderOptions.fileSizeMb * 8192 / duration.value - 196
-})
-
 const process = async () => {
   const path = await save({
     defaultPath: `${encoderOptions.outputName || 'output'}.${encoderOptions.outputExtension}`,
@@ -66,20 +78,28 @@ const process = async () => {
 
   savePath.value = path
 
-  const baseArgs = [
-    '-y',
-    '-ss', formatSeconds(videoRootContext.trim.value.start),
-    '-to', formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!),
-    '-i', props.path,
-    '-maxrate', `${Math.round(targetBitrate.value)}k`,
-    '-bufsize', `${Math.round(targetBitrate.value / 2)}k`,
-    '-rc', 'vbr',
-  ]
+  // addArgument('ss', formatSeconds(videoRootContext.trim.value.start))
+  // addArgument('to', formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!))
+  // addArgument('i', props.path)
+
+  // addArgument('maxrate', `${Math.round(targetBitrate.value)}k`)
+  // addArgument('bufsize', `${Math.round(targetBitrate.value / 2)}k`)
+  // addArgument('rc', 'vbr')
+
+  // const baseArgs = [
+  //   '-y',
+  //   '-ss', formatSeconds(videoRootContext.trim.value.start),
+  //   '-to', formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!),
+  //   '-i', props.path,
+  //   '-maxrate', `${Math.round(targetBitrate.value)}k`,
+  //   '-bufsize', `${Math.round(targetBitrate.value / 2)}k`,
+  //   '-rc', 'vbr',
+  // ]
 
   const videoFilters = [`fps=${encoderOptions.fps}`]
   const audioFilters = []
 
-  // in one of the videos for some reason videoHeight is given 2 more pixels. Might be something with the aspect ratio but i don't know
+  // // in one of the videos for some reason videoHeight is given 2 more pixels. Might be something with the aspect ratio but i don't know
   if (videoRootContext.crop.value.width || videoRootContext.crop.value.height) {
     const crop = `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
     videoFilters.push(`crop=${crop}`)
@@ -90,26 +110,27 @@ const process = async () => {
     audioFilters.push(`atempo=${encoderOptions.speed}`)
   }
 
-  if (encoderOptions.noAudio) {
-    baseArgs.push('-an')
-  }
+  // if (encoderOptions.noAudio) {
+  //   addArgument('an')
+  // }
 
-  if (encoderOptions.resolution) {
-    baseArgs.push('-s', encoderOptions.resolution)
-  }
+  // if (encoderOptions.resolution) {
+  //   addArgument('s', encoderOptions.resolution)
+  // }
 
   if (exportType.value === 'video') {
-    baseArgs.push('-vcodec', encoderOptions.encoder)
+    addArgument('vcodec', encoderOptions.encoder)
   } else if (exportType.value === 'animated') {
-    baseArgs.push('-loop', '0')
+    addArgument('loop', '0')
 
     if (encoderOptions.outputExtension === 'webp') {
-      baseArgs.push('-compression_level', `${webpCompressionLevel.value}`, '-quality', `${webpQuality.value}`)
+      addArgument('compression_level', `${webpCompressionLevel.value}`)
+      addArgument('quality', webpQuality.value)
     } else if (encoderOptions.outputExtension === 'avif') {
-      baseArgs.push('-vcodec', 'av1_nvenc')
+      addArgument('vcodec', 'av1_nvenc')
     }
   } else {
-    baseArgs.push('-frames:v', '1')
+    addArgument('frames:v', '1')
   }
 
   if (extraArguments.value.length > 0) {
@@ -119,7 +140,7 @@ const process = async () => {
       const [l, r] = x.split(' ')
 
       if (l && r) {
-        baseArgs.push(l, r)
+        addArgument(l, r)
       }
     }
   }
@@ -133,15 +154,18 @@ const process = async () => {
   }
 
   if (videoFilters.length > 0) {
-    baseArgs.push('-filter:v', videoFilters.join(','))
+    addArgument('filter:v', videoFilters.join(','))
   }
 
   if (audioFilters.length > 0) {
-    baseArgs.push('-filter:a', audioFilters.join(','))
+    addArgument('filter:a', audioFilters.join(','))
   }
 
-  baseArgs.push(path)
-  await spawn('binaries/ffmpeg', baseArgs)
+  // addArgument('path')
+
+  // baseArgs.push(path)
+  // console.log(argsParsed.value)
+  await spawn('binaries/ffmpeg', [...argsParsed.value, path])
 }
 
 watch(linesDebounced, () => {
@@ -155,6 +179,14 @@ defineShortcuts({
 
 <template>
   <section class="flex flex-col gap-4 @container">
+    <UTooltip :text="argsParsed.join(' ').toString()">
+      <p class="text-sm text-muted font-medium truncate">
+        {{ argsParsed.join(' ').toString() }}
+      </p>
+    </UTooltip>
+
+    <p>{{ encoderOptions.noAudio }}</p>
+
     <div class="grid gap-4 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end">
       <UFormField
         label="Encoder"
