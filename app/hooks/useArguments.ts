@@ -1,17 +1,18 @@
 type PossibleKeyValues = MaybeRefOrGetter<string | boolean | number | undefined>
+type Arguments = Record<string, PossibleKeyValues>
 
-export const useArguments = (initialArguments: MaybeRefOrGetter<Record<string, PossibleKeyValues>>) => {
-// export const useArguments = (initialArguments: MaybeRefOrGetter<Record<string, PossibleKeyValues>>) => {
-
-  const args = reactive<Record<string, PossibleKeyValues>>({
+export const useArguments = (
+  initialArguments: MaybeRefOrGetter<Arguments>,
+  extraArguments?: MaybeRefOrGetter<Arguments>,
+) => {
+  const args = reactive<Arguments>({
     y: true,
     ...toValue(initialArguments),
   })
-  // const args = reactive(new Map<string, PossibleKeyValues>())
 
-  const argsParsed = computed(() => {
+  const parsed = computed(() => {
     return Object
-      .entries(args)
+      .entries({ ...args, ...toValue(extraArguments) })
       .map(([key, value]) => {
         const result = [`-${key}`]
 
@@ -23,7 +24,7 @@ export const useArguments = (initialArguments: MaybeRefOrGetter<Record<string, P
           return []
         }
 
-        if (value === undefined) {
+        if (!value) {
           return []
         }
 
@@ -33,16 +34,37 @@ export const useArguments = (initialArguments: MaybeRefOrGetter<Record<string, P
       .flat()
   })
 
-  const add = (key: string, value?: PossibleKeyValues) => {
+  const set = (key: string, value?: PossibleKeyValues) => {
     args[key] = value ? value.toString() : true
+  }
 
-    // console.log(key, value)
-    // args.set(key, value ? value.toString() : true)
+  // example
+  // -rc vbr -an -lookahead 4
+  const parseArgumentsFromString = (value: string) => {
+    const s = value.split('-')
+    const result: Record<string, PossibleKeyValues> = {}
+
+    for (const arg of s) {
+      if (!arg) {
+        continue
+      }
+
+      const [l, r] = arg.split(' ')
+
+      if (!l) {
+        continue
+      }
+
+      result[l] = r || true
+    }
+
+    return result
   }
 
   return {
     args,
-    argsParsed,
-    add,
+    parsed,
+    set,
+    parseArgumentsFromString,
   }
 }

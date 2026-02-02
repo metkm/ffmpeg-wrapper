@@ -7,6 +7,7 @@ import { save } from '@tauri-apps/plugin-dialog'
 import { openPath } from '@tauri-apps/plugin-opener'
 import { useKeepScrollBottom } from '~/hooks/useKeepScrollBottom'
 import { useArguments } from '~/hooks/useArguments'
+import { useFilters } from '~/hooks/useFilters'
 
 const props = defineProps<{
   path: string
@@ -26,21 +27,72 @@ const targetBitrate = computed(() => {
   return encoderOptions.fileSizeMb * 8192 / duration.value - 196
 })
 
-const { argsParsed, add: addArgument } = useArguments({
-  an: computed(() => encoderOptions.noAudio),
-  s: computed(() => encoderOptions.resolution),
-  ss: computed(() => formatSeconds(videoRootContext.trim.value.start)),
-  to: computed(() => formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!)),
-  i: computed(() => props.path),
-  maxrate: computed(() => `${Math.round(targetBitrate.value)}k`),
-  bufsize: computed(() => `${Math.round(targetBitrate.value / 2)}k`),
-  rc: 'vbr',
+const exportType = computed(() => {
+  switch (encoderOptions.outputExtension) {
+    case 'mp4':
+    case 'avi':
+    case 'mov':
+    case 'dvr':
+      return 'video'
+    case 'webp':
+    case 'avif':
+      return 'animated'
+    default:
+      return 'image'
+  }
 })
 
-const savePath = ref('')
 const extraArguments = ref('')
 const extraVideoArguments = ref('')
 const extraAudioArguments = ref('')
+
+const {
+  parseFilterFromString: parseVideoFilterFromString,
+  parsed: parsedVideoFiltersFromString,
+} = useFilters({
+  fps: computed(() => encoderOptions.fps),
+  setpts: computed(() => encoderOptions.speed !== 1 ? `PTS/${encoderOptions.speed}` : undefined),
+  crop: computed(() => {
+    if (!videoRootContext.crop.value.width || !videoRootContext.crop.value.height) {
+      return
+    }
+
+    return `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
+  }),
+}, computed(() => parseVideoFilterFromString(extraVideoArguments.value)))
+
+const {
+  parseFilterFromString: parseAudioFiltersFromString,
+  parsed: parsedAudioFiltersFromString,
+} = useFilters({
+  atempo: computed(() => encoderOptions.speed !== 1 ? `atempo=${encoderOptions.speed}` : undefined),
+}, computed(() => parseAudioFiltersFromString(extraAudioArguments.value)))
+
+const {
+  parsed: argsParsed,
+  parseArgumentsFromString,
+} = useArguments(
+  {
+    'an': computed(() => encoderOptions.noAudio),
+    's': computed(() => encoderOptions.resolution),
+    'ss': computed(() => formatSeconds(videoRootContext.trim.value.start)),
+    'to': computed(() => formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!)),
+    'i': computed(() => props.path),
+    'maxrate': computed(() => `${Math.round(targetBitrate.value)}k`),
+    'bufsize': computed(() => `${Math.round(targetBitrate.value / 2)}k`),
+    'rc': 'vbr',
+    'vcodec': computed(() => (exportType.value === 'video' || encoderOptions.outputExtension === 'avif') ? encoderOptions.encoder : undefined),
+    'loop': computed(() => encoderOptions.outputExtension === 'webp' ? '0' : undefined),
+    'quality': computed(() => encoderOptions.outputExtension === 'webp' ? webpQuality.value : undefined),
+    'compression_level': computed(() => encoderOptions.outputExtension === 'webp' ? webpCompressionLevel.value : undefined),
+    'frames:v': computed(() => exportType.value === 'image' ? '1' : undefined),
+    'filter:v': computed(() => parsedVideoFiltersFromString.value),
+    'filter:a': computed(() => parsedAudioFiltersFromString.value),
+  },
+  computed(() => parseArgumentsFromString(extraArguments.value)),
+)
+
+const savePath = ref('')
 
 const webpCompressionLevel = ref(4)
 const webpQuality = ref(50)
@@ -48,18 +100,6 @@ const webpQuality = ref(50)
 const duration = computed(() =>
   ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!) - videoRootContext.trim.value.start) / encoderOptions.speed,
 )
-
-const exportType = computed(() => {
-  if (encoderOptions.outputExtension === 'mp4' || encoderOptions.outputExtension === 'avi' || encoderOptions.outputExtension === 'mov') {
-    return 'video'
-  }
-
-  if (encoderOptions.outputExtension === 'webp' || encoderOptions.outputExtension === 'avif') {
-    return 'animated'
-  }
-
-  return 'image'
-})
 
 const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(duration)
 
@@ -77,94 +117,6 @@ const process = async () => {
   }
 
   savePath.value = path
-
-  // addArgument('ss', formatSeconds(videoRootContext.trim.value.start))
-  // addArgument('to', formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!))
-  // addArgument('i', props.path)
-
-  // addArgument('maxrate', `${Math.round(targetBitrate.value)}k`)
-  // addArgument('bufsize', `${Math.round(targetBitrate.value / 2)}k`)
-  // addArgument('rc', 'vbr')
-
-  // const baseArgs = [
-  //   '-y',
-  //   '-ss', formatSeconds(videoRootContext.trim.value.start),
-  //   '-to', formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!),
-  //   '-i', props.path,
-  //   '-maxrate', `${Math.round(targetBitrate.value)}k`,
-  //   '-bufsize', `${Math.round(targetBitrate.value / 2)}k`,
-  //   '-rc', 'vbr',
-  // ]
-
-  const videoFilters = [`fps=${encoderOptions.fps}`]
-  const audioFilters = []
-
-  // // in one of the videos for some reason videoHeight is given 2 more pixels. Might be something with the aspect ratio but i don't know
-  if (videoRootContext.crop.value.width || videoRootContext.crop.value.height) {
-    const crop = `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
-    videoFilters.push(`crop=${crop}`)
-  }
-
-  if (encoderOptions.speed !== 1) {
-    videoFilters.push(`setpts=PTS/${encoderOptions.speed}`)
-    audioFilters.push(`atempo=${encoderOptions.speed}`)
-  }
-
-  // if (encoderOptions.noAudio) {
-  //   addArgument('an')
-  // }
-
-  // if (encoderOptions.resolution) {
-  //   addArgument('s', encoderOptions.resolution)
-  // }
-
-  if (exportType.value === 'video') {
-    addArgument('vcodec', encoderOptions.encoder)
-  } else if (exportType.value === 'animated') {
-    addArgument('loop', '0')
-
-    if (encoderOptions.outputExtension === 'webp') {
-      addArgument('compression_level', `${webpCompressionLevel.value}`)
-      addArgument('quality', webpQuality.value)
-    } else if (encoderOptions.outputExtension === 'avif') {
-      addArgument('vcodec', 'av1_nvenc')
-    }
-  } else {
-    addArgument('frames:v', '1')
-  }
-
-  if (extraArguments.value.length > 0) {
-    const a = extraArguments.value.split(',')
-
-    for (const x of a) {
-      const [l, r] = x.split(' ')
-
-      if (l && r) {
-        addArgument(l, r)
-      }
-    }
-  }
-
-  if (extraVideoArguments.value.length > 0) {
-    videoFilters.push(...extraVideoArguments.value.split(','))
-  }
-
-  if (extraAudioArguments.value.length > 0) {
-    audioFilters.push(...extraAudioArguments.value.split(','))
-  }
-
-  if (videoFilters.length > 0) {
-    addArgument('filter:v', videoFilters.join(','))
-  }
-
-  if (audioFilters.length > 0) {
-    addArgument('filter:a', audioFilters.join(','))
-  }
-
-  // addArgument('path')
-
-  // baseArgs.push(path)
-  // console.log(argsParsed.value)
   await spawn('binaries/ffmpeg', [...argsParsed.value, path])
 }
 
@@ -184,8 +136,6 @@ defineShortcuts({
         {{ argsParsed.join(' ').toString() }}
       </p>
     </UTooltip>
-
-    <p>{{ encoderOptions.noAudio }}</p>
 
     <div class="grid gap-4 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end">
       <UFormField
