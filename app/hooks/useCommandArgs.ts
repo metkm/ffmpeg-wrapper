@@ -44,21 +44,44 @@ export const useCommandArgs = (
       return result
     }
 
-    const split = value.split(type === 'arg' ? '-' : ',')
+    // Case 1: -key value / -flag
+    if (type === 'arg') {
+    // Match: -key value?  (value optional)
+      const matches = value.match(/-(\S+)(?:\s+(\S+))?/g) ?? []
 
-    for (let index = 0; index < split.length; index++) {
-      const element = split[index]
-      if (!element) {
-        continue
+      for (const match of matches) {
+        const [, key, val] = match.match(/-(\S+)(?:\s+(\S+))?/)!
+        result[key!] = val ?? true
       }
 
-      const [key, value] = element.split(type === 'arg' ? ' ' : '=')
-      if (!key) {
-        continue
-      }
-
-      result[key] = value || true
+      return result
     }
+
+    // Case 2: key=value,key=value
+    const pairs = value.split(',')
+
+    for (const pair of pairs) {
+      if (!pair) continue
+      const [key, val] = pair.split('=')
+      if (!key) continue
+      result[key] = val ?? true
+    }
+
+    // const split = value.split(type === 'arg' ? '-' : ',')
+
+    // for (let index = 0; index < split.length; index++) {
+    //   const element = split[index]
+    //   if (!element) {
+    //     continue
+    //   }
+
+    //   const [key, value] = element.split(type === 'arg' ? ' ' : '=')
+    //   if (!key) {
+    //     continue
+    //   }
+
+    //   result[key] = value || true
+    // }
 
     return result
   }
