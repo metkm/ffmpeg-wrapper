@@ -22,6 +22,7 @@ const { encoderOptions } = useOptionsStore()
 const videoRootContext = injectVideoRootContext()
 
 const savePath = ref('')
+const extraArguments = ref('')
 const extraVideoArguments = ref('')
 const extraAudioArguments = ref('')
 
@@ -70,8 +71,8 @@ const process = async () => {
     '-ss', formatSeconds(videoRootContext.trim.value.start),
     '-to', formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!),
     '-i', props.path,
-    '-maxrate', `${targetBitrate.value}k`,
-    '-bufsize', `${targetBitrate.value / 2}k`,
+    '-maxrate', `${Math.round(targetBitrate.value)}k`,
+    '-bufsize', `${Math.round(targetBitrate.value / 2)}k`,
     '-rc', 'vbr',
   ]
 
@@ -109,6 +110,18 @@ const process = async () => {
     }
   } else {
     baseArgs.push('-frames:v', '1')
+  }
+
+  if (extraArguments.value.length > 0) {
+    const a = extraArguments.value.split(',')
+
+    for (const x of a) {
+      const [l, r] = x.split(' ')
+
+      if (l && r) {
+        baseArgs.push(l, r)
+      }
+    }
   }
 
   if (extraVideoArguments.value.length > 0) {
@@ -213,6 +226,16 @@ defineShortcuts({
             @click="encoderOptions.resolution = undefined"
           />
         </div>
+      </UFormField>
+
+      <UFormField label="Extra Arguments">
+        <UInput
+          v-model="extraArguments"
+          variant="soft"
+          color="neutral"
+          placeholder="eg. -preset p4, -lookahead_level 5"
+          class="w-full"
+        />
       </UFormField>
 
       <UFormField label="Extra Video Arguments">
