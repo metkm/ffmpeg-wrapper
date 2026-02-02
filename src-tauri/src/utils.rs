@@ -1,6 +1,8 @@
 use std::io::Cursor;
 
 use image::{DynamicImage, RgbaImage};
+use tauri::async_runtime::Receiver;
+use tauri_plugin_shell::process::CommandEvent;
 use windows::{
     Win32::{
         Foundation::SIZE,
@@ -96,4 +98,16 @@ pub fn get_bitmap_bytes(hbitmap: HBITMAP) -> Result<Vec<u8>, String> {
         .unwrap();
 
     Ok(png_bytes)
+}
+
+pub async fn read_rx_stdout(mut rx: Receiver<CommandEvent>) -> Result<Vec<u8>, String> {
+    let mut buffer: Vec<u8> = Vec::with_capacity(64_000);
+
+    while let Some(event) = rx.recv().await {
+        if let CommandEvent::Stdout(line_bytes) = event {
+            buffer.extend_from_slice(&line_bytes);
+        }
+    }
+
+    Ok(buffer)
 }
