@@ -73,6 +73,7 @@ const { parsedArgs: parsedArgsVideoFilter } = useCommandArgs(
 const { parsedArgs, parseArgsFromString } = useCommandArgs(
   'arg',
   {
+    'y': true,
     'an': computed(() => encoderOptions.noAudio),
     's': computed(() => encoderOptions.resolution),
     'ss': computed(() => formatSeconds(videoRootContext.trim.value.start)),
