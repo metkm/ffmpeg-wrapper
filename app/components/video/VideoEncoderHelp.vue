@@ -21,7 +21,7 @@ watch(() => props.encoder, showEncoderHelp, { immediate: true })
 </script>
 
 <template>
-  <UModal :ui="{ content: 'max-w-none h-full' }">
+  <UModal :ui="{ content: 'max-w-5xl h-full' }">
     <UButton
       variant="subtle"
       icon="i-lucide-terminal"
