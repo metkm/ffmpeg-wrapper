@@ -5,7 +5,7 @@ interface UseCommandOptions {
   onClose?: () => void
 }
 
-export const useCommand = (options: UseCommandOptions) => {
+export const useCommand = (options?: UseCommandOptions) => {
   const command = shallowRef<Command<string>>()
   const child = shallowRef<Child>()
 
@@ -15,16 +15,16 @@ export const useCommand = (options: UseCommandOptions) => {
   const linesDebounced = refDebounced<string[]>(lines, 200, { maxWait: 200 })
 
   const onData = (_arg: string) => {
-    const line = _arg.trim()
+    const line = _arg.trimEnd()
 
     lines.value = [...lines.value, line]
 
-    options.onLine?.(line)
+    options?.onLine?.(line)
   }
 
   const kill = async () => {
     running.value = false
-    options.onClose?.()
+    options?.onClose?.()
 
     child.value?.kill()
       .then(() => {

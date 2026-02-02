@@ -289,8 +289,8 @@ defineShortcuts({
       ref="stdoutContainer"
       class="text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) whitespace-pre-line"
     >
-  {{ linesDebounced.join("\n") }}
-</pre>
+      {{ linesDebounced.join("\n") }}
+    </pre>
 
     <AppDockContainer side="bottom-center">
       <LayoutGroup>
@@ -406,6 +406,10 @@ defineShortcuts({
               />
             </motion.div>
           </AnimatePresence>
+
+          <Motion layout>
+            <VideoEncoderHelp :encoder="encoderOptions.encoder" />
+          </Motion>
         </motion.div>
       </LayoutGroup>
     </AppDockContainer>
