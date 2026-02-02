@@ -6,8 +6,7 @@ import { motion, RowValue } from 'motion-v'
 import { save } from '@tauri-apps/plugin-dialog'
 import { openPath } from '@tauri-apps/plugin-opener'
 import { useKeepScrollBottom } from '~/hooks/useKeepScrollBottom'
-import { useArguments } from '~/hooks/useArguments'
-import { useFilters } from '~/hooks/useFilters'
+import { useCommandArgs } from '~/hooks/useCommandArgs'
 
 const props = defineProps<{
   path: string
@@ -24,7 +23,7 @@ const { updateScrollPosition } = useKeepScrollBottom({
 const { encoderOptions } = useOptionsStore()
 
 const targetBitrate = computed(() => {
-  return encoderOptions.fileSizeMb * 8192 / duration.value - 196
+  return (encoderOptions.fileSizeMb * 8192) / duration.value - 196
 })
 
 const exportType = computed(() => {
@@ -46,32 +45,33 @@ const extraArguments = ref('')
 const extraVideoArguments = ref('')
 const extraAudioArguments = ref('')
 
-const {
-  parseFilterFromString: parseVideoFilterFromString,
-  parsed: parsedVideoFiltersFromString,
-} = useFilters({
-  fps: computed(() => encoderOptions.fps),
-  setpts: computed(() => encoderOptions.speed !== 1 ? `PTS/${encoderOptions.speed}` : undefined),
-  crop: computed(() => {
-    if (!videoRootContext.crop.value.width || !videoRootContext.crop.value.height) {
-      return
-    }
+const { parsedArgs: parsedArgsAudioFilter, parseArgsFromString: parseArgsFromStringFilter }
+  = useCommandArgs(
+    'filter',
+    {
+      atempo: computed(() => encoderOptions.speed !== 1 ? `atempo=${encoderOptions.speed}` : undefined),
+    },
+    computed(() => parseArgsFromStringFilter(extraAudioArguments.value)),
+  )
 
-    return `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
-  }),
-}, computed(() => parseVideoFilterFromString(extraVideoArguments.value)))
+const { parsedArgs: parsedArgsVideoFilter } = useCommandArgs(
+  'filter',
+  {
+    fps: computed(() => encoderOptions.fps),
+    setpts: computed(() => encoderOptions.speed !== 1 ? `PTS/${encoderOptions.speed}` : undefined),
+    crop: computed(() => {
+      if (!videoRootContext.crop.value.width || !videoRootContext.crop.value.height) {
+        return
+      }
 
-const {
-  parseFilterFromString: parseAudioFiltersFromString,
-  parsed: parsedAudioFiltersFromString,
-} = useFilters({
-  atempo: computed(() => encoderOptions.speed !== 1 ? `atempo=${encoderOptions.speed}` : undefined),
-}, computed(() => parseAudioFiltersFromString(extraAudioArguments.value)))
+      return `${videoRootContext.crop.value.width || videoRootContext.video.value.width}:${videoRootContext.crop.value.height || videoRootContext.video.value.height}:${videoRootContext.crop.value.left}:${videoRootContext.crop.value.top}`
+    }),
+  },
+  computed(() => parseArgsFromStringFilter(extraVideoArguments.value)),
+)
 
-const {
-  parsed: argsParsed,
-  parseArgumentsFromString,
-} = useArguments(
+const { parsedArgs, parseArgsFromString } = useCommandArgs(
+  'arg',
   {
     'an': computed(() => encoderOptions.noAudio),
     's': computed(() => encoderOptions.resolution),
@@ -81,15 +81,19 @@ const {
     'maxrate': computed(() => `${Math.round(targetBitrate.value)}k`),
     'bufsize': computed(() => `${Math.round(targetBitrate.value / 2)}k`),
     'rc': 'vbr',
-    'vcodec': computed(() => (exportType.value === 'video' || encoderOptions.outputExtension === 'avif') ? encoderOptions.encoder : undefined),
-    'loop': computed(() => encoderOptions.outputExtension === 'webp' ? '0' : undefined),
+    'vcodec': computed(() =>
+      exportType.value === 'video' || encoderOptions.outputExtension === 'avif'
+        ? encoderOptions.encoder
+        : undefined,
+    ),
+    'loop': computed(() => (encoderOptions.outputExtension === 'webp' ? '0' : undefined)),
     'quality': computed(() => encoderOptions.outputExtension === 'webp' ? webpQuality.value : undefined),
     'compression_level': computed(() => encoderOptions.outputExtension === 'webp' ? webpCompressionLevel.value : undefined),
-    'frames:v': computed(() => exportType.value === 'image' ? '1' : undefined),
-    'filter:v': computed(() => parsedVideoFiltersFromString.value),
-    'filter:a': computed(() => parsedAudioFiltersFromString.value),
+    'frames:v': computed(() => (exportType.value === 'image' ? '1' : undefined)),
+    'filter:v': computed(() => parsedArgsVideoFilter.value.join(',')),
+    'filter:a': computed(() => parsedArgsAudioFilter.value.join(',')),
   },
-  computed(() => parseArgumentsFromString(extraArguments.value)),
+  computed(() => parseArgsFromString(extraArguments.value)),
 )
 
 const savePath = ref('')
@@ -97,8 +101,11 @@ const savePath = ref('')
 const webpCompressionLevel = ref(4)
 const webpQuality = ref(50)
 
-const duration = computed(() =>
-  ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!) - videoRootContext.trim.value.start) / encoderOptions.speed,
+const duration = computed(
+  () =>
+    ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!)
+      - videoRootContext.trim.value.start)
+    / encoderOptions.speed,
 )
 
 const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(duration)
@@ -106,10 +113,12 @@ const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpe
 const process = async () => {
   const path = await save({
     defaultPath: `${encoderOptions.outputName || 'output'}.${encoderOptions.outputExtension}`,
-    filters: [{
-      name: 'video',
-      extensions: videoExportExtensions,
-    }],
+    filters: [
+      {
+        name: 'video',
+        extensions: videoExportExtensions,
+      },
+    ],
   })
 
   if (!path) {
@@ -117,7 +126,7 @@ const process = async () => {
   }
 
   savePath.value = path
-  await spawn('binaries/ffmpeg', [...argsParsed.value, path])
+  await spawn('binaries/ffmpeg', [...parsedArgs.value, path])
 }
 
 watch(linesDebounced, () => {
@@ -131,13 +140,15 @@ defineShortcuts({
 
 <template>
   <section class="flex flex-col gap-4 @container">
-    <UTooltip :text="argsParsed.join(' ').toString()">
+    <UTooltip :text="parsedArgs.join(' ').toString()">
       <p class="text-sm text-muted font-medium truncate">
-        {{ argsParsed.join(' ').toString() }}
+        {{ parsedArgs.join(" ").toString() }}
       </p>
     </UTooltip>
 
-    <div class="grid gap-4 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end">
+    <div
+      class="grid gap-4 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end"
+    >
       <UFormField
         label="Encoder"
         description="h264 is recommended"
@@ -278,8 +289,8 @@ defineShortcuts({
       ref="stdoutContainer"
       class="text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) whitespace-pre-line"
     >
-      {{ linesDebounced.join('\n') }}
-    </pre>
+  {{ linesDebounced.join("\n") }}
+</pre>
 
     <AppDockContainer side="bottom-center">
       <LayoutGroup>
@@ -314,7 +325,7 @@ defineShortcuts({
                 class="-ml-0.5"
                 @click="openPath(savePath.split('\\').slice(0, -1).join('\\'))"
               >
-                {{ savePath.split('\\').slice(0, -1).join('\\') }}
+                {{ savePath.split("\\").slice(0, -1).join("\\") }}
               </UButton>
             </Motion>
 
