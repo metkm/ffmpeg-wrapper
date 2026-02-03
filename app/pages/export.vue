@@ -44,6 +44,8 @@ onMounted(() => {
         side="right"
         :ui="{ body: 'pb-dock-height p-2', root: 'min-h-full' }"
         :default-size="20"
+        :max-size="40"
+        resizable
       >
         <VideoExportOptions :path="videoPath" />
       </UDashboardSidebar>
