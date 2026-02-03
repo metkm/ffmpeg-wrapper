@@ -22,8 +22,15 @@ export const useOptionsStore = defineStore('options', () => {
     outputExtension: 'mp4',
   })
 
+  const extraArguments = ref('')
+  const extraVideoArguments = ref('')
+  const extraAudioArguments = ref('')
+
   return {
     encoderOptions,
+    extraArguments,
+    extraVideoArguments,
+    extraAudioArguments,
   }
 }, {
   persist: {

@@ -20,14 +20,15 @@ const { updateScrollPosition } = useKeepScrollBottom({
   threshold: 50,
 })
 
-const { encoderOptions } = useOptionsStore()
+const optionsStore = useOptionsStore()
+const { encoderOptions, extraArguments, extraVideoArguments, extraAudioArguments } = storeToRefs(optionsStore)
 
 const targetBitrate = computed(() => {
-  return (encoderOptions.fileSizeMb * 8192) / duration.value - 196
+  return (encoderOptions.value.fileSizeMb * 8192) / duration.value - 196
 })
 
 const exportType = computed(() => {
-  switch (encoderOptions.outputExtension) {
+  switch (encoderOptions.value.outputExtension) {
     case 'mp4':
     case 'avi':
     case 'mov':
@@ -41,15 +42,11 @@ const exportType = computed(() => {
   }
 })
 
-const extraArguments = ref('')
-const extraVideoArguments = ref('')
-const extraAudioArguments = ref('')
-
 const { parsedArgs: parsedArgsAudioFilter, parseArgsFromString: parseArgsFromStringFilter }
   = useCommandArgs(
     'filter',
     {
-      atempo: computed(() => encoderOptions.speed !== 1 ? `atempo=${encoderOptions.speed}` : undefined),
+      atempo: computed(() => encoderOptions.value.speed !== 1 ? `atempo=${encoderOptions.value.speed}` : undefined),
     },
     computed(() => parseArgsFromStringFilter(extraAudioArguments.value)),
   )
@@ -57,8 +54,8 @@ const { parsedArgs: parsedArgsAudioFilter, parseArgsFromString: parseArgsFromStr
 const { parsedArgs: parsedArgsVideoFilter } = useCommandArgs(
   'filter',
   {
-    fps: computed(() => encoderOptions.fps),
-    setpts: computed(() => encoderOptions.speed !== 1 ? `PTS/${encoderOptions.speed}` : undefined),
+    fps: computed(() => encoderOptions.value.fps),
+    setpts: computed(() => encoderOptions.value.speed !== 1 ? `PTS/${encoderOptions.value.speed}` : undefined),
     crop: computed(() => {
       if (!videoRootContext.crop.value.width || !videoRootContext.crop.value.height) {
         return
@@ -74,24 +71,24 @@ const { parsedArgs, parseArgsFromString } = useCommandArgs(
   'arg',
   {
     'y': true,
-    'an': computed(() => encoderOptions.noAudio),
-    's': computed(() => encoderOptions.resolution),
+    'an': computed(() => encoderOptions.value.noAudio),
+    's': computed(() => encoderOptions.value.resolution),
     'ss': computed(() => formatSeconds(videoRootContext.trim.value.start)),
     'to': computed(() => formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!)),
     'i': computed(() => props.path),
     'maxrate': computed(() => `${Math.round(targetBitrate.value)}k`),
     'bufsize': computed(() => `${Math.round(targetBitrate.value / 2)}k`),
     'vcodec': computed(() =>
-      exportType.value === 'video' || encoderOptions.outputExtension === 'avif'
-        ? encoderOptions.encoder
+      exportType.value === 'video' || encoderOptions.value.outputExtension === 'avif'
+        ? encoderOptions.value.encoder
         : undefined,
     ),
-    'loop': computed(() => encoderOptions.outputExtension === 'webp' && '0'),
-    'quality': computed(() => encoderOptions.outputExtension === 'webp' && webpQuality.value),
-    'compression_level': computed(() => encoderOptions.outputExtension === 'webp' && webpCompressionLevel.value),
+    'loop': computed(() => encoderOptions.value.outputExtension === 'webp' && '0'),
+    'quality': computed(() => encoderOptions.value.outputExtension === 'webp' && webpQuality.value),
+    'compression_level': computed(() => encoderOptions.value.outputExtension === 'webp' && webpCompressionLevel.value),
     'frames:v': computed(() => exportType.value === 'image' && '1'),
-    'filter:v': computed(() => encoderOptions.encoder !== 'copy' && parsedArgsVideoFilter.value.join(',')),
-    'filter:a': computed(() => encoderOptions.encoder !== 'copy' && parsedArgsAudioFilter.value.join(',')),
+    'filter:v': computed(() => encoderOptions.value.encoder !== 'copy' && parsedArgsVideoFilter.value.join(',')),
+    'filter:a': computed(() => encoderOptions.value.encoder !== 'copy' && parsedArgsAudioFilter.value.join(',')),
   },
   computed(() => parseArgsFromString(extraArguments.value)),
 )
@@ -105,14 +102,14 @@ const duration = computed(
   () =>
     ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!)
       - videoRootContext.trim.value.start)
-    / encoderOptions.speed,
+    / encoderOptions.value.speed,
 )
 
 const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(duration)
 
 const process = async () => {
   const path = await save({
-    defaultPath: `${encoderOptions.outputName || 'output'}.${encoderOptions.outputExtension}`,
+    defaultPath: `${encoderOptions.value.outputName || 'output'}.${encoderOptions.value.outputExtension}`,
     filters: [
       {
         name: 'video',
@@ -222,33 +219,66 @@ defineShortcuts({
       </UFormField>
 
       <UFormField label="Extra Arguments">
-        <UInput
-          v-model="extraArguments"
-          variant="soft"
-          color="neutral"
-          placeholder="eg. -preset p4 -lookahead_level 5"
-          class="w-full"
-        />
+        <div class="flex gap-2">
+          <UInput
+            v-model="extraArguments"
+            variant="soft"
+            color="neutral"
+            placeholder="eg. -preset p4 -lookahead_level 5"
+            class="w-full"
+          />
+
+          <UButton
+            v-if="extraArguments"
+            icon="i-lucide-x"
+            variant="soft"
+            square
+            :ui="{ base: 'rounded' }"
+            @click="extraArguments = ''"
+          />
+        </div>
       </UFormField>
 
       <UFormField label="Extra Video Arguments">
-        <UInput
-          v-model="extraVideoArguments"
-          variant="soft"
-          color="neutral"
-          placeholder="eg. transpose=1,transpose=0"
-          class="w-full"
-        />
+        <div class="flex gap-2">
+          <UInput
+            v-model="extraVideoArguments"
+            variant="soft"
+            color="neutral"
+            placeholder="eg. transpose=1,transpose=0"
+            class="w-full"
+          />
+
+          <UButton
+            v-if="extraVideoArguments"
+            icon="i-lucide-x"
+            variant="soft"
+            square
+            :ui="{ base: 'rounded' }"
+            @click="extraVideoArguments = ''"
+          />
+        </div>
       </UFormField>
 
       <UFormField label="Extra Audio Arguments">
-        <UInput
-          v-model="extraAudioArguments"
-          variant="soft"
-          color="neutral"
-          placeholder="eg. volume=10.0"
-          class="w-full"
-        />
+        <div class="flex gap-2">
+          <UInput
+            v-model="extraAudioArguments"
+            variant="soft"
+            color="neutral"
+            placeholder="eg. volume=10.0"
+            class="w-full"
+          />
+
+          <UButton
+            v-if="extraAudioArguments"
+            icon="i-lucide-x"
+            variant="soft"
+            square
+            :ui="{ base: 'rounded' }"
+            @click="extraAudioArguments = ''"
+          />
+        </div>
       </UFormField>
 
       <UCheckbox
