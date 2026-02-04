@@ -93,7 +93,7 @@ if (storedNeutral) {
             >
               <template #leading>
                 <div
-                  class="size-4 rounded-lg ring ring-default"
+                  class="size-4 rounded-full ring ring-default"
                   :style="{ backgroundColor: `var(--color-${c.primary}-400)` }"
                 />
               </template>

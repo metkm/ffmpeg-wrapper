@@ -7,8 +7,9 @@ export const useCommandArgs = (
   extraArguments?: MaybeRefOrGetter<Arguments>,
 ) => {
   const args = reactive<Arguments>(toValue(initialArgs))
+  const disabledArgs = ref(new Set())
 
-  const argsObjectFiltered = computed(() => {
+  const argsValidFiltered = computed(() => {
     const result: Record<string, Omit<PossibleKeyValues, 'undefined'>> = {}
 
     for (const [k, v] of Object.entries({ ...args, ...toValue(extraArguments) })) {
@@ -27,8 +28,14 @@ export const useCommandArgs = (
   })
 
   const parsedArgs = computed(() =>
-    Object.entries(argsObjectFiltered.value)
-      .map(([k, v]) => type === 'arg' ? [`-${k}`, v?.toString()] : [`${k}=${v}`])
+    Object.entries(argsValidFiltered.value)
+      .map(([k, v]) => {
+        if (disabledArgs.value.has(k)) {
+          return []
+        }
+
+        return type === 'arg' ? [`-${k}`, v?.toString()] : [`${k}=${v}`]
+      })
       .flat(),
   )
 
@@ -68,10 +75,23 @@ export const useCommandArgs = (
     return result
   }
 
+  const toggleArgDisable = (key: string) => {
+    if (disabledArgs.value.has(key)) {
+      disabledArgs.value.delete(key)
+    } else {
+      disabledArgs.value.add(key)
+    }
+  }
+
+  const parsedArgsText = computed(() => parsedArgs.value.join(' ').toString())
+
   return {
     args,
-    argsObjectFiltered,
+    argsValidFiltered,
     parsedArgs,
+    parsedArgsText,
     parseArgsFromString,
+    disabledArgs,
+    toggleArgDisable,
   }
 }

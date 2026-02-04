@@ -25,12 +25,12 @@ const name = props.path.split('\\').slice(-1)
 
 <template>
   <NuxtLink :to="{ name: 'export', query: { path } }">
-    <div class="space-y-2 p-2 relative after:-z-10 after:absolute after:inset-0 after:bg-elevated after:rounded-lg after:opacity-0 after:scale-90 hover:after:scale-100 hover:after:opacity-100 after:transition-all after:will-change-[transform,opacity]">
-      <div class="aspect-video bg-elevated rounded-lg">
+    <div class="space-y-2 p-2 relative after:-z-10 after:absolute after:inset-0 after:bg-elevated after:rounded-md after:opacity-0 after:scale-90 hover:after:scale-100 hover:after:opacity-100 after:transition-all after:will-change-[transform,opacity]">
+      <div class="aspect-video bg-elevated rounded-md">
         <img
           v-if="image"
           :src="image"
-          class="w-full h-full rounded-lg"
+          class="w-full h-full rounded-md"
         >
 
         <div

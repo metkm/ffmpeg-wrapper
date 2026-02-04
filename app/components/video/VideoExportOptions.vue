@@ -67,7 +67,7 @@ const { parsedArgs: parsedArgsVideoFilter } = useCommandArgs(
   computed(() => parseArgsFromStringFilter(extraVideoArguments.value)),
 )
 
-const { argsObjectFiltered, parsedArgs, parseArgsFromString } = useCommandArgs(
+const { argsValidFiltered, parsedArgs, parseArgsFromString, disabledArgs, toggleArgDisable, parsedArgsText } = useCommandArgs(
   'arg',
   {
     'y': true,
@@ -137,36 +137,53 @@ defineShortcuts({
 
 <template>
   <section class="flex flex-col gap-2 @container">
-    <!-- <UTooltip :text="parsedArgs.join(' ').toString()">
-      <p class="text-sm text-muted font-medium truncate">
-        {{ parsedArgs.join(" ").toString() }}
-      </p>
-    </UTooltip> -->
-
-    <UCollapsible :ui="{ root: 'w-full', content: '' }">
-      <UTooltip :text="parsedArgs.join(' ').toString()">
+    <UCollapsible>
+      <UTooltip :text="parsedArgsText">
         <UButton
-          size="xs"
-          class="max-w-full"
+          size="sm"
           variant="soft"
+          trailing-icon="i-lucide-chevron-down"
+          :ui="{
+            base: 'rounded-md',
+            trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
+          }"
+          block
         >
           <p class="truncate">
-            {{ parsedArgs.join(' ').toString() }}
+            Parsed arguments (given to ffmpeg)
           </p>
         </UButton>
       </UTooltip>
 
       <template #content>
-        <ol class="text-xs font-medium divide-y divide-muted ring ring-default rounded-lg mt-2 m-0.5">
-          <li
-            v-for="([key, value]) in Object.entries(argsObjectFiltered)"
-            :key="key"
-            class="flex items-center gap-4 justify-between *:truncate p-2"
-          >
-            <p>{{ key }}</p>
-            <p>{{ value }}</p>
-          </li>
-        </ol>
+        <div class="mt-2 m-0.5">
+          <ol class="text-xs font-medium divide-y divide-muted ring ring-default rounded-md">
+            <li
+              v-for="([key, value]) in Object.entries(argsValidFiltered)"
+              :key="key"
+              class="flex items-center gap-4 justify-between *:truncate p-2"
+            >
+              <div>
+                <p>{{ key }}</p>
+                <p>{{ value }}</p>
+              </div>
+
+              <UButton
+                class="shrink-0"
+                :variant="disabledArgs.has(key) ? 'soft' : 'solid'"
+                @click="toggleArgDisable(key)"
+              >
+                {{ disabledArgs.has(key) ? 'Enable' : 'Disable' }}
+              </UButton>
+            </li>
+          </ol>
+
+          <UTooltip :text="parsedArgsText">
+            <p class="truncate text-xs mt-2 bg-muted rounded-md p-1">
+              {{ parsedArgsText }}
+            </p>
+          </UTooltip>
+        </div>
       </template>
     </UCollapsible>
 
