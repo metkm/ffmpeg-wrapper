@@ -72,10 +72,10 @@ const { parsedArgs, parseArgsFromString } = useCommandArgs(
   {
     'y': true,
     'an': computed(() => encoderOptions.value.noAudio),
-    's': computed(() => encoderOptions.value.resolution),
     'ss': computed(() => formatSeconds(videoRootContext.trim.value.start)),
     'to': computed(() => formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!)),
     'i': computed(() => props.path),
+    's': computed(() => encoderOptions.value.resolution),
     'maxrate': computed(() => `${Math.round(targetBitrate.value)}k`),
     'bufsize': computed(() => `${Math.round(targetBitrate.value / 2)}k`),
     'vcodec': computed(() =>
