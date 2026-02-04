@@ -67,7 +67,7 @@ const { parsedArgs: parsedArgsVideoFilter } = useCommandArgs(
   computed(() => parseArgsFromStringFilter(extraVideoArguments.value)),
 )
 
-const { parsedArgs, parseArgsFromString } = useCommandArgs(
+const { argsObjectFiltered, parsedArgs, parseArgsFromString } = useCommandArgs(
   'arg',
   {
     'y': true,
@@ -136,12 +136,39 @@ defineShortcuts({
 </script>
 
 <template>
-  <section class="flex flex-col gap-4 @container">
-    <UTooltip :text="parsedArgs.join(' ').toString()">
+  <section class="flex flex-col gap-2 @container">
+    <!-- <UTooltip :text="parsedArgs.join(' ').toString()">
       <p class="text-sm text-muted font-medium truncate">
         {{ parsedArgs.join(" ").toString() }}
       </p>
-    </UTooltip>
+    </UTooltip> -->
+
+    <UCollapsible :ui="{ root: 'w-full', content: '' }">
+      <UTooltip :text="parsedArgs.join(' ').toString()">
+        <UButton
+          size="xs"
+          class="max-w-full"
+          variant="soft"
+        >
+          <p class="truncate">
+            {{ parsedArgs.join(' ').toString() }}
+          </p>
+        </UButton>
+      </UTooltip>
+
+      <template #content>
+        <ol class="text-xs font-medium divide-y divide-muted ring ring-default rounded-lg mt-2 m-0.5">
+          <li
+            v-for="([key, value]) in Object.entries(argsObjectFiltered)"
+            :key="key"
+            class="flex items-center gap-4 justify-between *:truncate p-2"
+          >
+            <p>{{ key }}</p>
+            <p>{{ value }}</p>
+          </li>
+        </ol>
+      </template>
+    </UCollapsible>
 
     <div
       class="grid gap-4 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end"
