@@ -10,7 +10,7 @@ export const useCommandArgs = (
   const disabledArgs = ref(new Set())
 
   const argsValidFiltered = computed(() => {
-    const result: Record<string, Omit<PossibleKeyValues, 'undefined'>> = {}
+    const result: Record<string, NonNullable<PossibleKeyValues>> = {}
 
     for (const [k, v] of Object.entries({ ...args, ...toValue(extraArguments) })) {
       if (!v) {

@@ -133,6 +133,21 @@ watch(linesDebounced, () => {
 defineShortcuts({
   enter: process,
 })
+
+const bitrateArgParsed = computed(() => {
+  const v = argsValidFiltered.value['b:v']
+  if (!v) {
+    return undefined
+  }
+
+  const x = Number(v)
+
+  if (isNaN(x)) {
+    return
+  }
+
+  return x
+})
 </script>
 
 <template>
@@ -281,6 +296,13 @@ defineShortcuts({
             @click="extraArguments = ''"
           />
         </div>
+
+        <p
+          v-if="bitrateArgParsed && bitrateArgParsed > targetBitrate"
+          class="text-xs text-warning-400 mt-1"
+        >
+          The target file size might be higher than {{ encoderOptions.fileSizeMb }}Mb if -b:v given more than {{ Math.round(targetBitrate) }}k
+        </p>
       </UFormField>
 
       <UFormField label="Extra Video Arguments">
