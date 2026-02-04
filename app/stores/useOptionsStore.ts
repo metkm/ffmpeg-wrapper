@@ -26,11 +26,27 @@ export const useOptionsStore = defineStore('options', () => {
   const extraVideoArguments = ref('')
   const extraAudioArguments = ref('')
 
+  const exportType = computed(() => {
+    switch (encoderOptions.value.outputExtension) {
+      case 'mp4':
+      case 'avi':
+      case 'mov':
+      case 'dvr':
+        return 'video'
+      case 'webp':
+      case 'avif':
+        return 'animated'
+      default:
+        return 'image'
+    }
+  })
+
   return {
     encoderOptions,
     extraArguments,
     extraVideoArguments,
     extraAudioArguments,
+    exportType,
   }
 }, {
   persist: {

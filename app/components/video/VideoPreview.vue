@@ -83,7 +83,7 @@ defineShortcuts({
       <video
         ref="videoElement"
         :src="assetUrl"
-        class="aspect-video h-full rounded-lg"
+        class="aspect-video h-full rounded-md"
         crossorigin="anonymous"
         @ended="togglePlay"
       />

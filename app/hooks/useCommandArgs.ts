@@ -7,29 +7,34 @@ export const useCommandArgs = (
   extraArguments?: MaybeRefOrGetter<Arguments>,
 ) => {
   const args = reactive<Arguments>(toValue(initialArgs))
+  const disabledArgs = ref(new Set())
+
+  const argsValidFiltered = computed(() => {
+    const result: Record<string, NonNullable<PossibleKeyValues>> = {}
+
+    for (const [k, v] of Object.entries({ ...args, ...toValue(extraArguments) })) {
+      if (!v) {
+        continue
+      }
+
+      if (type === 'arg' && typeof v === 'boolean' && !v) {
+        continue
+      }
+
+      result[k] = v
+    }
+
+    return result
+  })
 
   const parsedArgs = computed(() =>
-    Object.entries({ ...args, ...toValue(extraArguments) })
+    Object.entries(argsValidFiltered.value)
       .map(([k, v]) => {
-        if (type === 'arg') {
-          const r = [`-${k}`]
-
-          if (!v) {
-            return []
-          }
-
-          if (typeof v === 'boolean') {
-            return v ? r : []
-          }
-
-          return [`-${k}`, v.toString()]
-        } else {
-          if (!v) {
-            return []
-          }
-
-          return [`${k}=${v}`]
+        if (disabledArgs.value.has(k)) {
+          return []
         }
+
+        return type === 'arg' ? [`-${k}`, v?.toString()] : [`${k}=${v}`]
       })
       .flat(),
   )
@@ -67,28 +72,26 @@ export const useCommandArgs = (
       result[key] = val ?? true
     }
 
-    // const split = value.split(type === 'arg' ? '-' : ',')
-
-    // for (let index = 0; index < split.length; index++) {
-    //   const element = split[index]
-    //   if (!element) {
-    //     continue
-    //   }
-
-    //   const [key, value] = element.split(type === 'arg' ? ' ' : '=')
-    //   if (!key) {
-    //     continue
-    //   }
-
-    //   result[key] = value || true
-    // }
-
     return result
   }
 
+  const toggleArgDisable = (key: string) => {
+    if (disabledArgs.value.has(key)) {
+      disabledArgs.value.delete(key)
+    } else {
+      disabledArgs.value.add(key)
+    }
+  }
+
+  const parsedArgsText = computed(() => parsedArgs.value.join(' ').toString())
+
   return {
     args,
+    argsValidFiltered,
     parsedArgs,
+    parsedArgsText,
     parseArgsFromString,
+    disabledArgs,
+    toggleArgDisable,
   }
 }
