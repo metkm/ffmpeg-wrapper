@@ -21,25 +21,10 @@ const { updateScrollPosition } = useKeepScrollBottom({
 })
 
 const optionsStore = useOptionsStore()
-const { encoderOptions, extraArguments, extraVideoArguments, extraAudioArguments } = storeToRefs(optionsStore)
+const { encoderOptions, extraArguments, extraVideoArguments, extraAudioArguments, exportType } = storeToRefs(optionsStore)
 
 const targetBitrate = computed(() => {
   return (encoderOptions.value.fileSizeMb * 8192) / duration.value - 196
-})
-
-const exportType = computed(() => {
-  switch (encoderOptions.value.outputExtension) {
-    case 'mp4':
-    case 'avi':
-    case 'mov':
-    case 'dvr':
-      return 'video'
-    case 'webp':
-    case 'avif':
-      return 'animated'
-    default:
-      return 'image'
-  }
 })
 
 const { parsedArgs: parsedArgsAudioFilter, parseArgsFromString: parseArgsFromStringFilter }
@@ -126,9 +111,7 @@ const process = async () => {
   await spawn('binaries/ffmpeg', [...parsedArgs.value, path])
 }
 
-watch(linesDebounced, () => {
-  updateScrollPosition()
-})
+watch(linesDebounced, updateScrollPosition)
 
 defineShortcuts({
   enter: process,
