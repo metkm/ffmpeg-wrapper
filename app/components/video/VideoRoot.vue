@@ -8,6 +8,7 @@ export interface VideoRootContext {
   crop: Ref<VideoCropOptions>
   trim: Ref<VideoTrimOptions>
   video: Ref<Video>
+  duration: ComputedRef<number>
   onDataLoaded: () => void
 }
 
@@ -16,6 +17,8 @@ export const [injectVideoRootContext, provideVideoRootContext] = createContext<V
 
 <script setup lang="ts">
 const videoElement = shallowRef<HTMLVideoElement | null>(null)
+
+const optionsStore = useOptionsStore()
 
 const video = ref<Video>({ currentTime: 0, volume: 1 })
 const crop = ref<VideoCropOptions>({ top: 0, left: 0 })
@@ -78,12 +81,20 @@ watch(videoElement, () => {
   }
 })
 
+const duration = computed(() => {
+  const e = trim.value.end ?? video.value.duration ?? 0
+  const s = trim.value.start ?? 0
+
+  return (e - s) / optionsStore.encoderOptions.speed
+})
+
 provideVideoRootContext({
   videoElement,
   crop,
   trim,
   video,
   onDataLoaded,
+  duration,
 })
 </script>
 

@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import { resolutions, videoEncoders, videoExportExtensions, videoExportItems } from '~/constants'
+import { resolutions, videoEncoders } from '~/constants'
 import { injectVideoRootContext } from './VideoRoot.vue'
-import { useFFmpeg } from '~/hooks/useFFmpeg'
-import { motion, RowValue } from 'motion-v'
-import { save } from '@tauri-apps/plugin-dialog'
-import { openPath } from '@tauri-apps/plugin-opener'
-import { useKeepScrollBottom } from '~/hooks/useKeepScrollBottom'
 import { useCommandArgs } from '~/hooks/useCommandArgs'
 
 const props = defineProps<{
@@ -14,17 +9,11 @@ const props = defineProps<{
 
 const videoRootContext = injectVideoRootContext()
 
-const stdoutContainer = useTemplateRef('stdoutContainer')
-const { updateScrollPosition } = useKeepScrollBottom({
-  container: stdoutContainer,
-  threshold: 50,
-})
-
 const optionsStore = useOptionsStore()
 const { encoderOptions, extraArguments, extraVideoArguments, extraAudioArguments, exportType } = storeToRefs(optionsStore)
 
 const targetBitrate = computed(() => {
-  return (encoderOptions.value.fileSizeMb * 8192) / duration.value - 196
+  return (encoderOptions.value.fileSizeMb * 8192) / videoRootContext.duration.value - 196
 })
 
 const { parsedArgs: parsedArgsAudioFilter, parseArgsFromString: parseArgsFromStringFilter }
@@ -78,44 +67,8 @@ const { argsValidFiltered, parsedArgs, parseArgsFromString, disabledArgs, toggle
   computed(() => parseArgsFromString(extraArguments.value)),
 )
 
-const savePath = ref('')
-
 const webpCompressionLevel = ref(4)
 const webpQuality = ref(50)
-
-const duration = computed(
-  () =>
-    ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!)
-      - videoRootContext.trim.value.start)
-    / encoderOptions.value.speed,
-)
-
-const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(duration)
-
-const process = async () => {
-  const path = await save({
-    defaultPath: `${encoderOptions.value.outputName || 'output'}.${encoderOptions.value.outputExtension}`,
-    filters: [
-      {
-        name: 'video',
-        extensions: videoExportExtensions,
-      },
-    ],
-  })
-
-  if (!path) {
-    return
-  }
-
-  savePath.value = path
-  await spawn('binaries/ffmpeg', [...parsedArgs.value, path])
-}
-
-watch(linesDebounced, updateScrollPosition)
-
-defineShortcuts({
-  enter: process,
-})
 
 const bitrateArgParsed = computed(() => {
   const v = argsValidFiltered.value['b:v']
@@ -123,7 +76,8 @@ const bitrateArgParsed = computed(() => {
     return undefined
   }
 
-  const x = Number(v)
+  // this is some kind of bandaid now
+  const x = Number(v.toString().replace('k', ''))
 
   if (isNaN(x)) {
     return
@@ -141,10 +95,6 @@ const bitrateArgParsed = computed(() => {
           size="sm"
           variant="soft"
           trailing-icon="i-lucide-chevron-down"
-          :ui="{
-            base: 'rounded-md',
-            trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
-          }"
           block
         >
           <p class="truncate">
@@ -363,134 +313,6 @@ const bitrateArgParsed = computed(() => {
       </template>
     </div>
 
-    <pre
-      v-if="linesDebounced.length > 0"
-      ref="stdoutContainer"
-      class="text-xs max-h-96 w-full overflow-x-hidden overflow-auto border border-dashed border-muted p-4 rounded-(--ui-radius) whitespace-pre-line"
-    >
-      {{ linesDebounced.join("\n") }}
-    </pre>
-
-    <AppDockContainer side="bottom-center">
-      <LayoutGroup>
-        <motion.div
-          layout
-          class="flex items-center gap-2 p-2 backdrop-blur-2xl shadow max-w-max border border-muted overflow-hidden relative"
-          :class="{ 'pb-2.5': running }"
-          :style="{ borderRadius: '999px' }"
-        >
-          <AnimatePresence>
-            <Motion layout>
-              <UButton
-                to="/"
-                icon="i-lucide-x"
-                variant="soft"
-                square
-              />
-            </Motion>
-
-            <Motion
-              v-if="savePath"
-              layout
-              :exit="{ opacity: 0 }"
-              :animate="{ opacity: 1 }"
-              :initial="{ opacity: 0 }"
-            >
-              <UButton
-                icon="i-lucide-folder-symlink"
-                variant="link"
-                color="neutral"
-                square
-                class="-ml-0.5"
-                @click="openPath(savePath.split('\\').slice(0, -1).join('\\'))"
-              >
-                {{ savePath.split("\\").slice(0, -1).join("\\") }}
-              </UButton>
-            </Motion>
-
-            <Motion layout>
-              <UFieldGroup>
-                <UInput
-                  v-model="encoderOptions.outputName"
-                  placeholder="output"
-                  variant="soft"
-                  class="w-26"
-                />
-
-                <USelectMenu
-                  v-model="encoderOptions.outputExtension"
-                  :items="videoExportItems"
-                  class="w-24"
-                  variant="soft"
-                  :search-input="false"
-                />
-              </UFieldGroup>
-            </Motion>
-
-            <Motion
-              v-if="running"
-              layout
-              :exit="{ opacity: 0 }"
-              :animate="{ opacity: 1 }"
-              :initial="{ opacity: 0 }"
-            >
-              <UButton
-                icon="i-lucide-circle-stop"
-                color="warning"
-                variant="subtle"
-                @click="kill"
-              >
-                Stop
-              </UButton>
-            </Motion>
-
-            <Motion layout>
-              <UButton
-                icon="i-lucide-folder-down"
-                :loading="running"
-                @click="process"
-              >
-                <AnimatePresence mode="wait">
-                  <motion.p
-                    v-if="running && progress.eta"
-                    :initial="{ translateY: -50 }"
-                    :animate="{ translateY: 0 }"
-                    :exit="{ translateY: -50 }"
-                    class="min-w-11 text-center"
-                  >
-                    <RowValue :value="etaAnimated" />s
-                  </motion.p>
-                  <motion.p
-                    v-else
-                    :initial="{ translateY: 50 }"
-                    :animate="{ translateY: 0 }"
-                    :exit="{ translateY: 50 }"
-                  >
-                    Export
-                  </motion.p>
-                </AnimatePresence>
-              </UButton>
-            </Motion>
-
-            <motion.div
-              v-if="running"
-              class="absolute bottom-0 w-full h-0.5 bg-accented transition-all"
-              :exit="{ transform: `translateY(100%)` }"
-              :initial="{ transform: `translateY(100%)` }"
-              :animate="{ transform: `translateY(0)` }"
-            >
-              <div
-                class="h-0.5 bg-primary transition-all"
-                :style="{ width: `${progress?.percent}%` }"
-              />
-            </motion.div>
-          </AnimatePresence>
-
-          <Motion layout>
-            <VideoEncoderHelp :encoder="encoderOptions.encoder" />
-          </Motion>
-        </motion.div>
-      </LayoutGroup>
-    </AppDockContainer>
+    <VideoExportDock :args="parsedArgs" />
   </section>
 </template>
