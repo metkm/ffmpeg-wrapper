@@ -24,7 +24,7 @@ const optionsStore = useOptionsStore()
 const { encoderOptions, extraArguments, extraVideoArguments, extraAudioArguments, exportType } = storeToRefs(optionsStore)
 
 const targetBitrate = computed(() => {
-  return (encoderOptions.value.fileSizeMb * 8192) / duration.value - 196
+  return (encoderOptions.value.fileSizeMb * 8192) / videoRootContext.duration.value - 196
 })
 
 const { parsedArgs: parsedArgsAudioFilter, parseArgsFromString: parseArgsFromStringFilter }
@@ -83,14 +83,7 @@ const savePath = ref('')
 const webpCompressionLevel = ref(4)
 const webpQuality = ref(50)
 
-const duration = computed(
-  () =>
-    ((videoRootContext.trim.value.end || videoRootContext.video.value.duration!)
-      - videoRootContext.trim.value.start)
-    / encoderOptions.value.speed,
-)
-
-const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(duration)
+const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(videoRootContext.duration)
 
 const process = async () => {
   const path = await save({
