@@ -34,7 +34,17 @@ export const useCommandArgs = (
           return []
         }
 
-        return type === 'arg' ? [`-${k}`, v?.toString()] : [`${k}=${v}`]
+        if (type === 'arg') {
+          const key = `-${k}`
+
+          if (typeof v === 'boolean' && v) {
+            return [key]
+          }
+
+          return [key, v?.toString()]
+        }
+
+        return [`${k}=${v}`]
       })
       .flat(),
   )
