@@ -59,7 +59,7 @@ defineShortcuts({
 
 <template>
   <div class="flex flex-col gap-4 h-[calc(100%)]">
-    <div class="h-[calc(100%-124px-16px)] mx-auto relative">
+    <div class="flex items-center h-[calc(100%-124px-16px)] mx-auto relative">
       <Transition
         enter-active-class="transition-all"
         leave-active-class="transition-all"
@@ -80,25 +80,27 @@ defineShortcuts({
         </div>
       </Transition>
 
-      <video
-        ref="videoElement"
-        :src="assetUrl"
-        class="aspect-video h-full rounded-md"
-        crossorigin="anonymous"
-        @ended="togglePlay"
-      />
+      <div class="relative aspect-video w-full max-h-full">
+        <video
+          ref="videoElement"
+          :src="assetUrl"
+          class="aspect-video h-full bg-green-500 rounded-md"
+          crossorigin="anonymous"
+          @ended="togglePlay"
+        />
+
+        <VideoCropOverlay
+          v-if="showCrop"
+          v-model="videoRootContext.crop.value"
+          :width="videoRootContext.video.value.width"
+          :height="videoRootContext.video.value.height"
+          class="z-10"
+        />
+      </div>
 
       <div
         class="absolute inset-0"
         @click="togglePlay"
-      />
-
-      <VideoCropOverlay
-        v-if="showCrop"
-        v-model="videoRootContext.crop.value"
-        :width="videoRootContext.video.value.width"
-        :height="videoRootContext.video.value.height"
-        class="z-10"
       />
     </div>
 
