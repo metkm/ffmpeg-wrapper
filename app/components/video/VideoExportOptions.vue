@@ -116,7 +116,8 @@ const bitrateArgParsed = computed(() => {
     return undefined
   }
 
-  const x = Number(v)
+  // this is some kind of bandaid now
+  const x = Number(v.toString().replace('k', ''))
 
   if (isNaN(x)) {
     return
