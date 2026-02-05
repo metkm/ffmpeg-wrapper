@@ -30,7 +30,9 @@ export const useCommandArgs = (
   const parsedArgs = computed(() =>
     Object.entries(argsValidFiltered.value)
       .map(([k, v]) => {
-        if (disabledArgs.value.has(k)) {
+        const isItExtra = toValue(extraArguments)?.[k]
+
+        if (disabledArgs.value.has(k) && !isItExtra) {
           return []
         }
 
