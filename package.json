@@ -1,7 +1,7 @@
 {
   "name": "fftrim",
   "private": true,
-  "version": "1.3.0",
+  "version": "1.4.7",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
