@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Motion, motion, RowValue } from 'motion-v'
+import { Motion, motion, RowValue, type MotionProps } from 'motion-v'
 import { openPath } from '@tauri-apps/plugin-opener'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import { injectVideoRootContext } from './VideoRoot.vue'
@@ -52,10 +52,32 @@ defineShortcuts({
   enter: process,
 })
 
-const variants = {
-  enterFrom: { opacity: 0, y: 50 },
-  enterTo: { opacity: 1, y: 0, transition: { delay: 0.5 } },
-  leaveTo: { opacity: 0, y: 50 },
+const dockVariants: MotionProps['variants'] = {
+  expanded: {
+    transition: {
+      delayChildren: 0.3,
+    },
+  },
+}
+
+const logsVariants: MotionProps['variants'] = {
+  expanded: {
+    opacity: 1,
+  },
+  minimized: {
+    opacity: 0,
+  },
+}
+
+const itemVariants: MotionProps['variants'] = {
+  expanded: {
+    opacity: 1,
+    y: 0,
+  },
+  minimized: {
+    opacity: 0,
+    y: 40,
+  },
 }
 </script>
 
@@ -71,27 +93,40 @@ const variants = {
           layout
           class="bg-default relative overflow-hidden"
           :style="{ borderRadius: showLogs && linesDebounced.length > 1 ? '6px' : '24px' }"
+          :initial="false"
+          :animate="showLogs ? 'expanded' : 'minimized'"
+          :variants="dockVariants"
+          exit="minimized"
         >
           <AnimatePresence mode="popLayout">
             <Motion
-              v-if="showLogs && linesDebounced.length > 1"
+              v-if="showLogs"
               layout
-              exit="leaveTo"
-              initial="enterFrom"
-              animate="enterTo"
-              :variants="variants"
+              :variants="logsVariants"
+              class="h-96 w-4xl"
             >
               <pre
+                v-if="linesDebounced.length > 1"
                 ref="stdoutContainer"
                 class="text-xs h-96 w-4xl whitespace-pre-line overflow-auto p-2"
               >
                 {{ linesDebounced.join('\n') }}
               </pre>
+              <UEmpty
+                v-else
+                title="Logs will shop up here."
+                class="w-full h-full"
+                variant="naked"
+              />
             </Motion>
 
             <motion.div
               layout
               class="flex items-center justify-center gap-2 overflow-hidden bg-default p-2 relative"
+              :initial="false"
+              :animate="running ? 'expanded' : 'minimized'"
+              exit="stopped"
+              :variants="dockVariants"
             >
               <AnimatePresence mode="popLayout">
                 <Motion layout>
@@ -107,10 +142,11 @@ const variants = {
                 <Motion
                   v-if="savePath"
                   layout="position"
-                  :variants="variants"
-                  exit="leaveTo"
-                  initial="enterFrom"
-                  animate="enterTo"
+                  :transition="{ delay: 0.3 }"
+                  :variants="itemVariants"
+                  initial="minimized"
+                  animate="expanded"
+                  exit="minimized"
                 >
                   <UButton
                     icon="i-lucide-folder-symlink"
@@ -146,10 +182,7 @@ const variants = {
                 <Motion
                   v-if="running"
                   layout
-                  :variants="variants"
-                  exit="leaveTo"
-                  initial="enterFrom"
-                  animate="enterTo"
+                  :variants="itemVariants"
                 >
                   <UButton
                     icon="i-lucide-circle-stop"
@@ -190,16 +223,9 @@ const variants = {
                   </UButton>
                 </Motion>
 
-                <Motion
-                  v-if="linesDebounced.length > 1"
-                  layout
-                  :variants="variants"
-                  exit="leaveTo"
-                  initial="enterFrom"
-                  animate="enterTo"
-                >
+                <Motion layout>
                   <UButton
-                    icon="i-lucide-chevron-up"
+                    icon="i-lucide-logs"
                     variant="subtle"
                     @click="showLogs = !showLogs"
                   />

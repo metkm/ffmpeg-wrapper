@@ -43,7 +43,7 @@ export default defineNuxtConfig({
         'lucide:computer',
         'lucide:upload',
         'lucide:chevron-down',
-        'lucide:chevron-up',
+        'lucide:logs',
         'lucide:refresh-cw',
         'lucide:swatch-book',
         'lucide:x',
