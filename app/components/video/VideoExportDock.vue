@@ -114,7 +114,7 @@ const itemVariants: MotionProps['variants'] = {
               </pre>
               <UEmpty
                 v-else
-                title="Logs will shop up here."
+                title="Logs will show up here."
                 class="w-full h-full"
                 variant="naked"
               />
