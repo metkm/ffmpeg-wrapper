@@ -89,13 +89,16 @@ const bitrateArgParsed = computed(() => {
 
 <template>
   <section class="flex flex-col gap-2 @container">
-    <UCollapsible>
+    <UCollapsible class="group">
       <UTooltip :text="parsedArgsText">
         <UButton
-          size="sm"
           variant="soft"
           trailing-icon="i-lucide-chevron-down"
           block
+          :ui="{
+            trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform',
+          }"
+          size="sm"
         >
           <p class="truncate">
             Parsed arguments (given to ffmpeg)
@@ -119,6 +122,7 @@ const bitrateArgParsed = computed(() => {
               <UButton
                 class="shrink-0"
                 :variant="disabledArgs.has(key) ? 'soft' : 'solid'"
+                size="xs"
                 @click="toggleArgDisable(key)"
               >
                 {{ disabledArgs.has(key) ? 'Enable' : 'Disable' }}
