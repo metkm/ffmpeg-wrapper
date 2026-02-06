@@ -87,12 +87,12 @@ const itemVariants: MotionProps['variants'] = {
       <motion.div
         layout
         class="bg-border p-px"
-        :style="{ borderRadius: showLogs && linesDebounced.length > 1 ? '7px' : '24px' }"
+        :style="{ borderRadius: showLogs ? '7px' : '24px' }"
       >
         <motion.div
           layout
           class="bg-default relative overflow-hidden"
-          :style="{ borderRadius: showLogs && linesDebounced.length > 1 ? '6px' : '24px' }"
+          :style="{ borderRadius: showLogs ? '6px' : '24px' }"
           :initial="false"
           :animate="showLogs ? 'expanded' : 'minimized'"
           :variants="dockVariants"
