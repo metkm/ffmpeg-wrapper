@@ -98,6 +98,7 @@ const bitrateArgParsed = computed(() => {
           :ui="{
             trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform',
           }"
+          size="sm"
         >
           <p class="truncate">
             Parsed arguments (given to ffmpeg)
@@ -121,6 +122,7 @@ const bitrateArgParsed = computed(() => {
               <UButton
                 class="shrink-0"
                 :variant="disabledArgs.has(key) ? 'soft' : 'solid'"
+                size="xs"
                 @click="toggleArgDisable(key)"
               >
                 {{ disabledArgs.has(key) ? 'Enable' : 'Disable' }}
