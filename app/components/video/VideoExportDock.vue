@@ -125,7 +125,7 @@ const itemVariants: MotionProps['variants'] = {
               class="flex items-center justify-center gap-2 overflow-hidden bg-default p-2 relative"
               :initial="false"
               :animate="running ? 'expanded' : 'minimized'"
-              exit="stopped"
+              exit="minimized"
               :variants="dockVariants"
             >
               <AnimatePresence mode="popLayout">
@@ -140,13 +140,9 @@ const itemVariants: MotionProps['variants'] = {
                 </Motion>
 
                 <Motion
-                  v-if="savePath"
-                  layout="position"
-                  :transition="{ delay: 0.3 }"
+                  v-if="savePath && running"
+                  layout
                   :variants="itemVariants"
-                  initial="minimized"
-                  animate="expanded"
-                  exit="minimized"
                 >
                   <UButton
                     icon="i-lucide-folder-symlink"
