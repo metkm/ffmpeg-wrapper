@@ -7,8 +7,6 @@
 
   --spacing-dock-inset: calc(var(--spacing) * 4);
   --spacing-dock-gap-for-content: calc(50px + var(--spacing-dock-inset) * 2);
-
-  --spacing-video-wrapper-height: calc(100vh - var(--spacing-titlebar-height) - var(--spacing-dock-gap-for-content) - (var(--spacing) * 2) - 124px - (var(--spacing) * 4));
 }
 
 :root {
