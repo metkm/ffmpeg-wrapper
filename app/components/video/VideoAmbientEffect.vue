@@ -33,7 +33,7 @@ useEventListener(videoRootContext.videoElement, ['pause', 'ended'], loopStop)
 </script>
 
 <template>
-  <div class="absolute -inset-32 -z-10">
+  <div class="absolute -inset-16 -z-10 opacity-40 blur-2xl">
     <canvas
       ref="canvas"
       width="10"

@@ -25,30 +25,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <UDashboardGroup
-    class="absolute flex flex-1 w-full h-full"
-    :unit="'rem'"
-  >
+  <div class="flex h-full w-full">
     <VideoRoot>
-      <UDashboardPanel :ui="{ root: 'min-h-0', body: 'sm:p-2 overflow-hidden relative pb-dock-height sm:pb-dock-height' }">
-        <template #body>
-          <VideoPreview
-            v-if="videoAssetUrl"
-            :asset-url="videoAssetUrl"
-            :path="videoPath"
-          />
-        </template>
-      </UDashboardPanel>
+      <VideoPreview
+        v-if="videoAssetUrl"
+        :asset-url="videoAssetUrl"
+        :path="videoPath"
+        class="pb-dock-gap-for-content p-2"
+      />
 
-      <UDashboardSidebar
-        side="right"
-        :ui="{ body: 'pb-dock-height p-2', root: 'min-h-full' }"
-        :default-size="20"
-        :max-size="40"
-        resizable
-      >
-        <VideoExportOptions :path="videoPath" />
-      </UDashboardSidebar>
+      <VideoExportOptions
+        :path="videoPath"
+        class="overflow-y-auto p-2 pb-dock-gap-for-content w-1/4"
+      />
     </VideoRoot>
-  </UDashboardGroup>
+  </div>
 </template>

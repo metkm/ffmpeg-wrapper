@@ -14,7 +14,7 @@ onUnmounted(resizeListener)
 </script>
 
 <template>
-  <div class="grid grid-cols-[140px_1fr_140px] h-8 text-muted text-xs z-50 ring ring-default">
+  <div class="grid grid-cols-[140px_1fr_140px] h-titlebar-height text-muted text-xs ring ring-default bg-transparent">
     <div
       data-tauri-drag-region
       class="flex items-center gap-1 pl-1"

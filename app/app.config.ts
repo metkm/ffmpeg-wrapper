@@ -17,7 +17,7 @@ export default defineAppConfig({
     },
     button: {
       slots: {
-        base: 'rounded-full',
+        base: 'rounded-4xl',
       },
     },
   },

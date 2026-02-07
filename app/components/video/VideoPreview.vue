@@ -58,8 +58,8 @@ defineShortcuts({
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 h-[calc(100%)]">
-    <div class="flex items-center h-[calc(100%-124px-16px)] mx-auto relative">
+  <div class="flex flex-col gap-4 flex-1 ">
+    <div class="relative min-h-0 min-w-0 max-h-full max-w-full shrink mx-auto flex-1">
       <Transition
         enter-active-class="transition-all"
         leave-active-class="transition-all"
@@ -80,14 +80,17 @@ defineShortcuts({
         </div>
       </Transition>
 
-      <div class="relative aspect-video w-full max-h-full">
+      <div class="flex items-center justify-center aspect-video h-full max-w-full">
+        <VideoAmbientEffect />
+
         <video
           ref="videoElement"
           :src="assetUrl"
-          class="aspect-video h-full rounded-md"
+          class="rounded-md mx-auto shadow shadow-black"
           crossorigin="anonymous"
           @ended="togglePlay"
         />
+        <!-- class="w-full h-full max-w-full max-h-full aspect-video mx-auto rounded-md" -->
 
         <VideoCropOverlay
           v-if="showCrop"

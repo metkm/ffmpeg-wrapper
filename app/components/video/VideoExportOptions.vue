@@ -88,7 +88,7 @@ const bitrateArgParsed = computed(() => {
 </script>
 
 <template>
-  <section class="flex flex-col gap-2 @container">
+  <section class="flex flex-col gap-2">
     <UCollapsible class="group">
       <UTooltip :text="parsedArgsText">
         <UButton
@@ -139,9 +139,7 @@ const bitrateArgParsed = computed(() => {
       </template>
     </UCollapsible>
 
-    <div
-      class="grid gap-4 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end"
-    >
+    <div class="grid gap-4 items-end">
       <UFormField
         label="Encoder"
         description="h264 is recommended"
