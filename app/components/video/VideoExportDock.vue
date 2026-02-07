@@ -55,7 +55,8 @@ defineShortcuts({
 const dockVariants: MotionProps['variants'] = {
   expanded: {
     transition: {
-      delayChildren: 0.3,
+      delayChildren: 0.2,
+      ease: 'linear',
     },
   },
 }
@@ -98,7 +99,7 @@ const itemVariants: MotionProps['variants'] = {
           :variants="dockVariants"
           exit="minimized"
         >
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence>
             <Motion
               v-if="showLogs"
               layout
