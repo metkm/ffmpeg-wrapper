@@ -1,82 +1,52 @@
 <script setup lang="ts">
-import { Command } from '@tauri-apps/plugin-shell'
-import type { VideoInfo } from '~/types/video'
+import { useCommand } from '~/hooks/useCommand'
 
 const props = defineProps<{
   path: string
 }>()
 
-const infoRef = ref<VideoInfo>({})
-const info: VideoInfo = {}
+const info = ref<Record<string, string>>()
 
-const command = Command.sidecar('binaries/ffmpeg', ['-i', props.path])
+// example
+// Stream #0:0: Video: av1 (Main) (av01 / 0x31307661), yuv420p(tv, bt709, progressive), 3840x2160 [SAR 1:1 DAR 16:9], q=2-31, 2000 kb/s, 60 fps, 15360 tbn (default)
+const regex = /Video: (?<codec>\w+)\s\((?<decoder>\w+)\).*?(?<resolution>\d+x\d+).*?(?<fps>\d+\sfps)/
 
-command.stderr.addListener('data', (_line) => {
-  const line = _line.trim()
-
-  if (line.startsWith('creation_time')) {
-    const ds = line.split(': ').at(-1)?.trim()
-
-    if (ds) {
-      const d = new Date(ds)
-      info.creationTime = d.toLocaleString()
+const { spawn } = useCommand({
+  onLine: (line) => {
+    const match = line.match(regex)
+    if (!match) {
+      return
     }
-  } else if (line.startsWith('Stream #0:0')) {
-    const l = line.split(',')
 
-    const fps = l.at(6)?.trim()
-    const resolution = l.at(4)?.split('[').at(0)?.trim()
-    const codec = l.at(0)?.split('Video:').at(1)?.trim().split(' ').at(0)
-
-    info.fps = fps
-    info.resolution = resolution
-    info.videoCodec = codec
-  } else if (line.startsWith('Stream #0:1')) {
-    const l = line.split(',')
-
-    const quality = l.at(4)
-    const codec = l.at(0)?.split('Audio:').at(1)?.trim().split(' ').at(0)
-
-    info.audioQuality = quality
-    info.audioCodec = codec
-  }
+    info.value = match.groups
+  },
 })
 
-command.addListener('close', () => {
-  infoRef.value = info
-})
-
-command.spawn()
+await spawn('binaries/ffmpeg', ['-i', props.path])
 </script>
 
 <template>
-  <UCollapsible class="flex flex-col">
+  <UCollapsible class="group">
     <UButton
-      variant="ghost"
       trailing-icon="i-lucide-chevron-down"
       :ui="{
-        trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
-        base: 'rounded',
+        trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform',
       }"
-      size="xl"
       block
-      color="neutral"
+      size="sm"
+      variant="soft"
+      class="text-left rounded-md"
     >
-      <div class="flex flex-col items-start">
-        <p>
-          {{ path.split('\\').at(-1) }}
-        </p>
-
-        <span class="text-sm text-muted">
-          Press <UKbd>C</UKbd> to toggle crop
-        </span>
-      </div>
+      {{ path.split('\\').at(-1) }}
     </UButton>
 
-    <template #content>
-      <ul class="p-4 rounded bg-elevated muted text-sm mt-4">
+    <template
+      v-if="info"
+      #content
+    >
+      <ul class="text-xs font-medium mt-2 m-0.5">
         <li
-          v-for="[key, value] in Object.entries(infoRef)"
+          v-for="[key, value] in Object.entries(info)"
           :key="key"
         >
           <span class="capitalize text-dimmed">{{ key }}: </span>

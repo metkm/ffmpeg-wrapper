@@ -9,6 +9,7 @@ export interface VideoRootContext {
   trim: Ref<VideoTrimOptions>
   video: Ref<Video>
   duration: ComputedRef<number>
+  loaded: Ref<boolean>
   onDataLoaded: () => void
 }
 
@@ -23,6 +24,7 @@ const optionsStore = useOptionsStore()
 const video = ref<Video>({ currentTime: 0, volume: 1 })
 const crop = ref<VideoCropOptions>({ top: 0, left: 0 })
 const trim = ref<VideoTrimOptions>({ start: 0 })
+const loaded = ref(false)
 
 const onDataLoaded = () => {
   const element = toValue(videoElement)
@@ -34,6 +36,7 @@ const onDataLoaded = () => {
 
   video.value.height = element.videoHeight
   video.value.width = element.videoWidth
+  loaded.value = true
 }
 
 const { ignoreUpdates } = watchIgnorable(
@@ -95,6 +98,7 @@ provideVideoRootContext({
   video,
   onDataLoaded,
   duration,
+  loaded,
 })
 </script>
 

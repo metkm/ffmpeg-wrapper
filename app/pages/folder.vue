@@ -40,69 +40,71 @@ watch(folderPath, updateEntries)
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 grow max-w-7xl w-full mx-auto @container">
-    <div class="flex items-center justify-between gap-2 ring ring-default rounded-md p-2 mx-2 mt-2">
-      <UButton
-        to="/"
-        icon="i-lucide-home"
-        variant="soft"
-        color="neutral"
-      />
+  <div class="overflow-y-auto grow">
+    <div class="flex flex-col gap-2 grow max-w-7xl w-full mx-auto @container">
+      <div class="flex items-center justify-between gap-2 ring ring-default rounded-md p-2 mx-2 mt-2">
+        <UButton
+          to="/"
+          icon="i-lucide-home"
+          variant="soft"
+          color="neutral"
+        />
 
-      <UBreadcrumb
-        :items="items"
-        class="pl-2"
-      />
+        <UBreadcrumb
+          :items="items"
+          class="pl-2"
+        />
 
-      <UButton
-        icon="i-lucide-refresh-cw"
-        variant="soft"
-        color="neutral"
-        @click="updateEntries"
+        <UButton
+          icon="i-lucide-refresh-cw"
+          variant="soft"
+          color="neutral"
+          @click="updateEntries"
+        >
+          Refresh
+        </UButton>
+      </div>
+
+      <ol
+        v-if="entries.length > 0"
+        class="grid grid-cols-2 @3xl:grid-cols-3 @7xl:grid-cols-4"
       >
-        Refresh
-      </UButton>
+        <li
+          v-for="entry in entries"
+          :key="entry.name"
+          class="*:m-auto"
+        >
+          <FolderItem
+            v-if="entry.isDirectory"
+            :path="`${folderPath}\\${entry.name}`"
+            size="xl"
+          />
+          <FileVideo
+            v-else
+            :path="`${folderPath}\\${entry.name}`"
+            class="w-full h-full"
+          />
+        </li>
+      </ol>
+      <UEmpty
+        v-else
+        icon="i-lucide-folder"
+        title="No videos found"
+        class="h-full"
+        variant="naked"
+        :actions="[
+          {
+            label: 'Home',
+            icon: 'i-lucide-home',
+            to: '/',
+          },
+          {
+            label: 'Refresh',
+            icon: 'i-lucide-refresh-cw',
+            onClick: updateEntries,
+          },
+        ]"
+      />
     </div>
-
-    <ol
-      v-if="entries.length > 0"
-      class="grid grid-cols-2 @3xl:grid-cols-3 @7xl:grid-cols-4"
-    >
-      <li
-        v-for="entry in entries"
-        :key="entry.name"
-        class="*:m-auto"
-      >
-        <FolderItem
-          v-if="entry.isDirectory"
-          :path="`${folderPath}\\${entry.name}`"
-          size="xl"
-        />
-        <FileVideo
-          v-else
-          :path="`${folderPath}\\${entry.name}`"
-          class="w-full h-full"
-        />
-      </li>
-    </ol>
-    <UEmpty
-      v-else
-      icon="i-lucide-folder"
-      title="No videos found"
-      class="h-full"
-      variant="naked"
-      :actions="[
-        {
-          label: 'Home',
-          icon: 'i-lucide-home',
-          to: '/',
-        },
-        {
-          label: 'Refresh',
-          icon: 'i-lucide-refresh-cw',
-          onClick: updateEntries,
-        },
-      ]"
-    />
   </div>
 </template>

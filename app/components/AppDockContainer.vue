@@ -16,7 +16,7 @@ const insets = computed(() => {
   const v: Vertical = (left as Vertical | undefined) || 'bottom' satisfies Vertical
   const h: Horizontal = (right as Horizontal | undefined) || 'right' satisfies Horizontal
 
-  return `${v === 'bottom' ? 'bottom-4' : 'top-4'} ${h === 'left' ? 'left-4' : h === 'center' ? 'left-4 right-4' : 'right-4'}`
+  return `${v === 'bottom' ? 'bottom-dock-inset' : 'top-dock-inset'} ${h === 'left' ? 'left-dock-inset' : h === 'center' ? 'left-dock-inset right-dock-inset' : 'right-dock-inset'}`
 })
 </script>
 

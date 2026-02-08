@@ -1,7 +1,7 @@
 {
   "name": "fftrim",
   "private": true,
-  "version": "1.4.7",
+  "version": "1.4.8",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
@@ -25,7 +25,7 @@
     "@vueuse/nuxt": "^14.2.0",
     "@vueuse/router": "^14.2.0",
     "eslint": "^9.39.2",
-    "motion-v": "^1.10.2",
+    "motion-v": "1.10.0",
     "nuxt": "^4.3.0",
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",

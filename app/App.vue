@@ -27,11 +27,11 @@ onMounted(async () => {
         <AppWindowOverlay />
 
         <template #fallback>
-          <div class="h-8" />
+          <div class="h-titlebar-height" />
         </template>
       </Suspense>
 
-      <main class="flex flex-col grow relative p-2 overflow-y-auto">
+      <main class="flex h-full w-full min-h-0 min-w-0 relative *:p-2">
         <NuxtPage />
       </main>
     </div>

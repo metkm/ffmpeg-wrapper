@@ -11,7 +11,7 @@ export const formatSeconds = (n: number) => {
 }
 
 export const formatTimeToSeconds = (time: string) => {
-  const [hours, minutes, seconds] = time.slice(0, -3).split(':')
+  const [hours, minutes, seconds] = time.split(':')
   let totalSeconds = 0
 
   if (hours) {

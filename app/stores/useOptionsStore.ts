@@ -1,4 +1,4 @@
-import type { resolutions, videoExportExtensions } from '~/constants'
+import { fileExtensions, type resolutions } from '~/constants'
 
 interface EncoderOptions {
   noAudio: boolean
@@ -7,7 +7,7 @@ interface EncoderOptions {
   fps: number
   speed: number
   outputName: string
-  outputExtension: typeof videoExportExtensions[number]
+  outputExtension: typeof fileExtensions[number]['name']
   resolution?: typeof resolutions[number]
 }
 
@@ -22,24 +22,29 @@ export const useOptionsStore = defineStore('options', () => {
     outputExtension: 'mp4',
   })
 
+  const savePath = ref('')
+  const rememberSavePath = ref(false)
+
   const extraArguments = ref('')
   const extraVideoArguments = ref('')
   const extraAudioArguments = ref('')
 
-  const exportType = computed(() => {
-    switch (encoderOptions.value.outputExtension) {
-      case 'mp4':
-      case 'avi':
-      case 'mov':
-      case 'dvr':
-        return 'video'
-      case 'webp':
-      case 'avif':
-        return 'animated'
-      default:
-        return 'image'
-    }
-  })
+  const exportType = computed(() => fileExtensions.find(ext => ext.name === encoderOptions.value.outputExtension)?.type || 'video')
+
+  watch(
+    [() => encoderOptions.value.outputName, () => encoderOptions.value.outputExtension],
+    ([name, ext]) => {
+      if (!savePath.value)
+        return
+
+      const s = savePath.value.split('\\')
+      if (s.length < 1 || name.length < 1)
+        return
+
+      s[s.length - 1] = `${name}.${ext}`
+      savePath.value = s.join('\\')
+    },
+  )
 
   return {
     encoderOptions,
@@ -47,6 +52,8 @@ export const useOptionsStore = defineStore('options', () => {
     extraVideoArguments,
     extraAudioArguments,
     exportType,
+    savePath,
+    rememberSavePath,
   }
 }, {
   persist: {

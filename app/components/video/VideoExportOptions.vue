@@ -10,7 +10,7 @@ const props = defineProps<{
 const videoRootContext = injectVideoRootContext()
 
 const optionsStore = useOptionsStore()
-const { encoderOptions, extraArguments, extraVideoArguments, extraAudioArguments, exportType } = storeToRefs(optionsStore)
+const { encoderOptions, extraArguments, extraVideoArguments, extraAudioArguments, exportType, rememberSavePath, savePath } = storeToRefs(optionsStore)
 
 const targetBitrate = computed(() => {
   return (encoderOptions.value.fileSizeMb * 8192) / videoRootContext.duration.value - 196
@@ -88,7 +88,9 @@ const bitrateArgParsed = computed(() => {
 </script>
 
 <template>
-  <section class="flex flex-col gap-2 @container">
+  <section class="flex flex-col gap-2">
+    <VideoInfo :path="path" />
+
     <UCollapsible class="group">
       <UTooltip :text="parsedArgsText">
         <UButton
@@ -99,6 +101,7 @@ const bitrateArgParsed = computed(() => {
             trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform',
           }"
           size="sm"
+          class="rounded-md"
         >
           <p class="truncate">
             Parsed arguments (given to ffmpeg)
@@ -108,16 +111,16 @@ const bitrateArgParsed = computed(() => {
 
       <template #content>
         <div class="mt-2 m-0.5">
-          <ol class="text-xs font-medium divide-y divide-muted ring ring-default rounded-md">
+          <ol class="text-xs font-medium divide-y divide-default ring ring-default rounded-md">
             <li
               v-for="([key, value]) in Object.entries(argsValidFiltered)"
               :key="key"
               class="flex items-center gap-4 justify-between *:truncate p-2"
             >
-              <div>
-                <p>{{ key }}</p>
-                <p>{{ value }}</p>
-              </div>
+              <p class="truncate">
+                <span class="text-dimmed">{{ key }}: </span>
+                {{ value }}
+              </p>
 
               <UButton
                 class="shrink-0"
@@ -139,9 +142,7 @@ const bitrateArgParsed = computed(() => {
       </template>
     </UCollapsible>
 
-    <div
-      class="grid gap-4 @2xl:grid-cols-3 @4xl:grid-cols-4 @5xl:grid-cols-5 @6xl:grid-cols-6 items-end"
-    >
+    <div class="grid gap-4 items-end">
       <UFormField
         label="Encoder"
         description="h264 is recommended"
@@ -288,6 +289,12 @@ const bitrateArgParsed = computed(() => {
         v-model="encoderOptions.noAudio"
         label="Remove audio"
         :disabled="exportType !== 'video'"
+      />
+
+      <UCheckbox
+        v-model="rememberSavePath"
+        label="Remember save path"
+        :description="savePath"
       />
 
       <template v-if="encoderOptions.outputExtension === 'webp'">
