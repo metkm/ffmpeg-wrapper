@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { injectVideoRootContext } from './VideoRoot.vue'
+import { animate } from 'motion-v'
 
 const WIDTH = 1920
 const HEIGHT = 1080
-const PIXELS = 4 * WIDTH * HEIGHT
 
 const videoRootContext = injectVideoRootContext()
 
-const step = ref(0)
-const showAmbient = ref(false)
+const loopId = ref<number>()
 
 const canvas = useTemplateRef('canvas')
 const canvasTemp = useTemplateRef('canvasTemp')
@@ -17,54 +16,60 @@ const ctx = computed(() => canvas.value?.getContext('2d'))
 const ctxTemp = computed(() => canvasTemp.value?.getContext('2d', { willReadFrequently: true }))
 
 const draw = () => {
-  if (!ctx.value || !ctxTemp.value || !videoRootContext.videoElement.value) {
+  if (!ctxTemp.value || !ctx.value || !videoRootContext.videoElement.value) {
     return
   }
 
-  let oldData = ctxTemp.value.getImageData(0, 0, WIDTH, HEIGHT)
+  const oldFrame = ctxTemp.value.getImageData(0, 0, WIDTH, HEIGHT)
+  ctx.value?.putImageData(oldFrame, 0, 0)
 
   ctxTemp.value.drawImage(videoRootContext.videoElement.value, 0, 0, WIDTH, HEIGHT)
 
-  const newData = ctxTemp.value.getImageData(0, 0, WIDTH, HEIGHT)
-
-  if (oldData.data[0] === 0) {
-    oldData = newData
-  }
-
-  let pixels = PIXELS
-
-  while (pixels--) {
-    oldData.data[pixels] = oldData.data[pixels]! * 0.5 + newData.data[pixels]! * 0.5
-  }
-
-  ctx.value.putImageData(oldData, 0, 0)
+  animate(canvasTemp.value!, { opacity: [0, 1] }, { duration: 5 })
 }
 
-const throttledDraw = useThrottleFn(draw, 100)
+const throttledDraw = useThrottleFn(draw, 5_000)
 
-const loop = () => {
+const loop = async () => {
   throttledDraw()
-  step.value = window.requestAnimationFrame(loop)
+  loopId.value = window.requestAnimationFrame(loop)
 }
 
 const loopStop = () => {
-  window.cancelAnimationFrame(step.value)
+  console.log(loopId.value)
+  if (!loopId.value)
+    return
+
+  window.cancelAnimationFrame(loopId.value)
 }
 
 useEventListener(videoRootContext.videoElement, 'play', loop)
-useEventListener(videoRootContext.videoElement, 'seeked', draw)
+useEventListener(videoRootContext.videoElement, 'seeked', throttledDraw)
 useEventListener(videoRootContext.videoElement, ['pause', 'ended'], loopStop)
 
 useEventListener(videoRootContext.videoElement, 'loadeddata', async () => {
   await sleep(500)
   draw()
-  showAmbient.value = true
 })
 </script>
 
 <template>
-  <div class="absolute -inset-10 blur-xl -z-10 opacity-40">
+  <div class="absolute inset-0 -z-10 opacity-40 scale-110 blur-xl pointer-events-none">
     <canvas
+      ref="canvas"
+      :width="WIDTH"
+      :height="HEIGHT"
+      class="w-full h-full"
+    />
+
+    <canvas
+      ref="canvasTemp"
+      :width="WIDTH"
+      :height="HEIGHT"
+      class="w-full h-full absolute inset-0"
+    />
+
+    <!-- <canvas
       ref="canvas"
       :width="WIDTH"
       :height="HEIGHT"
@@ -77,6 +82,6 @@ useEventListener(videoRootContext.videoElement, 'loadeddata', async () => {
       :width="WIDTH"
       :height="HEIGHT"
       class="hidden"
-    />
+    /> -->
   </div>
 </template>
