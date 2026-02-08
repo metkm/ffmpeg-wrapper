@@ -10,7 +10,7 @@ const props = defineProps<{
 const videoRootContext = injectVideoRootContext()
 
 const optionsStore = useOptionsStore()
-const { encoderOptions, extraArguments, extraVideoArguments, extraAudioArguments, exportType } = storeToRefs(optionsStore)
+const { encoderOptions, extraArguments, extraVideoArguments, extraAudioArguments, exportType, rememberSavePath, savePath } = storeToRefs(optionsStore)
 
 const targetBitrate = computed(() => {
   return (encoderOptions.value.fileSizeMb * 8192) / videoRootContext.duration.value - 196
@@ -99,6 +99,7 @@ const bitrateArgParsed = computed(() => {
             trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform',
           }"
           size="sm"
+          class="rounded-md"
         >
           <p class="truncate">
             Parsed arguments (given to ffmpeg)
@@ -286,6 +287,12 @@ const bitrateArgParsed = computed(() => {
         v-model="encoderOptions.noAudio"
         label="Remove audio"
         :disabled="exportType !== 'video'"
+      />
+
+      <UCheckbox
+        v-model="rememberSavePath"
+        label="Remember save path"
+        :description="savePath"
       />
 
       <template v-if="encoderOptions.outputExtension === 'webp'">

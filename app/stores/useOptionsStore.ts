@@ -22,26 +22,14 @@ export const useOptionsStore = defineStore('options', () => {
     outputExtension: 'mp4',
   })
 
+  const savePath = ref('')
+  const rememberSavePath = ref(false)
+
   const extraArguments = ref('')
   const extraVideoArguments = ref('')
   const extraAudioArguments = ref('')
 
-  const exportType = computed(() => {
-    return fileExtensions.find(ext => ext.name === encoderOptions.value.outputExtension)?.type || 'video'
-
-    // switch (encoderOptions.value.outputExtension) {
-    //   case 'mp4':
-    //   case 'avi':
-    //   case 'mov':
-    //   case 'dvr':
-    //     return 'video'
-    //   case 'webp':
-    //   case 'avif':
-    //     return 'animated'
-    //   default:
-    //     return 'image'
-    // }
-  })
+  const exportType = computed(() => fileExtensions.find(ext => ext.name === encoderOptions.value.outputExtension)?.type || 'video')
 
   return {
     encoderOptions,
@@ -49,6 +37,8 @@ export const useOptionsStore = defineStore('options', () => {
     extraVideoArguments,
     extraAudioArguments,
     exportType,
+    savePath,
+    rememberSavePath,
   }
 }, {
   persist: {

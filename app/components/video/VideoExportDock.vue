@@ -20,23 +20,24 @@ const { updateScrollPosition } = useKeepScrollBottom({
 })
 
 const optionsStore = useOptionsStore()
-const { encoderOptions } = storeToRefs(optionsStore)
+const { encoderOptions, savePath, rememberSavePath } = storeToRefs(optionsStore)
 
-const savePath = ref('')
 const showLogs = ref(false)
 
 const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(videoRootContext.duration)
 
 const process = async () => {
-  const path = await save({
-    defaultPath: `${encoderOptions.value.outputName || 'output'}.${encoderOptions.value.outputExtension}`,
-    filters: [
-      {
-        name: 'video',
-        extensions: fileExtensionNames,
-      },
-    ],
-  })
+  const path = rememberSavePath.value && savePath.value
+    ? savePath.value
+    : await save({
+        defaultPath: `${encoderOptions.value.outputName || 'output'}.${encoderOptions.value.outputExtension}`,
+        filters: [
+          {
+            name: 'video',
+            extensions: fileExtensionNames,
+          },
+        ],
+      })
 
   if (!path) {
     return
