@@ -1,25 +1,44 @@
 <script setup lang="ts">
 import { injectVideoRootContext } from './VideoRoot.vue'
 
-const videoRootContext = injectVideoRootContext()
+const WIDTH = 1920
+const HEIGHT = 1080
+const PIXELS = 4 * WIDTH * HEIGHT
 
-const canvas = useTemplateRef('canvas')
+const videoRootContext = injectVideoRootContext()
 
 const step = ref(0)
 
-const draw = () => {
-  const ctx = canvas.value?.getContext('2d')
+const canvas = useTemplateRef('canvas')
+const canvasTemp = useTemplateRef('canvasTemp')
 
-  if (!videoRootContext.videoElement.value || !canvas.value || !ctx) {
+const ctx = computed(() => canvas.value?.getContext('2d'))
+const ctxTemp = computed(() => canvasTemp.value?.getContext('2d'))
+
+const draw = () => {
+  if (!ctx.value || !ctxTemp.value || !videoRootContext.videoElement.value) {
     return
   }
 
-  console.log(videoRootContext.videoElement.value?.readyState)
-  ctx.drawImage(videoRootContext.videoElement.value, 0, 0, canvas.value.width, canvas.value.height)
+  const oldData = ctxTemp.value.getImageData(0, 0, WIDTH, HEIGHT)
+
+  ctxTemp.value.drawImage(videoRootContext.videoElement.value, 0, 0, WIDTH, HEIGHT)
+
+  const newData = ctxTemp.value.getImageData(0, 0, WIDTH, HEIGHT)
+
+  let pixels = PIXELS
+
+  while (pixels--) {
+    oldData.data[pixels] = oldData.data[pixels]! * 0.5 + newData.data[pixels]! * 0.5
+  }
+
+  ctx.value.putImageData(oldData, 0, 0)
 }
 
+const throttledDraw = useThrottleFn(draw, 200)
+
 const loop = () => {
-  draw()
+  throttledDraw()
   step.value = window.requestAnimationFrame(loop)
 }
 
@@ -36,9 +55,16 @@ useEventListener(videoRootContext.videoElement, ['pause', 'ended'], loopStop)
   <div class="absolute -inset-16 -z-10 opacity-40 blur-2xl">
     <canvas
       ref="canvas"
-      width="10"
-      height="6"
-      class="w-full h-full aspect-video pointer-events-none"
+      :width="WIDTH"
+      :height="HEIGHT"
+      class="h-80 aspect-video pointer-events-none"
+    />
+
+    <canvas
+      ref="canvasTemp"
+      :width="WIDTH"
+      :height="HEIGHT"
+      class="hidden"
     />
   </div>
 </template>

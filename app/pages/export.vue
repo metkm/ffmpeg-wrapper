@@ -25,7 +25,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex h-full w-full">
+  <div class="flex h-full w-full p-0!">
     <VideoRoot>
       <VideoPreview
         v-if="videoAssetUrl"
