@@ -86,11 +86,10 @@ defineShortcuts({
         <video
           ref="videoElement"
           :src="assetUrl"
-          class="rounded-md mx-auto shadow shadow-black"
+          class="rounded-md h-full w-full mx-auto shadow shadow-black animate-fade-in"
           crossorigin="anonymous"
           @ended="togglePlay"
         />
-        <!-- class="w-full h-full max-w-full max-h-full aspect-video mx-auto rounded-md" -->
 
         <VideoCropOverlay
           v-if="showCrop"

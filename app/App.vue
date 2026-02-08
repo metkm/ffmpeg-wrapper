@@ -31,7 +31,7 @@ onMounted(async () => {
         </template>
       </Suspense>
 
-      <main class="flex h-full w-full min-h-0 min-w-0 relative *:p-2 overflow-y-auto">
+      <main class="flex h-full w-full min-h-0 min-w-0 relative *:p-2">
         <NuxtPage />
       </main>
     </div>
