@@ -89,6 +89,8 @@ const bitrateArgParsed = computed(() => {
 
 <template>
   <section class="flex flex-col gap-2">
+    <VideoInfo :path="path" />
+
     <UCollapsible class="group">
       <UTooltip :text="parsedArgsText">
         <UButton
@@ -109,16 +111,16 @@ const bitrateArgParsed = computed(() => {
 
       <template #content>
         <div class="mt-2 m-0.5">
-          <ol class="text-xs font-medium divide-y divide-muted ring ring-default rounded-md">
+          <ol class="text-xs font-medium divide-y divide-default ring ring-default rounded-md">
             <li
               v-for="([key, value]) in Object.entries(argsValidFiltered)"
               :key="key"
               class="flex items-center gap-4 justify-between *:truncate p-2"
             >
-              <div>
-                <p>{{ key }}</p>
-                <p>{{ value }}</p>
-              </div>
+              <p class="truncate">
+                <span class="text-dimmed">{{ key }}: </span>
+                {{ value }}
+              </p>
 
               <UButton
                 class="shrink-0"

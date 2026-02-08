@@ -5,7 +5,7 @@ import { animate } from 'motion-v'
 
 const regex = /(?<name>\w+)=\s*(?<value>.*?)\s/gm
 
-export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
+export const useFFmpeg = (duration?: MaybeRefOrGetter<number>) => {
   const progress = ref<FFmpegProgress>({})
 
   const _etaAnimated = useMotionValue(0)
@@ -26,7 +26,7 @@ export const useFFmpeg = (duration: MaybeRefOrGetter<number>) => {
 
       if (name === 'speed') {
         progress.value.speed = parseFloat(value?.slice(0, -1) || '1')
-      } else if (name === 'time') {
+      } else if (name === 'time' && duration) {
         const seconds = formatTimeToSeconds(value)
         const durationLeft = toValue(duration) - seconds
 
