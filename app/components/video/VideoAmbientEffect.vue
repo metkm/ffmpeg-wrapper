@@ -36,7 +36,6 @@ const loop = async () => {
 }
 
 const loopStop = () => {
-  console.log(loopId.value)
   if (!loopId.value)
     return
 
