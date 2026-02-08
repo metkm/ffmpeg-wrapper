@@ -24,7 +24,7 @@ const { encoderOptions, savePath, rememberSavePath } = storeToRefs(optionsStore)
 
 const showLogs = ref(false)
 
-const { running, spawn, linesDebounced, kill, progress, etaAnimated } = useFFmpeg(videoRootContext.duration)
+const { running, spawn, linesDebounced, kill, progress, etaAnimated, error } = useFFmpeg(videoRootContext.duration)
 
 const process = async () => {
   const path = rememberSavePath.value && savePath.value
@@ -244,6 +244,7 @@ const itemVariants: MotionProps['variants'] = {
                 <UButton
                   icon="i-lucide-logs"
                   variant="subtle"
+                  :color="error ? 'error' : 'primary'"
                   @click="showLogs = !showLogs"
                 />
               </Motion>

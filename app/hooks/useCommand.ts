@@ -10,6 +10,7 @@ export const useCommand = (options?: UseCommandOptions) => {
   const child = shallowRef<Child>()
 
   const running = ref(false)
+  const error = ref(false)
 
   const lines = ref<string[]>([])
   const linesDebounced = refDebounced<string[]>(lines, 200, { maxWait: 200 })
@@ -23,6 +24,7 @@ export const useCommand = (options?: UseCommandOptions) => {
   }
 
   const kill = async () => {
+    error.value = false
     running.value = false
     options?.onClose?.()
 
@@ -45,7 +47,13 @@ export const useCommand = (options?: UseCommandOptions) => {
     command.value.stdout.on('data', onData)
     command.value.stderr.on('data', onData)
 
-    command.value.once('close', kill)
+    command.value.once('close', (terminatedPayload) => {
+      kill()
+
+      if (terminatedPayload.code !== 0) {
+        error.value = true
+      }
+    })
     command.value.once('error', kill)
 
     child.value = await command.value.spawn()
@@ -66,5 +74,6 @@ export const useCommand = (options?: UseCommandOptions) => {
     kill,
     spawn,
     running,
+    error,
   }
 }
