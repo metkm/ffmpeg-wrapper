@@ -8,6 +8,7 @@ const PIXELS = 4 * WIDTH * HEIGHT
 const videoRootContext = injectVideoRootContext()
 
 const step = ref(0)
+const showAmbient = ref(false)
 
 const canvas = useTemplateRef('canvas')
 const canvasTemp = useTemplateRef('canvasTemp')
@@ -39,7 +40,7 @@ const draw = () => {
   ctx.value.putImageData(oldData, 0, 0)
 }
 
-const throttledDraw = useThrottleFn(draw, 200)
+const throttledDraw = useThrottleFn(draw, 100)
 
 const loop = () => {
   throttledDraw()
@@ -51,8 +52,14 @@ const loopStop = () => {
 }
 
 useEventListener(videoRootContext.videoElement, 'play', loop)
-useEventListener(videoRootContext.videoElement, ['seeked', 'loadeddata'], () => requestIdleCallback(draw))
+useEventListener(videoRootContext.videoElement, 'seeked', draw)
 useEventListener(videoRootContext.videoElement, ['pause', 'ended'], loopStop)
+
+useEventListener(videoRootContext.videoElement, 'loadeddata', async () => {
+  await sleep(500)
+  draw()
+  showAmbient.value = true
+})
 </script>
 
 <template>
@@ -61,7 +68,8 @@ useEventListener(videoRootContext.videoElement, ['pause', 'ended'], loopStop)
       ref="canvas"
       :width="WIDTH"
       :height="HEIGHT"
-      class="h-full w-full aspect-video pointer-events-none animate-fade-in"
+      class="h-full w-full aspect-video pointer-events-none"
+      :class="{ 'animate-fade-in': showAmbient }"
     />
 
     <canvas

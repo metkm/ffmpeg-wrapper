@@ -85,9 +85,10 @@ defineShortcuts({
 
         <video
           ref="videoElement"
-          :src="assetUrl"
-          class="rounded-md h-full w-full mx-auto shadow shadow-black animate-fade-in"
+          class="rounded-md w-full aspect-video mx-auto shadow shadow-black transition-opacity"
+          :class="videoRootContext.loaded ? 'animate-fade-in': 'opacity-0'"
           crossorigin="anonymous"
+          :src="assetUrl"
           @ended="togglePlay"
         />
 
