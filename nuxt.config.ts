@@ -52,6 +52,7 @@ export default defineNuxtConfig({
         'lucide:folder-down',
         'lucide:circle-stop',
         'lucide:home',
+        'lucide:loader-circle',
         'heroicons:pause-solid',
         'heroicons:play-solid',
         'fluent:dismiss-16-regular',

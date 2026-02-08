@@ -89,7 +89,9 @@ const bitrateArgParsed = computed(() => {
 
 <template>
   <section class="flex flex-col gap-2">
-    <VideoInfo :path="path" />
+    <AppSuspense>
+      <VideoInfo :path="path" />
+    </AppSuspense>
 
     <UCollapsible class="group">
       <UTooltip :text="parsedArgsText">
