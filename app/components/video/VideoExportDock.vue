@@ -57,7 +57,6 @@ const dockVariants: MotionProps['variants'] = {
   expanded: {
     transition: {
       delayChildren: 0.2,
-      ease: 'linear',
     },
   },
 }
