@@ -88,12 +88,12 @@ const itemVariants: MotionProps['variants'] = {
       <motion.div
         layout
         class="bg-border p-px"
-        :style="{ borderRadius: showLogs ? '7px' : '24px' }"
+        :style="{ borderRadius: '24px' }"
       >
         <motion.div
           layout
           class="bg-default relative overflow-hidden"
-          :style="{ borderRadius: showLogs ? '6px' : '24px' }"
+          :style="{ borderRadius: '24px' }"
           :initial="false"
           :animate="showLogs ? 'expanded' : 'minimized'"
           :variants="dockVariants"
@@ -104,132 +104,150 @@ const itemVariants: MotionProps['variants'] = {
               v-if="showLogs"
               layout
               :variants="logsVariants"
-              class="h-96 w-4xl"
+              class="w-4xl"
             >
-              <pre
-                v-if="linesDebounced.length > 1"
-                ref="stdoutContainer"
-                class="text-xs h-96 w-4xl whitespace-pre-line overflow-auto p-2"
-              >
-                {{ linesDebounced.join('\n') }}
-              </pre>
-              <UEmpty
-                v-else
-                title="Logs will show up here."
-                class="w-full h-full"
-                variant="naked"
-              />
-            </Motion>
-
-            <motion.div
-              layout
-              class="flex items-center justify-center gap-2 overflow-hidden bg-default p-2 relative"
-              :initial="false"
-              :animate="running ? 'expanded' : 'minimized'"
-              exit="minimized"
-              :variants="dockVariants"
-            >
-              <AnimatePresence mode="popLayout">
-                <Motion layout>
-                  <UButton
-                    to="/"
-                    icon="i-lucide-x"
-                    variant="soft"
-                    square
-                    class="will-change-transform"
-                  />
+              <AnimatePresence mode="wait">
+                <Motion
+                  v-if="linesDebounced.length > 1"
+                  :exit="{ opacity: 0 }"
+                  :initial="{ opacity: 0 }"
+                  :animate="{ opacity: 1 }"
+                  layout="position"
+                >
+                  <pre
+                    ref="stdoutContainer"
+                    class="text-xs h-96 w-4xl whitespace-pre-line overflow-auto p-2 pb-0"
+                  >
+                  {{ linesDebounced.join('\n') }}
+                </pre>
                 </Motion>
 
                 <Motion
-                  v-if="savePath && running"
+                  v-else
                   layout
-                  :variants="itemVariants"
+                  :exit="{ opacity: 0 }"
+                  :initial="{ opacity: 0 }"
+                  :animate="{ opacity: 1 }"
+                  class="m-2 mb-0"
                 >
-                  <UButton
-                    icon="i-lucide-folder-symlink"
-                    variant="link"
-                    color="neutral"
-                    square
-                    class="-ml-0.5"
-                    @click="openPath(savePath.split('\\').slice(0, -1).join('\\'))"
-                  >
-                    {{ savePath.split("\\").slice(0, -1).join("\\") }}
-                  </UButton>
-                </Motion>
-
-                <Motion layout>
-                  <UFieldGroup>
-                    <UInput
-                      v-model="encoderOptions.outputName"
-                      placeholder="output"
-                      variant="soft"
-                      class="w-26"
-                    />
-
-                    <USelectMenu
-                      v-model="encoderOptions.outputExtension"
-                      :items="videoExportItems"
-                      class="w-24"
-                      variant="soft"
-                      :search-input="false"
-                    />
-                  </UFieldGroup>
-                </Motion>
-
-                <Motion
-                  v-if="running"
-                  layout
-                  :variants="itemVariants"
-                >
-                  <UButton
-                    icon="i-lucide-circle-stop"
-                    color="warning"
+                  <UEmpty
+                    description="Logs will show up here."
+                    class="rounded-2xl"
                     variant="subtle"
-                    @click="kill"
-                  >
-                    Stop
-                  </UButton>
-                </Motion>
-
-                <Motion layout>
-                  <UButton
-                    icon="i-lucide-folder-down"
-                    :loading="running"
-                    class="overflow-hidden"
-                    @click="process"
-                  >
-                    <AnimatePresence mode="wait">
-                      <motion.p
-                        v-if="running && progress.eta"
-                        :initial="{ translateY: -50 }"
-                        :animate="{ translateY: 0 }"
-                        :exit="{ translateY: -50 }"
-                        class="min-w-11 text-center"
-                      >
-                        <RowValue :value="etaAnimated" />s
-                      </motion.p>
-                      <motion.p
-                        v-else
-                        :initial="{ translateY: 50 }"
-                        :animate="{ translateY: 0 }"
-                        :exit="{ translateY: 50 }"
-                      >
-                        Export
-                      </motion.p>
-                    </AnimatePresence>
-                  </UButton>
-                </Motion>
-
-                <Motion layout>
-                  <UButton
-                    icon="i-lucide-logs"
-                    variant="subtle"
-                    @click="showLogs = !showLogs"
                   />
                 </Motion>
               </AnimatePresence>
-            </motion.div>
+            </Motion>
           </AnimatePresence>
+
+          <motion.div
+            layout
+            class="flex items-center justify-center gap-2 overflow-hidden bg-default p-2 relative"
+            :initial="false"
+            :animate="running ? 'expanded' : 'minimized'"
+            exit="minimized"
+            :variants="dockVariants"
+          >
+            <AnimatePresence mode="popLayout">
+              <Motion layout>
+                <UButton
+                  to="/"
+                  icon="i-lucide-x"
+                  variant="subtle"
+                  square
+                  class="will-change-transform"
+                />
+              </Motion>
+
+              <Motion
+                v-if="savePath && running"
+                layout
+                :variants="itemVariants"
+              >
+                <UButton
+                  icon="i-lucide-folder-symlink"
+                  variant="link"
+                  color="neutral"
+                  square
+                  class="-ml-0.5"
+                  @click="openPath(savePath.split('\\').slice(0, -1).join('\\'))"
+                >
+                  {{ savePath.split("\\").slice(0, -1).join("\\") }}
+                </UButton>
+              </Motion>
+
+              <Motion layout>
+                <UFieldGroup>
+                  <UInput
+                    v-model="encoderOptions.outputName"
+                    placeholder="output"
+                    variant="soft"
+                    class="w-26"
+                  />
+
+                  <USelectMenu
+                    v-model="encoderOptions.outputExtension"
+                    :items="videoExportItems"
+                    class="w-24"
+                    variant="soft"
+                    :search-input="false"
+                  />
+                </UFieldGroup>
+              </Motion>
+
+              <Motion
+                v-if="running"
+                layout
+                :variants="itemVariants"
+              >
+                <UButton
+                  icon="i-lucide-circle-stop"
+                  color="warning"
+                  variant="subtle"
+                  @click="kill"
+                >
+                  Stop
+                </UButton>
+              </Motion>
+
+              <Motion layout>
+                <UButton
+                  icon="i-lucide-folder-down"
+                  :loading="running"
+                  class="overflow-hidden"
+                  @click="process"
+                >
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      v-if="running && progress.eta"
+                      :initial="{ translateY: -50 }"
+                      :animate="{ translateY: 0 }"
+                      :exit="{ translateY: -50 }"
+                      class="min-w-11 text-center"
+                    >
+                      <RowValue :value="etaAnimated" />s
+                    </motion.p>
+                    <motion.p
+                      v-else
+                      :initial="{ translateY: 50 }"
+                      :animate="{ translateY: 0 }"
+                      :exit="{ translateY: 50 }"
+                    >
+                      Export
+                    </motion.p>
+                  </AnimatePresence>
+                </UButton>
+              </Motion>
+
+              <Motion layout>
+                <UButton
+                  icon="i-lucide-logs"
+                  variant="subtle"
+                  @click="showLogs = !showLogs"
+                />
+              </Motion>
+            </AnimatePresence>
+          </motion.div>
         </motion.div>
       </motion.div>
     </LayoutGroup>

@@ -54,7 +54,7 @@ useEventListener(videoRootContext.videoElement, 'loadeddata', async () => {
 </script>
 
 <template>
-  <div class="absolute inset-0 -z-10 opacity-40 scale-110 blur-xl pointer-events-none">
+  <div class="absolute inset-0 -z-10 opacity-40 scale-110 blur-2xl pointer-events-none">
     <canvas
       ref="canvas"
       :width="WIDTH"
@@ -68,20 +68,5 @@ useEventListener(videoRootContext.videoElement, 'loadeddata', async () => {
       :height="HEIGHT"
       class="w-full h-full absolute inset-0"
     />
-
-    <!-- <canvas
-      ref="canvas"
-      :width="WIDTH"
-      :height="HEIGHT"
-      class="h-full w-full aspect-video pointer-events-none"
-      :class="{ 'animate-fade-in': showAmbient }"
-    />
-
-    <canvas
-      ref="canvasTemp"
-      :width="WIDTH"
-      :height="HEIGHT"
-      class="hidden"
-    /> -->
   </div>
 </template>
