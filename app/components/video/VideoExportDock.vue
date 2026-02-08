@@ -47,11 +47,11 @@ const process = async () => {
   await spawn('binaries/ffmpeg', [...props.args, path])
 }
 
-watch(linesDebounced, updateScrollPosition)
-
 defineShortcuts({
   enter: process,
 })
+
+watch(linesDebounced, updateScrollPosition)
 
 const dockVariants: MotionProps['variants'] = {
   expanded: {

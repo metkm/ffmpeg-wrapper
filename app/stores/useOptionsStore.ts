@@ -31,6 +31,21 @@ export const useOptionsStore = defineStore('options', () => {
 
   const exportType = computed(() => fileExtensions.find(ext => ext.name === encoderOptions.value.outputExtension)?.type || 'video')
 
+  watch(
+    [() => encoderOptions.value.outputName, () => encoderOptions.value.outputExtension],
+    ([name, ext]) => {
+      if (!savePath.value)
+        return
+
+      const s = savePath.value.split('\\')
+      if (s.length < 1 || name.length < 1)
+        return
+
+      s[s.length - 1] = `${name}.${ext}`
+      savePath.value = s.join('\\')
+    },
+  )
+
   return {
     encoderOptions,
     extraArguments,
