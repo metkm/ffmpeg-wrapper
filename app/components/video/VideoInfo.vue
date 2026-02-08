@@ -12,8 +12,9 @@ const regex = /Video: (?<codec>\w+)\s\((?<decoder>\w+)\).*?(?<resolution>\d+x\d+
 const { spawn } = useCommand({
   onLine: (line) => {
     const match = line.match(regex)
-    if (!match)
+    if (!match) {
       return
+    }
 
     info.value = match.groups
   },
