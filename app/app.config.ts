@@ -15,6 +15,13 @@ export default defineAppConfig({
         root: 'w-full',
       },
     },
+    checkbox: {
+      slots: {
+        root: 'min-w-0',
+        description: 'truncate',
+        wrapper: 'min-w-0',
+      },
+    },
     button: {
       slots: {
         base: 'rounded-4xl',
