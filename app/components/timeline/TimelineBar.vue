@@ -86,11 +86,11 @@ const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props
 <template>
   <div
     ref="container"
-    class="relative w-full h-24 px-5 rounded border border-(--ui-bg-elevated)"
+    class="relative w-full h-24 px-5 rounded-md ring ring-default"
   >
     <TimelineThumb
       ref="leftThumb"
-      class="absolute rounded-l z-10"
+      class="absolute rounded-l-md z-10"
       :style="{
         left: `${leftThumbx}px`,
       }"
@@ -98,7 +98,7 @@ const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props
 
     <TimelineThumb
       ref="rightThumb"
-      class="absolute rounded-r z-10"
+      class="absolute rounded-r-md z-10"
       :style="{
         left: `${rightThumbx}px`,
       }"
@@ -129,7 +129,7 @@ const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props
       />
 
       <div
-        class="absolute h-full w-0.5 bg-white z-50 pointer-events-none select-none -translate-x-1/2"
+        class="absolute h-full w-0.5 bg-inverted shadow shadow-black z-50 pointer-events-none select-none -translate-x-1/2"
         :style="{ left: `${indicatorOffset}px` }"
       />
     </div>
