@@ -3,9 +3,9 @@ import { Motion, motion, RowValue, type MotionProps } from 'motion-v'
 import { openPath } from '@tauri-apps/plugin-opener'
 import { useFFmpeg } from '~/hooks/useFFmpeg'
 import { injectVideoRootContext } from './VideoRoot.vue'
-import { videoExportExtensions, videoExportItems } from '~/constants'
 import { save } from '@tauri-apps/plugin-dialog'
 import { useKeepScrollBottom } from '~/hooks/useKeepScrollBottom'
+import { fileExtensionNames, outputExtensionSelectItems } from '~/constants'
 
 const props = defineProps<{
   args: string[]
@@ -33,7 +33,7 @@ const process = async () => {
     filters: [
       {
         name: 'video',
-        extensions: videoExportExtensions,
+        extensions: fileExtensionNames,
       },
     ],
   })
@@ -187,7 +187,7 @@ const itemVariants: MotionProps['variants'] = {
 
                   <USelectMenu
                     v-model="encoderOptions.outputExtension"
-                    :items="videoExportItems"
+                    :items="outputExtensionSelectItems"
                     class="w-24"
                     variant="soft"
                     :search-input="false"

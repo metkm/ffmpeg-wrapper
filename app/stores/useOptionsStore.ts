@@ -1,4 +1,4 @@
-import type { resolutions, videoExportExtensions } from '~/constants'
+import { fileExtensions, type resolutions } from '~/constants'
 
 interface EncoderOptions {
   noAudio: boolean
@@ -7,7 +7,7 @@ interface EncoderOptions {
   fps: number
   speed: number
   outputName: string
-  outputExtension: typeof videoExportExtensions[number]
+  outputExtension: typeof fileExtensions[number]['name']
   resolution?: typeof resolutions[number]
 }
 
@@ -27,18 +27,20 @@ export const useOptionsStore = defineStore('options', () => {
   const extraAudioArguments = ref('')
 
   const exportType = computed(() => {
-    switch (encoderOptions.value.outputExtension) {
-      case 'mp4':
-      case 'avi':
-      case 'mov':
-      case 'dvr':
-        return 'video'
-      case 'webp':
-      case 'avif':
-        return 'animated'
-      default:
-        return 'image'
-    }
+    return fileExtensions.find(ext => ext.name === encoderOptions.value.outputExtension)?.type || 'video'
+
+    // switch (encoderOptions.value.outputExtension) {
+    //   case 'mp4':
+    //   case 'avi':
+    //   case 'mov':
+    //   case 'dvr':
+    //     return 'video'
+    //   case 'webp':
+    //   case 'avif':
+    //     return 'animated'
+    //   default:
+    //     return 'image'
+    // }
   })
 
   return {

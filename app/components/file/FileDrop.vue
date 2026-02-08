@@ -3,7 +3,7 @@ import type { UnlistenFn } from '@tauri-apps/api/event'
 import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { open } from '@tauri-apps/plugin-dialog'
 import { motion } from 'motion-v'
-import { videoImportExtensions } from '~/constants'
+import { videoExtensionNames } from '~/constants'
 import { usePathsStore } from '~/stores/usePathsStore'
 
 defineProps<{
@@ -27,7 +27,7 @@ const openFile = async () => {
     directory: false,
     filters: [{
       name: 'video',
-      extensions: videoImportExtensions,
+      extensions: videoExtensionNames,
     }],
   }) ?? undefined
 
@@ -42,7 +42,7 @@ const openFile = async () => {
 let unlistenFn: UnlistenFn | undefined
 
 const correctFileType = computed(() => {
-  return videoImportExtensions.some((ext) => {
+  return videoExtensionNames.some((ext) => {
     return hoveringPath.value?.endsWith(ext)
   })
 })

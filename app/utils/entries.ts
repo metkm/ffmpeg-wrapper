@@ -1,5 +1,5 @@
 import { readDir } from '@tauri-apps/plugin-fs'
-import { videoImportExtensions } from '~/constants'
+import { videoExtensionNames } from '~/constants'
 
 export const getVideoEntries = async (path: string) => {
   const entries = await readDir(path)
@@ -12,6 +12,6 @@ export const getVideoEntries = async (path: string) => {
     if (!ext)
       return false
 
-    return videoImportExtensions.includes(ext as typeof videoImportExtensions[number])
+    return videoExtensionNames.includes(ext as typeof videoExtensionNames[number])
   })
 }
