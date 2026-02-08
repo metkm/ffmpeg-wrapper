@@ -3,7 +3,7 @@ import { useCommand } from './useCommand'
 import { getCurrentWindow, ProgressBarStatus } from '@tauri-apps/api/window'
 import { animate } from 'motion-v'
 
-const regex = /(?<name>\w+)=\s*(?<value>.*?)\s/gm
+const regex = /(time=(?<time>\d+:\d+:\d+)).*(speed=(?<speed>\d+.\d+x))/
 
 export const useFFmpeg = (duration?: MaybeRefOrGetter<number>) => {
   const progress = ref<FFmpegProgress>({})
@@ -11,40 +11,35 @@ export const useFFmpeg = (duration?: MaybeRefOrGetter<number>) => {
   const _etaAnimated = useMotionValue(0)
   const etaAnimated = useTransform(() => Math.round(_etaAnimated.get()))
 
+  // example
+  // frame=   84 fps= 81 q=162.0 size=     256KiB time=00:00:01.40 bitrate=1498.2kbits/s speed=1.35x elapsed=0:00:01.03
   const onLine = (line: string) => {
-    const matches = line.matchAll(regex)
+    const match = line.match(regex)
+    if (!match || !match.groups)
+      return
 
-    for (const match of matches) {
-      if (!match.groups)
-        continue
+    if (match.groups['speed']) {
+      progress.value.speed = parseFloat(match.groups['speed'])
+    }
 
-      const name = match.groups.name
-      const value = match.groups.value
+    if (match.groups['time'] && duration) {
+      const seconds = formatTimeToSeconds(match.groups['time'])
+      const durationLeft = toValue(duration) - seconds
 
-      if (value === 'N/A' || !value)
-        continue
+      const eta = durationLeft / (progress.value.speed || 1)
 
-      if (name === 'speed') {
-        progress.value.speed = parseFloat(value?.slice(0, -1) || '1')
-      } else if (name === 'time' && duration) {
-        const seconds = formatTimeToSeconds(value)
-        const durationLeft = toValue(duration) - seconds
+      animate(_etaAnimated, eta, {
+        from: progress.value.eta || 0,
+        ease: 'easeInOut',
+      })
 
-        const eta = durationLeft / (progress.value.speed || 1)
+      progress.value.eta = eta
+      progress.value.percent = seconds / toValue(duration) * 100
 
-        animate(_etaAnimated, eta, {
-          from: progress.value.eta || 0,
-          ease: 'easeInOut',
-        })
-
-        progress.value.eta = eta
-        progress.value.percent = seconds / toValue(duration) * 100
-
-        getCurrentWindow().setProgressBar({
-          status: ProgressBarStatus.Normal,
-          progress: Math.round(progress.value.percent),
-        })
-      }
+      getCurrentWindow().setProgressBar({
+        status: ProgressBarStatus.Normal,
+        progress: Math.round(progress.value.percent),
+      })
     }
   }
 
