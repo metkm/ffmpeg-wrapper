@@ -14,7 +14,7 @@ onUnmounted(resizeListener)
 </script>
 
 <template>
-  <div class="grid grid-cols-[140px_1fr_140px] h-titlebar-height text-muted text-xs ring ring-default bg-transparent">
+  <div class="grid grid-cols-[140px_1fr_140px] h-titlebar-height text-muted text-xs bg-transparent">
     <div
       data-tauri-drag-region
       class="flex items-center gap-1 pl-1"
@@ -33,8 +33,6 @@ onUnmounted(resizeListener)
     </div>
 
     <div class="flex items-center [&_button]:justify-center">
-      <!-- <AppColorMode /> -->
-
       <button
         class="w-12 h-8 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10"
         @click="window.minimize()"
