@@ -24,8 +24,8 @@ jobs:
           # https://github.com/tauri-apps/tauri/pull/14402
 
           # - platform: ubuntu-22.04
-          #   ffmpeg-link: https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-08-31-13-00/ffmpeg-n7.1.1-57-g1b48158a23-linux64-gpl-7.1.tar.xz
-          #   ffmpeg-name: 'ffmpeg-n7.1.1-57-g1b48158a23-linux64-gpl-7.1'
+          #   ffmpeg-link: https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n8.0-latest-linux64-gpl-8.0.tar.xz
+          #   ffmpeg-name: 'ffmpeg-n8.0-latest-linux64-gpl-8.0'
     
     runs-on: ${{ matrix.platform }}
 
@@ -37,7 +37,7 @@ jobs:
 
       - name: install ffmpeg (windows)
         if: matrix.platform == 'windows-latest'
-        run: Invoke-WebRequest https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-7.1.1-full_build.7z -OutFile ffmpeg.7z
+        run: Invoke-WebRequest ${{ matrix.ffmpeg-link }} -OutFile ffmpeg.7z
       
       - name: extract ffmpeg (windows)
         if: matrix.platform == 'windows-latest'
