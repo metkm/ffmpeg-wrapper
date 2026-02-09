@@ -58,8 +58,8 @@ jobs:
       - name: upload ffmpeg binaries
         uses: actions/upload-artifact@v4
         with:
-          name: ffmpeg-binaries
-          path: src-tauri/binaries/
+          name: ffmpeg-binary-${{ matrix.ffmpeg-name }}
+          path: src-tauri/binaries/${{ matrix.ffmpeg-name }}
           retention-days: 1
 
   publish-tauri:
