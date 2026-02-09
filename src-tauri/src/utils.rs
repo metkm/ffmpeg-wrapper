@@ -1,8 +1,12 @@
+#[cfg(target_os = "windows")]
 use std::io::Cursor;
-
+#[cfg(target_os = "windows")]
 use image::{DynamicImage, RgbaImage};
+
 use tauri::async_runtime::Receiver;
 use tauri_plugin_shell::process::CommandEvent;
+
+#[cfg(target_os = "windows")]
 use windows::{
     Win32::{
         Foundation::SIZE,
@@ -18,6 +22,7 @@ use windows::{
     core::{Interface, PCWSTR},
 };
 
+#[cfg(target_os = "windows")]
 pub fn get_thumbnail_bitmap(path: &str, size: i32) -> windows::core::Result<HBITMAP> {
     let wide: Vec<u16> = path.encode_utf16().chain(Some(0)).collect();
 
@@ -36,6 +41,7 @@ pub fn get_thumbnail_bitmap(path: &str, size: i32) -> windows::core::Result<HBIT
     unsafe { factory.GetImage(size, flags) }
 }
 
+#[cfg(target_os = "windows")]
 pub fn get_bitmap_bytes(hbitmap: HBITMAP) -> Result<Vec<u8>, String> {
     let mut bmp: BITMAP = unsafe { std::mem::zeroed() };
 

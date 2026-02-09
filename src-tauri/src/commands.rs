@@ -37,6 +37,7 @@ pub async fn get_frame(
     Ok(buffer)
 }
 
+#[cfg(target_os = "windows")]
 #[tauri::command]
 pub async fn get_file_thumbnail(_app: tauri::AppHandle, path: String) -> Result<Vec<u8>, String> {
     let bitmap = utils::get_thumbnail_bitmap(&path, 480).map_err(|err| err.message())?;
