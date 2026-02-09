@@ -144,6 +144,8 @@ const bitrateArgParsed = computed(() => {
       </template>
     </UCollapsible>
 
+    <VideoEncoderHelp :encoder="encoderOptions.encoder" />
+
     <div class="grid gap-4 items-end">
       <UFormField
         label="Encoder"

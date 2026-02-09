@@ -23,9 +23,13 @@ watch(() => props.encoder, showEncoderHelp, { immediate: true })
 <template>
   <UModal :ui="{ content: 'max-w-5xl h-full' }">
     <UButton
-      variant="subtle"
       icon="i-lucide-terminal"
-    />
+      size="sm"
+      class="rounded-md"
+      block
+    >
+      Terminal
+    </UButton>
 
     <template #content>
       <div class="flex flex-col gap-2 max-h-full h-full overflow-hidden p-2">
