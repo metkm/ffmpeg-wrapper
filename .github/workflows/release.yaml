@@ -84,7 +84,7 @@ jobs:
       - name: download ffmpeg binaries
         uses: actions/download-artifact@v4
         with:
-          name: ffmpeg-binaries-${{ matrix.platform }}
+          name: ffmpeg-binary-${{ matrix.platform }}
           path: src-tauri/binaries/
 
       - name: setup node
