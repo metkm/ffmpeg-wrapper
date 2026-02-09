@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BreadcrumbItem } from '@nuxt/ui'
+import { sep, join } from '@tauri-apps/api/path'
 import type { DirEntry } from '@tauri-apps/plugin-fs'
 
 definePageMeta({
@@ -23,18 +24,28 @@ const updateEntries = async () => {
   }
 }
 
-const items = computed(() => {
-  return folderPath.value.split('\\')
-    .map((item, index, array) => {
-      const base = array.slice(0, index - array.length + 1).join('\\')
+const items = computedAsync(
+  async () => {
+    const result: BreadcrumbItem[] = []
+    const spl = folderPath.value.split(sep())
 
-      return {
-        label: `${item}`,
+    for (let index = 1; index < spl.length; index++) {
+      const item = spl[index]
+      if (!item)
+        continue
+
+      const base = await join(...spl.slice(0, index + 1))
+
+      result.push({
+        label: item,
         to: { name: 'folder', query: { path: base } },
-      }
-    })
-    .slice(1) as BreadcrumbItem[]
-})
+      })
+    }
+
+    return result
+  },
+  [],
+)
 
 watch(folderPath, updateEntries)
 </script>
@@ -74,16 +85,18 @@ watch(folderPath, updateEntries)
           :key="entry.name"
           class="*:m-auto"
         >
-          <FolderItem
-            v-if="entry.isDirectory"
-            :path="`${folderPath}\\${entry.name}`"
-            size="xl"
-          />
-          <FileVideo
-            v-else
-            :path="`${folderPath}\\${entry.name}`"
-            class="w-full h-full"
-          />
+          <AppSuspense>
+            <FolderItem
+              v-if="entry.isDirectory"
+              :path="`${folderPath}\\${entry.name}`"
+              size="xl"
+            />
+            <FileVideo
+              v-else
+              :path="`${folderPath}\\${entry.name}`"
+              class="w-full h-full"
+            />
+          </AppSuspense>
         </li>
       </ol>
       <UEmpty

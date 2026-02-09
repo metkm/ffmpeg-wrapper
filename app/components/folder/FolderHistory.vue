@@ -1,48 +1,27 @@
 <script setup lang="ts">
-const { pathHistory } = usePathsStore()
-
-const folders = computed(() => {
-  const foldersWithoutDuplicates: string[] = []
-
-  for (let index = 0; index < pathHistory.length; index++) {
-    const element = pathHistory[index]
-    if (!element)
-      continue
-
-    const folderPath = element.path
-      .split('\\')
-      .slice(0, -1)
-      .join('\\')
-
-    if (foldersWithoutDuplicates.find(path => folderPath === path))
-      continue
-
-    foldersWithoutDuplicates.push(folderPath)
-  }
-
-  foldersWithoutDuplicates.reverse()
-  return foldersWithoutDuplicates
-})
+const { folderHistorySorted } = usePathsStore()
 </script>
 
 <template>
   <div class="flex flex-col gap-2">
     <UPageCard
-      v-if="folders.length > 0"
+      v-if="folderHistorySorted.length > 0"
       title="Recently used folders"
       description="The folder the opened video is in will show up here"
       variant="soft"
     >
       <ol class="flex flex-wrap gap-2">
         <li
-          v-for="folder in folders"
-          :key="folder"
+          v-for="folder in folderHistorySorted"
+          :key="folder.path"
         >
-          <FolderItem
-            :path="folder"
-            class="ring ring-default"
-            variant="soft"
-          />
+          <AppSuspense>
+            <FolderItem
+              :path="folder.path"
+              class="ring ring-default"
+              variant="soft"
+            />
+          </AppSuspense>
         </li>
       </ol>
     </UPageCard>

@@ -1,17 +1,23 @@
-import { readDir } from '@tauri-apps/plugin-fs'
+import { extname } from '@tauri-apps/api/path'
+import { readDir, type DirEntry } from '@tauri-apps/plugin-fs'
 import { videoExtensionNames } from '~/constants'
 
 export const getVideoEntries = async (path: string) => {
   const entries = await readDir(path)
 
-  return entries.filter((item) => {
-    if (item.isDirectory)
-      return true
+  const result: DirEntry[] = []
 
-    const ext = item.name.split('\\').at(-1)?.split('.').at(-1)
-    if (!ext)
-      return false
+  for (let index = 0; index < entries.length; index++) {
+    const entry = entries[index]
 
-    return videoExtensionNames.includes(ext as typeof videoExtensionNames[number])
-  })
+    if (!entry || entry.isDirectory)
+      continue
+
+    const ext = await extname(entry.name)
+    if (videoExtensionNames.includes(ext)) {
+      result.push(entry)
+    }
+  }
+
+  return result
 }

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { UnlistenFn } from '@tauri-apps/api/event'
 import { getCurrentWebview } from '@tauri-apps/api/webview'
+import { basename, extname } from '@tauri-apps/api/path'
+
 import { open } from '@tauri-apps/plugin-dialog'
 import { motion } from 'motion-v'
 import { videoExtensionNames } from '~/constants'
@@ -14,7 +16,7 @@ const emit = defineEmits<{
   select: [path: string]
 }>()
 
-const { addPathHistory } = usePathsStore()
+const { addPathToFolderHistory } = usePathsStore()
 
 const modelValue = defineModel<string>()
 
@@ -35,17 +37,25 @@ const openFile = async () => {
 
   if (modelValue.value) {
     emit('select', modelValue.value)
-    addPathHistory(modelValue.value)
+    addPathToFolderHistory(modelValue.value)
   }
 }
 
 let unlistenFn: UnlistenFn | undefined
 
-const correctFileType = computed(() => {
-  return videoExtensionNames.some((ext) => {
-    return hoveringPath.value?.endsWith(ext)
-  })
-})
+const isCorrectFileType = computedAsync(
+  async () => {
+    if (!hoveringPath.value)
+      return false
+
+    return videoExtensionNames.includes(await extname(hoveringPath.value))
+  },
+  false,
+)
+
+const fileName = computedAsync(
+  async () => hoveringPath.value ? await basename(hoveringPath.value) : '',
+)
 
 onMounted(async () => {
   unlistenFn = await getCurrentWebview()
@@ -58,7 +68,7 @@ onMounted(async () => {
         hovering.value = false
         hoveringPath.value = undefined
       } else if (event.payload.type === 'drop') {
-        if (!correctFileType.value) {
+        if (!isCorrectFileType.value) {
           return
         }
 
@@ -69,7 +79,7 @@ onMounted(async () => {
 
         modelValue.value = path
         emit('select', path)
-        addPathHistory(path)
+        addPathToFolderHistory(path)
       }
     })
 })
@@ -101,23 +111,23 @@ onUnmounted(() => unlistenFn?.())
           </motion.span>
 
           <motion.div
-            v-if="hoveringPath"
-            layout
+            v-if="fileName"
+            layout="position"
             :initial="{ opacity: 0 }"
             :animate="{ opacity: 1 }"
             :exit="{ opacity: 0 }"
           >
             <motion.p
               layout="position"
-              class="font-medium text-muted text-center mt-4"
-              layout-id="hovering-path"
+              class="font-medium text-muted text-center mt-4 min-w-10"
             >
-              {{ hoveringPath.split('\\').at(-1) }}
+              {{ fileName }}
             </motion.p>
 
             <motion.p
-              v-if="!correctFileType"
+              v-if="!isCorrectFileType"
               class="font-medium text-error text-sm mt-1 capitalize"
+              layout="position"
             >
               wrong file type
             </motion.p>

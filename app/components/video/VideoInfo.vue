@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { basename } from '@tauri-apps/api/path'
 import { useCommand } from '~/hooks/useCommand'
 
 const props = defineProps<{
@@ -23,6 +24,8 @@ const { spawn } = useCommand({
 })
 
 await spawn('binaries/ffmpeg', ['-i', props.path])
+
+const name = await basename(props.path)
 </script>
 
 <template>
@@ -37,7 +40,7 @@ await spawn('binaries/ffmpeg', ['-i', props.path])
       variant="soft"
       class="text-left rounded-md"
     >
-      {{ path.split('\\').at(-1) }}
+      {{ name }}
     </UButton>
 
     <template

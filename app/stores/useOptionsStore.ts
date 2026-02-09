@@ -1,3 +1,4 @@
+import { dirname, join } from '@tauri-apps/api/path'
 import { fileExtensions, type resolutions } from '~/constants'
 
 interface EncoderOptions {
@@ -33,16 +34,12 @@ export const useOptionsStore = defineStore('options', () => {
 
   watch(
     [() => encoderOptions.value.outputName, () => encoderOptions.value.outputExtension],
-    ([name, ext]) => {
+    async ([name, ext]) => {
       if (!savePath.value)
         return
 
-      const s = savePath.value.split('\\')
-      if (s.length < 1 || name.length < 1)
-        return
-
-      s[s.length - 1] = `${name}.${ext}`
-      savePath.value = s.join('\\')
+      const dirName = await dirname(savePath.value)
+      savePath.value = await join(dirName, name.length < 1 ? `output.${ext}` : `${name}.${ext}`)
     },
   )
 

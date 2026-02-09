@@ -6,12 +6,15 @@ import { injectVideoRootContext } from './VideoRoot.vue'
 import { save } from '@tauri-apps/plugin-dialog'
 import { useKeepScrollBottom } from '~/hooks/useKeepScrollBottom'
 import { fileExtensionNames, outputExtensionSelectItems } from '~/constants'
+import { dirname } from '@tauri-apps/api/path'
 
 const props = defineProps<{
   args: string[]
 }>()
 
 const videoRootContext = injectVideoRootContext()
+
+const showLogs = ref(false)
 
 const stdoutContainer = useTemplateRef('stdoutContainer')
 const { updateScrollPosition } = useKeepScrollBottom({
@@ -21,8 +24,6 @@ const { updateScrollPosition } = useKeepScrollBottom({
 
 const optionsStore = useOptionsStore()
 const { encoderOptions, savePath, rememberSavePath } = storeToRefs(optionsStore)
-
-const showLogs = ref(false)
 
 const { running, spawn, linesDebounced, kill, progress, etaAnimated, error } = useFFmpeg(videoRootContext.duration)
 
@@ -50,6 +51,11 @@ const process = async () => {
 defineShortcuts({
   enter: process,
 })
+
+const dirName = computedAsync(
+  async () => dirname(savePath.value),
+  '',
+)
 
 watch(linesDebounced, updateScrollPosition)
 
@@ -170,9 +176,9 @@ const itemVariants: MotionProps['variants'] = {
                   color="neutral"
                   square
                   class="-ml-0.5"
-                  @click="openPath(savePath.split('\\').slice(0, -1).join('\\'))"
+                  @click="openPath(dirName)"
                 >
-                  {{ savePath.split("\\").slice(0, -1).join("\\") }}
+                  {{ dirName }}
                 </UButton>
               </Motion>
 
