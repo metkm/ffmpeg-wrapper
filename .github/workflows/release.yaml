@@ -18,9 +18,14 @@ jobs:
           - platform: windows-latest
             ffmpeg-link: 'https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-7.1.1-full_build.7z'
             ffmpeg-name: 'ffmpeg-7.1.1-full_build'
-          - platform: ubuntu-22.04
-            ffmpeg-link: https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-08-31-13-00/ffmpeg-n7.1.1-57-g1b48158a23-linux64-gpl-7.1.tar.xz
-            ffmpeg-name: 'ffmpeg-n7.1.1-57-g1b48158a23-linux64-gpl-7.1'
+
+          # Commenting these lines because there is a bug in linux webkit that causes videos to not play.
+          # https://github.com/tauri-apps/tauri/issues/3725
+          # https://github.com/tauri-apps/tauri/pull/14402
+
+          # - platform: ubuntu-22.04
+          #   ffmpeg-link: https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-08-31-13-00/ffmpeg-n7.1.1-57-g1b48158a23-linux64-gpl-7.1.tar.xz
+          #   ffmpeg-name: 'ffmpeg-n7.1.1-57-g1b48158a23-linux64-gpl-7.1'
     
     runs-on: ${{ matrix.platform }}
 
@@ -73,8 +78,10 @@ jobs:
         include:
           - platform: windows-latest
             args: ''
-          - platform: ubuntu-22.04
-            args: ''
+
+          # Read the description above in the first job.
+          # - platform: ubuntu-22.04
+          #   args: ''
 
     runs-on: ${{ matrix.platform }}
 
@@ -108,7 +115,7 @@ jobs:
       - name: install frontend dependencies
         run: npm install # change this to npm, pnpm or bun depending on which one you use.
 
-      - uses: tauri-apps/tauri-action@v1
+      - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
