@@ -50,7 +50,7 @@ const ModifyTime = defineComponent(async () => {
     <div class="h-full w-full">
       <div class="aspect-video bg-elevated rounded-md h-24 mx-auto w-full">
         <AppSuspense v-if="currentPlatform === 'windows'">
-          <FileThumbnail" />
+          <FileThumbnail />
 
           <template #fallback>
             <div class="h-full w-full flex items-center justify-center gap-2 text-muted">
