@@ -1,11 +1,11 @@
-mod utils;
 mod commands;
+mod utils;
 
 use tauri::{App, Runtime};
 use tauri_plugin_window_state::StateFlags;
 
 #[cfg(target_os = "windows")]
-fn handlers() -> impl Fn(tauri::ipc::Invoke) -> bool  {
+fn handlers() -> impl Fn(tauri::ipc::Invoke) -> bool {
     tauri::generate_handler![
         commands::get_file_thumbnail,
         commands::get_audio_graph,
@@ -15,28 +15,20 @@ fn handlers() -> impl Fn(tauri::ipc::Invoke) -> bool  {
 
 #[cfg(not(target_os = "windows"))]
 fn handlers() -> impl Fn(tauri::ipc::Invoke) -> bool {
-    tauri::generate_handler![
-        commands::get_audio_graph,
-        commands::get_frame
-    ]
+    tauri::generate_handler![commands::get_audio_graph, commands::get_frame]
 }
 
 fn setup<R: Runtime>(app: &mut App<R>) -> std::result::Result<(), Box<dyn std::error::Error>> {
-    let mut window_builder = tauri::WebviewWindowBuilder::new(
-        app,
-        "main",
-        tauri::WebviewUrl::App("index.html".into()),
-    );
+    let mut window_builder =
+        tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("index.html".into()));
 
     if let Some(f) = std::env::args()
         .into_iter()
         .skip(1)
         .find(|f| !f.starts_with("-"))
     {
-        window_builder = window_builder.initialization_script(format!(
-            "window.openedFile = {:?}",
-            f
-        ));
+        window_builder =
+            window_builder.initialization_script(format!("window.openedFile = {:?}", f));
     }
 
     window_builder
@@ -59,16 +51,17 @@ pub fn run() {
         std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
     }
 
-    let builder = tauri::Builder::default();
-    
+    let builder = tauri::Builder::default().plugin(tauri_plugin_os::init());
+
     let plugin_window_state = tauri_plugin_window_state::Builder::new()
         .with_state_flags(
             StateFlags::SIZE
-            | StateFlags::POSITION
-            | StateFlags::MAXIMIZED
-            | StateFlags::DECORATIONS
-            | StateFlags::FULLSCREEN,
-        ).build();
+                | StateFlags::POSITION
+                | StateFlags::MAXIMIZED
+                | StateFlags::DECORATIONS
+                | StateFlags::FULLSCREEN,
+        )
+        .build();
 
     builder
         .plugin(plugin_window_state)

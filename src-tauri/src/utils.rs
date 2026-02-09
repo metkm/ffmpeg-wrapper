@@ -1,7 +1,7 @@
 #[cfg(target_os = "windows")]
-use std::io::Cursor;
-#[cfg(target_os = "windows")]
 use image::{DynamicImage, RgbaImage};
+#[cfg(target_os = "windows")]
+use std::io::Cursor;
 
 use tauri::async_runtime::Receiver;
 use tauri_plugin_shell::process::CommandEvent;

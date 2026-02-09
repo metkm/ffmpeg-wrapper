@@ -1,12 +1,15 @@
 <script setup lang="tsx">
+import { platform } from '@tauri-apps/plugin-os'
 import { invoke } from '@tauri-apps/api/core'
 import { basename } from '@tauri-apps/api/path'
 import { stat } from '@tauri-apps/plugin-fs'
 
 const props = defineProps<{
   path: string
-  isDirectory?: boolean
+  isDirectory: boolean
 }>()
+
+const currentPlatform = platform()
 
 const Name = defineComponent(async () => {
   const name = await basename(props.path)
@@ -46,8 +49,8 @@ const ModifyTime = defineComponent(async () => {
   <NuxtLink :to="{ name: props.isDirectory ? 'folder' : 'export', query: { path } }">
     <div class="h-full w-full">
       <div class="aspect-video bg-elevated rounded-md h-24 mx-auto w-full">
-        <AppSuspense>
-          <FileThumbnail />
+        <AppSuspense v-if="currentPlatform === 'windows'">
+          <FileThumbnail" />
 
           <template #fallback>
             <div class="h-full w-full flex items-center justify-center gap-2 text-muted">
@@ -60,6 +63,11 @@ const ModifyTime = defineComponent(async () => {
             </div>
           </template>
         </AppSuspense>
+        <UIcon
+          v-else
+          name="i-lucide-folder"
+          class="h-full w-full"
+        />
       </div>
 
       <div class="text-sm pl-1 pt-1">

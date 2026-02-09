@@ -86,24 +86,10 @@ watch(folderPath, updateEntries)
           class="*:m-auto p-2 relative after:-z-10 after:absolute after:inset-0 after:bg-elevated/50 after:rounded-md after:opacity-0 after:scale-90 hover:after:scale-100 hover:after:opacity-100 after:transition-all after:will-change-[transform,opacity]"
         >
           <FolderItem
-            :path="`${folderPath}\\${entry.name}`"
+            :path="`${folderPath}${sep()}${entry.name}`"
             class="w-full h-full"
             :is-directory="entry.isDirectory"
           />
-
-          <!-- <AppSuspense>
-            <FolderItem
-              v-if="entry.isDirectory"
-              :path="`${folderPath}\\${entry.name}`"
-              size="xl"
-              class="w-full h-full"
-            />
-            <FileVideo
-              v-else
-              :path="`${folderPath}\\${entry.name}`"
-              class="w-full h-full"
-            />
-          </AppSuspense> -->
         </li>
       </ol>
       <UEmpty
