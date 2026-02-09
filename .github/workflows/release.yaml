@@ -16,16 +16,16 @@ jobs:
       matrix:
         include:
           - platform: windows-latest
-            ffmpeg-link: 'https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-7.1.1-full_build.7z'
-            ffmpeg-name: 'ffmpeg-7.1.1-full_build'
+            ffmpeg-link: 'https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-02-09-13-51/ffmpeg-n8.0.1-55-g59384ce6b6-win64-gpl-8.0.zip'
+            ffmpeg-name: 'ffmpeg-n8.0.1-55-g59384ce6b6-win64-gpl-8.0'
 
           # Commenting these lines because there is a bug in linux webkit that causes videos to not play.
           # https://github.com/tauri-apps/tauri/issues/3725
           # https://github.com/tauri-apps/tauri/pull/14402
 
           # - platform: ubuntu-22.04
-          #   ffmpeg-link: https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n8.0-latest-linux64-gpl-8.0.tar.xz
-          #   ffmpeg-name: 'ffmpeg-n8.0-latest-linux64-gpl-8.0'
+          #   ffmpeg-link: https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-02-09-13-51/ffmpeg-n8.0.1-55-g59384ce6b6-linux64-gpl-8.0.tar.xz
+          #   ffmpeg-name: 'ffmpeg-n8.0.1-55-g59384ce6b6-linux64-gpl-8.0'
     
     runs-on: ${{ matrix.platform }}
 
@@ -45,7 +45,7 @@ jobs:
 
       - name: move ffmpeg to binaries folder (windows)
         if: matrix.platform == 'windows-latest'
-        run: mv ffmpeg-7.1.1-full_build/bin/ffmpeg.exe src-tauri/binaries/ffmpeg-x86_64-pc-windows-msvc.exe
+        run: mv ${{ matrix.ffmpeg-name }}/bin/ffmpeg.exe src-tauri/binaries/ffmpeg-x86_64-pc-windows-msvc.exe
 
       - name: install ffmpeg (linux)
         if: matrix.platform == 'ubuntu-22.04'
