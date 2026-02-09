@@ -18,6 +18,7 @@ const { folderHistorySorted } = usePathsStore()
           <AppSuspense>
             <FolderItem
               :path="folder.path"
+              is-directory
               class="ring ring-default"
               variant="soft"
             />

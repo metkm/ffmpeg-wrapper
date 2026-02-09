@@ -14,11 +14,11 @@ definePageMeta({
 
 const folderPath = useRouteQuery('path', '')
 
-const entries = ref<DirEntry[]>(await getVideoEntries(folderPath.value))
+const entries = ref<DirEntry[]>(await getFolderEntries(folderPath.value))
 
 const updateEntries = async () => {
   try {
-    entries.value = await getVideoEntries(folderPath.value)
+    entries.value = await getFolderEntries(folderPath.value)
   } catch {
     await navigateTo('/')
   }
@@ -78,25 +78,32 @@ watch(folderPath, updateEntries)
 
       <ol
         v-if="entries.length > 0"
-        class="grid grid-cols-2 @3xl:grid-cols-3 @7xl:grid-cols-4"
+        class="grid grid-cols-5 xl:grid-cols-6"
       >
         <li
           v-for="entry in entries"
           :key="entry.name"
-          class="*:m-auto"
+          class="*:m-auto p-2 relative after:-z-10 after:absolute after:inset-0 after:bg-elevated/50 after:rounded-md after:opacity-0 after:scale-90 hover:after:scale-100 hover:after:opacity-100 after:transition-all after:will-change-[transform,opacity]"
         >
-          <AppSuspense>
+          <FolderItem
+            :path="`${folderPath}\\${entry.name}`"
+            class="w-full h-full"
+            :is-directory="entry.isDirectory"
+          />
+
+          <!-- <AppSuspense>
             <FolderItem
               v-if="entry.isDirectory"
               :path="`${folderPath}\\${entry.name}`"
               size="xl"
+              class="w-full h-full"
             />
             <FileVideo
               v-else
               :path="`${folderPath}\\${entry.name}`"
               class="w-full h-full"
             />
-          </AppSuspense>
+          </AppSuspense> -->
         </li>
       </ol>
       <UEmpty
