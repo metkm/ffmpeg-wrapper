@@ -13,7 +13,8 @@ const optionsStore = useOptionsStore()
 const { encoderOptions, extraArguments, extraVideoArguments, extraAudioArguments, exportType, rememberSavePath, savePath } = storeToRefs(optionsStore)
 
 const targetBitrate = computed(() => {
-  return (encoderOptions.value.fileSizeMb * 8192) / videoRootContext.duration.value - 196
+  const totalBitrate = (encoderOptions.value.fileSizeMb * 8192) / videoRootContext.duration.value
+  return (totalBitrate - 196) * 0.95
 })
 
 const { parsedArgs: parsedArgsAudioFilter, parseArgsFromString: parseArgsFromStringFilter }
@@ -50,13 +51,13 @@ const { argsValidFiltered, parsedArgs, parseArgsFromString, disabledArgs, toggle
     'to': computed(() => formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!)),
     'i': computed(() => props.path),
     's': computed(() => encoderOptions.value.resolution),
-    'maxrate': computed(() => `${Math.round(targetBitrate.value)}k`),
-    'bufsize': computed(() => `${Math.round(targetBitrate.value / 2)}k`),
     'vcodec': computed(() =>
       exportType.value === 'video' || encoderOptions.value.outputExtension === 'avif'
         ? encoderOptions.value.encoder
         : undefined,
     ),
+    'maxrate': computed(() => `${Math.round(targetBitrate.value)}k`),
+    'bufsize': computed(() => `${Math.round(targetBitrate.value * 2)}k`),
     'loop': computed(() => encoderOptions.value.outputExtension === 'webp' && '0'),
     'quality': computed(() => encoderOptions.value.outputExtension === 'webp' && webpQuality.value),
     'compression_level': computed(() => encoderOptions.value.outputExtension === 'webp' && webpCompressionLevel.value),
