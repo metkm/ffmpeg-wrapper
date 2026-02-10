@@ -192,7 +192,7 @@ const bitrateArgParsed = computed(() => {
       >
         <USelect
           v-model="encoderOptions.fps"
-          :items="[10, 20, 24, 30, 60, 144, 180, 240]"
+          :items="[10, 20, 24, 30, 60, 90, 120, 144, 180, 240]"
           color="neutral"
           variant="soft"
           :disabled="exportType === 'image'"

@@ -166,9 +166,11 @@ const itemVariants: MotionProps['variants'] = {
               </Motion>
 
               <Motion
-                v-if="savePath && running"
+                v-if="savePath"
                 layout
-                :variants="itemVariants"
+                :initial="{ opacity: 0 }"
+                :animate="{ opacity: 1 }"
+                :exit="{ opacity: 0 }"
               >
                 <UButton
                   icon="i-lucide-folder-symlink"
