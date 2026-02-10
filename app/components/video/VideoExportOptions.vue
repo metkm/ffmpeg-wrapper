@@ -189,6 +189,7 @@ const bitrateArgParsed = computed(() => {
       <UFormField
         label="FPS"
         description="Frames per second"
+        :help="videoRootContext.videoInfo.value.fps && encoderOptions.fps > videoRootContext.videoInfo.value.fps ? `${encoderOptions.fps} fps exceeds the source ${videoRootContext.videoInfo.value.fps} fps; output size may be unpredictable.` : undefined"
       >
         <USelect
           v-model="encoderOptions.fps"
@@ -220,7 +221,10 @@ const bitrateArgParsed = computed(() => {
         </div>
       </UFormField>
 
-      <UFormField label="Extra Arguments">
+      <UFormField
+        label="Extra Arguments"
+        :help="bitrateArgParsed && bitrateArgParsed > targetBitrate ? `Setting -b:v above ${Math.round(targetBitrate)}k may result in a file size over ${encoderOptions.fileSizeMb} MB.` : undefined"
+      >
         <div class="flex gap-2">
           <UInput
             v-model="extraArguments"
@@ -239,13 +243,6 @@ const bitrateArgParsed = computed(() => {
             @click="extraArguments = ''"
           />
         </div>
-
-        <p
-          v-if="bitrateArgParsed && bitrateArgParsed > targetBitrate"
-          class="text-xs text-warning-400 mt-1"
-        >
-          The target file size might be higher than {{ encoderOptions.fileSizeMb }}Mb if -b:v given more than {{ Math.round(targetBitrate) }}k
-        </p>
       </UFormField>
 
       <UFormField label="Extra Video Arguments">

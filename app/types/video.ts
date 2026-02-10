@@ -17,3 +17,11 @@ export interface Video {
   width?: number
   height?: number
 }
+
+export interface VideoInfo {
+  codec?: string
+  decoder?: string
+  resolution?: `${number}x${number}`
+  fps?: number
+  bitrate?: string
+}
