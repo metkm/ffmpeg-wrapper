@@ -23,8 +23,7 @@ const { spawn } = useCommand({
   },
 })
 
-await spawn('binaries/ffmpeg', ['-i', props.path])
-
+spawn('binaries/ffmpeg', ['-i', props.path])
 const name = await basename(props.path)
 </script>
 
