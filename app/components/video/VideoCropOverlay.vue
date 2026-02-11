@@ -44,7 +44,7 @@ const containerStyle = computed(() => {
   }
 })
 
-const handleMouseMove = (e: MouseEvent) => {
+const handlePointerMove = (e: PointerEvent) => {
   e.preventDefault()
 
   const dx = (e.clientX - startMouse.x) / containerElementWidth.value
@@ -80,20 +80,25 @@ const handleMouseMove = (e: MouseEvent) => {
   }
 }
 
-const handleMouseUp = () => {
-  window.removeEventListener('mousemove', handleMouseMove)
-  window.removeEventListener('mouseup', handleMouseUp)
+const handlePointerUp = () => {
+  window.removeEventListener('pointermove', handlePointerMove)
+  window.removeEventListener('pointerup', handlePointerUp)
 }
 
-const handleMouseDown = (e: MouseEvent, side: Side) => {
+const handlePointerDown = (e: PointerEvent, side: Side) => {
+  e.preventDefault()
+
+  const element = e.currentTarget as HTMLElement
+  element.setPointerCapture(e.pointerId)
+
   resizingSide.value = side
   startMouse.x = e.clientX
   startMouse.y = e.clientY
 
   Object.assign(startCrop, crop)
 
-  addEventListener('mousemove', handleMouseMove)
-  addEventListener('mouseup', handleMouseUp)
+  addEventListener('pointermove', handlePointerMove)
+  addEventListener('pointerup', handlePointerUp)
 }
 </script>
 
@@ -112,24 +117,24 @@ const handleMouseDown = (e: MouseEvent, side: Side) => {
       >
         <div
           class="absolute inset-1.5"
-          @mousedown="(event) => handleMouseDown(event, 'move')"
+          @pointerdown="(event) => handlePointerDown(event, 'move')"
         />
 
         <div
           class="left-0 h-full w-1 px-1.5 cursor-w-resize -translate-x-1/2"
-          @mousedown="(event) => handleMouseDown(event, 'w')"
+          @pointerdown="(event) => handlePointerDown(event, 'w')"
         />
         <div
           class="top-0 w-full h-1 py-1.5 cursor-n-resize -translate-y-1/2"
-          @mousedown="(event) => handleMouseDown(event, 'n')"
+          @pointerdown="(event) => handlePointerDown(event, 'n')"
         />
         <div
           class="top-full w-full h-1 py-1.5 cursor-s-resize -translate-y-1/2"
-          @mousedown="(event) => handleMouseDown(event, 's')"
+          @pointerdown="(event) => handlePointerDown(event, 's')"
         />
         <div
           class="left-full h-full w-1 px-1.5 cursor-e-resize -translate-x-1/2"
-          @mousedown="(event) => handleMouseDown(event, 'e')"
+          @pointerdown="(event) => handlePointerDown(event, 'e')"
         />
       </div>
     </div>
