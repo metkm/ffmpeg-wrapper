@@ -63,6 +63,7 @@ defineShortcuts({
       <motion.div
         layout
         class="min-h-0 flex flex-col justify-center gap-2 grow"
+        :class="videoRootContext.loaded ? 'animate-fade-in': 'opacity-0'"
       >
         <motion.div
           layout
@@ -73,7 +74,7 @@ defineShortcuts({
 
         <motion.div
           layout
-          class="relative h-full aspect-ratio max-h-max mx-auto min-h-0 grow"
+          class="relative h-full max-h-max aspect-ratio mx-auto min-h-0 grow"
         >
           <Transition
             enter-active-class="transition-all"
@@ -100,7 +101,6 @@ defineShortcuts({
           <video
             ref="videoElement"
             class="rounded-md w-full h-full shadow mx-auto shadow-black transition-opacity"
-            :class="videoRootContext.loaded ? 'animate-fade-in': 'opacity-0'"
             crossorigin="anonymous"
             :src="assetUrl"
             @ended="togglePlay"
