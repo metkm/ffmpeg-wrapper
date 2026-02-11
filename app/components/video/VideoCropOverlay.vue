@@ -13,154 +13,88 @@ const modelValueCrop = defineModel<VideoCropOptions>({
   },
 })
 
-const MIN_HEIGHT = 20
-const MIN_WIDTH = 20
-
 type Side = 'w' | 'n' | 'e' | 's' | 'move'
 
 const containerElement = useTemplateRef('containerElement')
+const { width: containerElementWidth, height: containerElementHeight } = useElementSize(containerElement)
 
 const resizingSide = ref<Side | undefined>()
 
-const mouseEventDown = ref<MouseEvent>()
-const mouseEventDownContainer = reactive({
-  offsetX: 0,
-  offsetY: 0,
-  width: 100,
-  height: 100,
-})
+const startMouse = reactive({ x: 0, y: 0 })
 
-const container = reactive({
-  offsetX: 0,
-  offsetY: 0,
-  width: 100,
-  height: 100,
+const startCrop = reactive({ x: 0, y: 0, width: 0, height: 0 })
+const crop = reactive({
+  x: 0,
+  y: 0,
+  width: 1,
+  height: 1,
 })
 
 const containerStyle = computed(() => {
+  if (!containerElement.value)
+    return {}
+
+  const w = containerElementWidth.value
+  const h = containerElementHeight.value
+
   return {
-    width: `${container.width}px`,
-    height: `${container.height}px`,
-    transform: `translate(${container.offsetX}px, ${container.offsetY}px)`,
+    width: `${crop.width * w}px`,
+    height: `${crop.height * h}px`,
+    transform: `translate(${crop.x * w}px, ${crop.y * h}px)`,
   }
 })
 
-const handleMouseUp = () => {
-  mouseEventDownContainer.offsetX = container.offsetX
-  mouseEventDownContainer.offsetY = container.offsetY
-  mouseEventDownContainer.width = container.width
-  mouseEventDownContainer.height = container.height
+const handleMouseMove = (e: MouseEvent) => {
+  e.preventDefault()
 
+  const dx = (e.clientX - startMouse.x) / containerElementWidth.value
+  const dy = (e.clientY - startMouse.y) / containerElementHeight.value
+
+  if (resizingSide.value === 'n') {
+    const newY = clamp(startCrop.y + dy, 0, 1)
+
+    crop.height = startCrop.height - (newY - startCrop.y)
+    crop.y = newY
+  } else if (resizingSide.value === 'e') {
+    crop.width = clamp(startCrop.width + dx, 0, 1)
+  } else if (resizingSide.value === 's') {
+    crop.height = clamp(startCrop.height + dy, 0, 1)
+  } else if (resizingSide.value === 'w') {
+    const newX = clamp(startCrop.x + dx, 0, 1)
+
+    crop.width = startCrop.width - (newX - startCrop.x)
+    crop.x = newX
+  } else if (resizingSide.value === 'move') {
+    crop.x = clamp(startCrop.x + dx, 0, 1 - crop.width)
+    crop.y = clamp(startCrop.y + dy, 0, 1 - crop.height)
+  }
+
+  if (props.height) {
+    modelValueCrop.value.top = Math.floor(crop.y * props.height)
+    modelValueCrop.value.height = Math.floor(crop.height * props.height)
+  }
+
+  if (props.width) {
+    modelValueCrop.value.left = Math.floor(crop.x * props.width)
+    modelValueCrop.value.width = Math.floor(crop.width * props.width)
+  }
+}
+
+const handleMouseUp = () => {
   window.removeEventListener('mousemove', handleMouseMove)
   window.removeEventListener('mouseup', handleMouseUp)
 }
 
-const handleMouseMove = (event: MouseEvent) => {
-  event.preventDefault()
-  if (!mouseEventDown.value || !containerElement.value) return
-
-  const offsetXDiff = -(mouseEventDown.value.clientX - event.clientX)
-  const offsetYDiff = -(mouseEventDown.value.clientY - event.clientY)
-
-  const offsetXNew = offsetXDiff + mouseEventDownContainer.offsetX
-  const offsetYNew = offsetYDiff + mouseEventDownContainer.offsetY
-
-  if (resizingSide.value === 'move') {
-    container.offsetX = clamp(
-      offsetXNew,
-      0,
-      containerElement.value.clientWidth - mouseEventDownContainer.width,
-    )
-    container.offsetY = clamp(
-      offsetYNew,
-      0,
-      containerElement.value.clientHeight - mouseEventDownContainer.height,
-    )
-  } else if (resizingSide.value === 'w') {
-    const newWidth = mouseEventDownContainer.width - offsetXDiff
-
-    const rightSideOfCropWidth = containerElement.value.clientWidth - offsetXNew - newWidth
-    const leftSideOfCropWidth = containerElement.value.clientWidth - rightSideOfCropWidth
-
-    container.offsetX = clamp(
-      offsetXNew,
-      0,
-      leftSideOfCropWidth - 20,
-    )
-
-    if (container.offsetX <= 0) {
-      return
-    }
-
-    container.width = clamp(newWidth, 20, containerElement.value.clientWidth)
-  } else if (resizingSide.value === 'e') {
-    container.width = clamp(
-      mouseEventDownContainer.width + offsetXDiff,
-      MIN_WIDTH,
-      containerElement.value.clientWidth - container.offsetX,
-    )
-  } else if (resizingSide.value === 'n') {
-    const newHeight = mouseEventDownContainer.height - offsetYDiff
-
-    const bottomSideOfCropWidth = containerElement.value.clientHeight - offsetYNew - newHeight
-    const topSideOfCropWidth = containerElement.value.clientHeight - bottomSideOfCropWidth
-
-    container.offsetY = clamp(
-      offsetYNew,
-      0,
-      topSideOfCropWidth - 20,
-    )
-
-    if (container.offsetY <= 0) {
-      return
-    }
-
-    container.height = clamp(newHeight, 20, containerElement.value.clientHeight)
-  } else if (resizingSide.value === 's') {
-    container.height = clamp(
-      mouseEventDownContainer.height + offsetYDiff,
-      MIN_HEIGHT,
-      containerElement.value.clientHeight - container.offsetY,
-    )
-  }
-}
-
-const handleMouseDown = (event: MouseEvent, side: Side) => {
-  event.preventDefault()
+const handleMouseDown = (e: MouseEvent, side: Side) => {
   resizingSide.value = side
-  mouseEventDown.value = event
+  startMouse.x = e.clientX
+  startMouse.y = e.clientY
 
-  mouseEventDownContainer.offsetX = container.offsetX
-  mouseEventDownContainer.offsetY = container.offsetY
-  mouseEventDownContainer.width = container.width
-  mouseEventDownContainer.height = container.height
+  Object.assign(startCrop, crop)
 
-  window.addEventListener('mousemove', handleMouseMove)
-  window.addEventListener('mouseup', handleMouseUp)
+  addEventListener('mousemove', handleMouseMove)
+  addEventListener('mouseup', handleMouseUp)
 }
-
-onMounted(() => {
-  if (!containerElement.value) return
-
-  container.height = containerElement.value.clientHeight
-  container.width = containerElement.value.clientWidth
-})
-
-watch(container, () => {
-  if (!containerElement.value) return
-
-  if (props.height) {
-    modelValueCrop.value.top = Math.floor(range(0, containerElement.value.clientHeight, 0, props.height, container.offsetY))
-    modelValueCrop.value.height = Math.floor(range(0, containerElement.value.clientHeight, 0, props.height, container.height))
-  }
-
-  if (props.width) {
-    modelValueCrop.value.left = Math.floor(range(0, containerElement.value.clientWidth, 0, props.width, container.offsetX))
-    modelValueCrop.value.width = Math.floor(range(0, containerElement.value.clientWidth, 0, props.width, container.width))
-  }
-}, {
-  immediate: true,
-})
 </script>
 
 <template>
