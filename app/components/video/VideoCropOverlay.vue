@@ -44,53 +44,60 @@ const handlePointerMove = (e: PointerEvent) => {
   const dx = (e.clientX - startMouse.x) / containerElementWidth.value
   const dy = (e.clientY - startMouse.y) / containerElementHeight.value
 
-  const cancelledOutRatio = videoRootContext.video.value.ratio / (props.ratio ?? videoRootContext.video.value.ratio)
+  const ratio = videoRootContext.video.value.ratio / (props.ratio ?? videoRootContext.video.value.ratio)
 
   if (resizingSide.value === 'n') {
-    const newY = clamp(startCrop.y + dy, 0, 1)
+    const bottomEdgeAnchor = startCrop.y + startCrop.height
+
+    crop.y = clamp(startCrop.y + dy, 0, 1)
+    crop.height = startCrop.height - (crop.y - startCrop.y)
 
     if (props.ratio) {
-      crop.width = crop.height / cancelledOutRatio
-    }
+      crop.width = crop.height / ratio
 
-    crop.height = startCrop.height - (newY - startCrop.y)
-    crop.y = newY
-  } else if (resizingSide.value === 'e') {
-    let newWidth = clamp(startCrop.width + dx, 0, 1 - crop.x)
-
-    if (props.ratio) {
-      crop.height = newWidth * cancelledOutRatio
-
-      if (crop.y + crop.height > 1) {
-        crop.height = 1 - startCrop.y
-        newWidth = crop.height / cancelledOutRatio
+      if (crop.width + crop.x > 1) {
+        crop.width = 1 - crop.x
+        crop.height = crop.width * ratio
+        crop.y = bottomEdgeAnchor - crop.height
       }
     }
+  } else if (resizingSide.value === 'e') {
+    crop.width = clamp(startCrop.width + dx, 0, 1 - crop.x)
 
-    crop.width = newWidth
+    if (props.ratio) {
+      crop.height = crop.width * ratio
+
+      if (crop.height + crop.y > 1) {
+        crop.height = 1 - crop.y
+        crop.width = crop.height / ratio
+      }
+    }
   } else if (resizingSide.value === 's') {
     crop.height = clamp(startCrop.height + dy, 0, 1 - crop.y)
 
     if (props.ratio) {
-      crop.width = crop.height / cancelledOutRatio
-    }
-  } else if (resizingSide.value === 'w') {
-    let newX = clamp(startCrop.x + dx, 0, 1)
-    let newWidth = startCrop.width - (newX - startCrop.x)
+      crop.width = crop.height / ratio
 
-    if (props.ratio) {
-      crop.height = newWidth * cancelledOutRatio
-
-      if (crop.y + crop.height > 1) {
-        crop.height = 1 - crop.y
-
-        newWidth = crop.height / cancelledOutRatio
-        newX = startCrop.x + startCrop.width - newWidth
+      if (crop.width + crop.x > 1) {
+        crop.width = 1 - crop.x
+        crop.height = crop.width * ratio
       }
     }
+  } else if (resizingSide.value === 'w') {
+    const rightEdgeAnchor = startCrop.x + startCrop.width
 
-    crop.width = newWidth
-    crop.x = newX
+    crop.x = clamp(startCrop.x + dx, 0, 1)
+    crop.width = startCrop.width - (crop.x - startCrop.x)
+
+    if (props.ratio) {
+      crop.height = crop.width * ratio
+
+      if (crop.height + crop.y > 1) {
+        crop.height = 1 - crop.y
+        crop.width = crop.height / ratio
+        crop.x = rightEdgeAnchor - crop.width
+      }
+    }
   } else if (resizingSide.value === 'move') {
     crop.x = clamp(startCrop.x + dx, 0, 1 - crop.width)
     crop.y = clamp(startCrop.y + dy, 0, 1 - crop.height)
@@ -131,20 +138,15 @@ const handlePointerDown = (e: PointerEvent, side: Side) => {
   addEventListener('pointerup', handlePointerUp)
 }
 
-watch(() => props.ratio, (ratio) => {
-  if (!ratio)
+watch(() => props.ratio, (_ratio) => {
+  if (!_ratio)
     return
 
-  const newRatio = videoRootContext.video.value.ratio / ratio
+  const ratio = videoRootContext.video.value.ratio / _ratio
+  crop.width = crop.height / ratio
 
-  // this means the crop ratio is narrower than the video ratio
-  // so we are going to update width
-  if (ratio <= videoRootContext.video.value.ratio) {
-    crop.width = crop.height / newRatio
-
-    if (crop.x + crop.width > 1) {
-      crop.x = 1 - crop.width
-    }
+  if (crop.x + crop.width > 1) {
+    crop.x = 1 - crop.width
   }
 })
 </script>
