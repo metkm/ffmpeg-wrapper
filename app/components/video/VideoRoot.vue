@@ -6,6 +6,7 @@ import type { VideoCropOptions, VideoTrimOptions, Video, VideoInfo } from '~/typ
 export interface VideoRootContext {
   videoElement: ShallowRef<HTMLVideoElement | null>
   crop: Ref<VideoCropOptions>
+  cropEnabled: Ref<boolean>
   trim: Ref<VideoTrimOptions>
   video: Ref<Video>
   duration: ComputedRef<number>
@@ -26,7 +27,9 @@ const videoInfo = ref<VideoInfo>({})
 const video = ref<Video>({ currentTime: 0, volume: 1 })
 const crop = ref<VideoCropOptions>({ top: 0, left: 0 })
 const trim = ref<VideoTrimOptions>({ start: 0 })
+
 const loaded = ref(false)
+const cropEnabled = ref(false)
 
 const onDataLoaded = () => {
   const element = toValue(videoElement)
@@ -96,6 +99,7 @@ const duration = computed(() => {
 provideVideoRootContext({
   videoElement,
   crop,
+  cropEnabled,
   trim,
   video,
   onDataLoaded,

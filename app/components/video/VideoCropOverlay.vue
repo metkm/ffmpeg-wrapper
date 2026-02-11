@@ -1,19 +1,9 @@
 <script setup lang="ts">
-import type { VideoCropOptions } from '~/types/video'
-
-const props = defineProps<{
-  width?: number
-  height?: number
-}>()
-
-const modelValueCrop = defineModel<VideoCropOptions>({
-  default: {
-    top: 0,
-    left: 0,
-  },
-})
+import { injectVideoRootContext } from './VideoRoot.vue'
 
 type Side = 'w' | 'n' | 'e' | 's' | 'move'
+
+const videoRootContext = injectVideoRootContext()
 
 const containerElement = useTemplateRef('containerElement')
 const { width: containerElementWidth, height: containerElementHeight } = useElementSize(containerElement)
@@ -69,14 +59,17 @@ const handlePointerMove = (e: PointerEvent) => {
     crop.y = clamp(startCrop.y + dy, 0, 1 - crop.height)
   }
 
-  if (props.height) {
-    modelValueCrop.value.top = Math.floor(crop.y * props.height)
-    modelValueCrop.value.height = Math.floor(crop.height * props.height)
+  const videoHeight = videoRootContext.video.value.height
+  const videoWidth = videoRootContext.video.value.width
+
+  if (videoHeight) {
+    videoRootContext.crop.value.top = Math.floor(crop.y * videoHeight)
+    videoRootContext.crop.value.height = Math.floor(crop.height * videoHeight)
   }
 
-  if (props.width) {
-    modelValueCrop.value.left = Math.floor(crop.x * props.width)
-    modelValueCrop.value.width = Math.floor(crop.width * props.width)
+  if (videoWidth) {
+    videoRootContext.crop.value.left = Math.floor(crop.x * videoWidth)
+    videoRootContext.crop.value.width = Math.floor(crop.width * videoWidth)
   }
 }
 

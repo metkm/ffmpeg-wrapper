@@ -32,7 +32,7 @@ const { parsedArgs: parsedArgsVideoFilter } = useCommandArgs(
     fps: computed(() => encoderOptions.value.fps),
     setpts: computed(() => encoderOptions.value.speed !== 1 ? `PTS/${encoderOptions.value.speed}` : undefined),
     crop: computed(() => {
-      if (!videoRootContext.crop.value.width || !videoRootContext.crop.value.height) {
+      if (!videoRootContext.crop.value.width || !videoRootContext.crop.value.height || !videoRootContext.cropEnabled.value) {
         return
       }
 

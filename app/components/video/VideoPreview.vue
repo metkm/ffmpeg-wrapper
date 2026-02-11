@@ -5,14 +5,12 @@ defineProps<{
   assetUrl: string
   path: string
 }>()
+const videoRootContext = injectVideoRootContext()
 
-const showCrop = ref(false)
 const playing = ref(false)
 const showVideoState = ref(false)
 
 const videoElement = useTemplateRef('videoElement')
-
-const videoRootContext = injectVideoRootContext()
 
 const trimStartFormatted = computed(() => formatSeconds(videoRootContext.trim.value.start))
 const trimEndFormatted = computed(() => formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration || 0))
@@ -51,7 +49,7 @@ onMounted(() => {
 
 defineShortcuts({
   'c': () => {
-    showCrop.value = !showCrop.value
+    videoRootContext.cropEnabled.value = !videoRootContext.cropEnabled.value
   },
   ' ': togglePlay,
 })
@@ -59,13 +57,12 @@ defineShortcuts({
 
 <template>
   <div class="flex flex-col gap-4 flex-1 ">
-    <!-- <div class="relative min-h-0 min-w-0 max-h-full max-w-full shrink mx-auto flex-1"> -->
     <div class="min-h-0 flex flex-col items-start">
       <UButton
-        :variant="showCrop ? 'solid' : 'soft'"
+        :variant="videoRootContext.cropEnabled.value ? 'solid' : 'soft'"
         icon="i-lucide-crop"
         class="mb-2"
-        @click="showCrop = !showCrop"
+        @click="videoRootContext.cropEnabled.value = !videoRootContext.cropEnabled.value"
       >
         Crop
       </UButton>
@@ -104,10 +101,7 @@ defineShortcuts({
         />
 
         <VideoCropOverlay
-          v-if="showCrop"
-          v-model="videoRootContext.crop.value"
-          :width="videoRootContext.video.value.width"
-          :height="videoRootContext.video.value.height"
+          v-if="videoRootContext.cropEnabled.value"
           class="z-10"
         />
       </div>
