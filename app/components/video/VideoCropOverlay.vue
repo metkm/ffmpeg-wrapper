@@ -148,7 +148,7 @@ watch(() => props.ratio, (_ratio) => {
   if (crop.x + crop.width > 1) {
     crop.x = 1 - crop.width
   }
-})
+}, { immediate: true })
 </script>
 
 <template>
