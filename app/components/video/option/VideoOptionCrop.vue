@@ -51,7 +51,7 @@ const selectRatio = (ratio: typeof aspectRatios[number]) => {
           :key="ratio.label"
         >
           <UButton
-            :variant="ratio.label === aspectRatio?.label ? 'soft' : 'ghost'"
+            :variant="ratio.label === aspectRatio?.label ? 'subtle' : 'ghost'"
             class="rounded-md min-w-14"
             size="sm"
             block
