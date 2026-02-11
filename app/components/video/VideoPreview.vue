@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { motion } from 'motion-v'
 import { injectVideoRootContext } from './VideoRoot.vue'
 
 defineProps<{
@@ -9,6 +10,7 @@ const videoRootContext = injectVideoRootContext()
 
 const playing = ref(false)
 const showVideoState = ref(false)
+const cropRatio = ref()
 
 const videoElement = useTemplateRef('videoElement')
 
@@ -57,99 +59,109 @@ defineShortcuts({
 
 <template>
   <div class="flex flex-col gap-4 flex-1 ">
-    <div class="min-h-0 flex flex-col items-start">
-      <UButton
-        :variant="videoRootContext.cropEnabled.value ? 'solid' : 'soft'"
-        icon="i-lucide-crop"
-        class="mb-2"
-        @click="videoRootContext.cropEnabled.value = !videoRootContext.cropEnabled.value"
+    <LayoutGroup>
+      <motion.div
+        layout
+        class="min-h-0 flex flex-col items-start gap-2"
       >
-        Crop
-      </UButton>
-
-      <div class="relative h-full aspect-ratio mx-auto max-w-full min-h-0">
-        <Transition
-          enter-active-class="transition-all"
-          leave-active-class="transition-all"
-          enter-from-class="opacity-0 scale-80"
-          leave-to-class="opacity-0 scale-80"
-          @after-enter="onAfterEnter"
+        <motion.div
+          layout
+          class="flex items-center"
         >
-          <div
-            v-show="showVideoState"
-            class="flex items-center justify-center absolute inset-0 z-50 pointer-events-none will-change-transform"
+          <VideoOptionCrop v-model:ratio="cropRatio" />
+        </motion.div>
+
+        <motion.div
+          layout
+          class="relative h-full aspect-ratio mx-auto max-w-full min-h-0"
+        >
+          <Transition
+            enter-active-class="transition-all"
+            leave-active-class="transition-all"
+            enter-from-class="opacity-0 scale-80"
+            leave-to-class="opacity-0 scale-80"
+            @after-enter="onAfterEnter"
           >
-            <div class="size-24 p-4 rounded-full bg-default/80">
-              <UIcon
-                :name="`i-heroicons-${playing ? 'play' : 'pause'}-solid`"
-                class="h-full w-full"
-              />
+            <div
+              v-show="showVideoState"
+              class="flex items-center justify-center absolute inset-0 z-50 pointer-events-none will-change-transform"
+            >
+              <div class="size-24 p-4 rounded-full bg-default/80">
+                <UIcon
+                  :name="`i-heroicons-${playing ? 'play' : 'pause'}-solid`"
+                  class="h-full w-full"
+                />
+              </div>
             </div>
-          </div>
-        </Transition>
+          </Transition>
 
-        <VideoAmbientEffect />
+          <VideoAmbientEffect />
 
-        <video
-          ref="videoElement"
-          class="rounded-md w-full h-full shadow mx-auto shadow-black transition-opacity"
-          :class="videoRootContext.loaded ? 'animate-fade-in': 'opacity-0'"
-          crossorigin="anonymous"
-          :src="assetUrl"
-          @ended="togglePlay"
+          <video
+            ref="videoElement"
+            class="rounded-md w-full h-full shadow mx-auto shadow-black transition-opacity"
+            :class="videoRootContext.loaded ? 'animate-fade-in': 'opacity-0'"
+            crossorigin="anonymous"
+            :src="assetUrl"
+            @ended="togglePlay"
+            @click="togglePlay"
+          />
+
+          <VideoCropOverlay
+            v-if="videoRootContext.cropEnabled.value"
+            :ratio="cropRatio"
+            class="z-10"
+          />
+        </motion.div>
+      </motion.div>
+
+      <motion.div
+        layout
+        class="grid grid-cols-[1fr_10fr_1fr] grid-rows-[auto_1fr] items-center gap-2 w-full"
+      >
+        <div class="flex items-center gap-4 justify-between col-start-2 text-sm">
+          <p class="text-primary font-medium">
+            {{ formatSeconds(videoRootContext.video.value.currentTime) }}
+          </p>
+
+          <p>
+            {{ trimStartFormatted }} - {{ trimEndFormatted }}
+          </p>
+        </div>
+
+        <UButton
+          :icon="playing ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
+          size="xl"
+          class="shadow shadow-black h-full justify-center col-start-1"
           @click="togglePlay"
         />
 
-        <VideoCropOverlay
-          v-if="videoRootContext.cropEnabled.value"
-          class="z-10"
-        />
-      </div>
-    </div>
-
-    <div class="grid grid-cols-[1fr_10fr_1fr] grid-rows-[auto_1fr] items-center gap-2 w-full">
-      <div class="flex items-center gap-4 justify-between col-start-2 text-sm">
-        <p class="text-primary font-medium">
-          {{ formatSeconds(videoRootContext.video.value.currentTime) }}
-        </p>
-
-        <p>
-          {{ trimStartFormatted }} - {{ trimEndFormatted }}
-        </p>
-      </div>
-
-      <UButton
-        :icon="playing ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
-        size="xl"
-        class="shadow shadow-black h-full justify-center col-start-1"
-        @click="togglePlay"
-      />
-
-      <TimelineBar
-        v-model="videoRootContext.video.value.currentTime"
-        v-model:trim="videoRootContext.trim.value"
-        :duration="videoRootContext.video.value.duration || 0"
-        :asset-url="assetUrl"
-        :path="path"
-      />
-
-      <div class="-mt-1">
-        <UIcon
-          :name="volumeIcon"
-          class="size-4"
+        <TimelineBar
+          v-model="videoRootContext.video.value.currentTime"
+          v-model:trim="videoRootContext.trim.value"
+          :duration="videoRootContext.video.value.duration || 0"
+          :asset-url="assetUrl"
+          :path="path"
         />
 
-        <USlider
-          v-model="videoRootContext.video.value.volume"
-          :min="0"
-          :max="1"
-          :step="0.01"
-          :tooltip="{
-            delayDuration: 0,
-          }"
-        />
-      </div>
-    </div>
+        <div class="-mt-1">
+          <UIcon
+            :name="volumeIcon"
+            class="size-4"
+          />
+
+          <USlider
+            v-model="videoRootContext.video.value.volume"
+            :min="0"
+            :max="1"
+            :step="0.01"
+            :tooltip="{
+              delayDuration: 0,
+            }"
+          />
+        </div>
+      </motion.div>
+    </LayoutGroup>
   </div>
 </template>
 

@@ -16,6 +16,7 @@ export interface Video {
   duration?: number
   width?: number
   height?: number
+  ratio: number
 }
 
 export interface VideoInfo {
@@ -24,4 +25,5 @@ export interface VideoInfo {
   resolution?: `${number}x${number}`
   fps?: number
   bitrate?: string
+  ratio?: number
 }

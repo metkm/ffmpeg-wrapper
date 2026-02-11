@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { injectVideoRootContext } from './VideoRoot.vue'
 
+const props = defineProps<{
+  ratio?: number
+}>()
+
 type Side = 'w' | 'n' | 'e' | 's' | 'move'
 
 const videoRootContext = injectVideoRootContext()
@@ -40,19 +44,52 @@ const handlePointerMove = (e: PointerEvent) => {
   const dx = (e.clientX - startMouse.x) / containerElementWidth.value
   const dy = (e.clientY - startMouse.y) / containerElementHeight.value
 
+  const cancelledOutRatio = videoRootContext.video.value.ratio / (props.ratio ?? videoRootContext.video.value.ratio)
+
   if (resizingSide.value === 'n') {
     const newY = clamp(startCrop.y + dy, 0, 1)
+
+    if (props.ratio) {
+      crop.width = crop.height / cancelledOutRatio
+    }
 
     crop.height = startCrop.height - (newY - startCrop.y)
     crop.y = newY
   } else if (resizingSide.value === 'e') {
-    crop.width = clamp(startCrop.width + dx, 0, 1)
-  } else if (resizingSide.value === 's') {
-    crop.height = clamp(startCrop.height + dy, 0, 1)
-  } else if (resizingSide.value === 'w') {
-    const newX = clamp(startCrop.x + dx, 0, 1)
+    let newWidth = clamp(startCrop.width + dx, 0, 1 - crop.x)
 
-    crop.width = startCrop.width - (newX - startCrop.x)
+    if (props.ratio) {
+      crop.height = newWidth * cancelledOutRatio
+
+      if (crop.y + crop.height > 1) {
+        crop.height = 1 - startCrop.y
+        newWidth = crop.height / cancelledOutRatio
+      }
+    }
+
+    crop.width = newWidth
+  } else if (resizingSide.value === 's') {
+    crop.height = clamp(startCrop.height + dy, 0, 1 - crop.y)
+
+    if (props.ratio) {
+      crop.width = crop.height / cancelledOutRatio
+    }
+  } else if (resizingSide.value === 'w') {
+    let newX = clamp(startCrop.x + dx, 0, 1)
+    let newWidth = startCrop.width - (newX - startCrop.x)
+
+    if (props.ratio) {
+      crop.height = newWidth * cancelledOutRatio
+
+      if (crop.y + crop.height > 1) {
+        crop.height = 1 - crop.y
+
+        newWidth = crop.height / cancelledOutRatio
+        newX = startCrop.x + startCrop.width - newWidth
+      }
+    }
+
+    crop.width = newWidth
     crop.x = newX
   } else if (resizingSide.value === 'move') {
     crop.x = clamp(startCrop.x + dx, 0, 1 - crop.width)
@@ -93,6 +130,23 @@ const handlePointerDown = (e: PointerEvent, side: Side) => {
   addEventListener('pointermove', handlePointerMove)
   addEventListener('pointerup', handlePointerUp)
 }
+
+watch(() => props.ratio, (ratio) => {
+  if (!ratio)
+    return
+
+  const newRatio = videoRootContext.video.value.ratio / ratio
+
+  // this means the crop ratio is narrower than the video ratio
+  // so we are going to update width
+  if (ratio <= videoRootContext.video.value.ratio) {
+    crop.width = crop.height / newRatio
+
+    if (crop.x + crop.width > 1) {
+      crop.x = 1 - crop.width
+    }
+  }
+})
 </script>
 
 <template>

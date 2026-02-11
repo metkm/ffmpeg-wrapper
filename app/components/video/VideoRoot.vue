@@ -24,7 +24,7 @@ const videoElement = shallowRef<HTMLVideoElement | null>(null)
 const optionsStore = useOptionsStore()
 
 const videoInfo = ref<VideoInfo>({})
-const video = ref<Video>({ currentTime: 0, volume: 1 })
+const video = ref<Video>({ currentTime: 0, volume: 1, ratio: 16 / 9 })
 const crop = ref<VideoCropOptions>({ top: 0, left: 0 })
 const trim = ref<VideoTrimOptions>({ start: 0 })
 
@@ -41,6 +41,8 @@ const onDataLoaded = () => {
 
   video.value.height = element.videoHeight
   video.value.width = element.videoWidth
+  video.value.ratio = element.videoWidth / element.videoHeight
+
   loaded.value = true
 }
 
