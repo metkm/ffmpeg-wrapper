@@ -32,7 +32,7 @@ const { parsedArgs: parsedArgsVideoFilter } = useCommandArgs(
     fps: computed(() => encoderOptions.value.fps),
     setpts: computed(() => encoderOptions.value.speed !== 1 ? `PTS/${encoderOptions.value.speed}` : undefined),
     crop: computed(() => {
-      if (!videoRootContext.crop.value.width || !videoRootContext.crop.value.height) {
+      if (!videoRootContext.crop.value.width || !videoRootContext.crop.value.height || !videoRootContext.cropEnabled.value) {
         return
       }
 
@@ -189,14 +189,27 @@ const bitrateArgParsed = computed(() => {
       <UFormField
         label="FPS"
         description="Frames per second"
+        :help="videoRootContext.videoInfo.value.fps && encoderOptions.fps && encoderOptions.fps > videoRootContext.videoInfo.value.fps ? `${encoderOptions.fps} fps exceeds the source ${videoRootContext.videoInfo.value.fps} fps; output size may be unpredictable.` : undefined"
       >
-        <USelect
-          v-model="encoderOptions.fps"
-          :items="[10, 20, 24, 30, 60, 90, 120, 144, 180, 240]"
-          color="neutral"
-          variant="soft"
-          :disabled="exportType === 'image'"
-        />
+        <div class="flex items-center gap-2">
+          <USelect
+            v-model="encoderOptions.fps"
+            :items="[10, 20, 24, 30, 60, 90, 120, 144, 180, 240]"
+            color="neutral"
+            variant="soft"
+            :disabled="exportType === 'image'"
+            :placeholder="videoRootContext.videoInfo.value.fps?.toString()"
+          />
+
+          <UButton
+            v-if="encoderOptions.fps"
+            icon="i-lucide-x"
+            variant="soft"
+            square
+            :ui="{ base: 'rounded' }"
+            @click="encoderOptions.fps = undefined"
+          />
+        </div>
       </UFormField>
 
       <UFormField label="Resolution">
@@ -206,7 +219,7 @@ const bitrateArgParsed = computed(() => {
             :items="resolutions"
             color="neutral"
             variant="soft"
-            placeholder="default"
+            :placeholder="videoRootContext.videoInfo.value.resolution"
           />
 
           <UButton
@@ -220,7 +233,10 @@ const bitrateArgParsed = computed(() => {
         </div>
       </UFormField>
 
-      <UFormField label="Extra Arguments">
+      <UFormField
+        label="Extra Arguments"
+        :help="bitrateArgParsed && bitrateArgParsed > targetBitrate ? `Setting -b:v above ${Math.round(targetBitrate)}k may result in a file size over ${encoderOptions.fileSizeMb} MB.` : undefined"
+      >
         <div class="flex gap-2">
           <UInput
             v-model="extraArguments"
@@ -239,13 +255,6 @@ const bitrateArgParsed = computed(() => {
             @click="extraArguments = ''"
           />
         </div>
-
-        <p
-          v-if="bitrateArgParsed && bitrateArgParsed > targetBitrate"
-          class="text-xs text-warning-400 mt-1"
-        >
-          The target file size might be higher than {{ encoderOptions.fileSizeMb }}Mb if -b:v given more than {{ Math.round(targetBitrate) }}k
-        </p>
       </UFormField>
 
       <UFormField label="Extra Video Arguments">

@@ -27,5 +27,10 @@ export default defineAppConfig({
         base: 'rounded-4xl',
       },
     },
+    formField: {
+      slots: {
+        help: 'text-warning-500',
+      },
+    },
   },
 })

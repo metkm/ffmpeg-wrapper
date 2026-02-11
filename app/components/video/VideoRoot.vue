@@ -1,15 +1,17 @@
 <script lang="ts">
 import { createContext } from 'motion-v'
 import type { ShallowRef } from 'vue'
-import type { VideoCropOptions, VideoTrimOptions, Video } from '~/types/video'
+import type { VideoCropOptions, VideoTrimOptions, Video, VideoInfo } from '~/types/video'
 
 export interface VideoRootContext {
   videoElement: ShallowRef<HTMLVideoElement | null>
   crop: Ref<VideoCropOptions>
+  cropEnabled: Ref<boolean>
   trim: Ref<VideoTrimOptions>
   video: Ref<Video>
   duration: ComputedRef<number>
   loaded: Ref<boolean>
+  videoInfo: Ref<VideoInfo>
   onDataLoaded: () => void
 }
 
@@ -21,10 +23,13 @@ const videoElement = shallowRef<HTMLVideoElement | null>(null)
 
 const optionsStore = useOptionsStore()
 
-const video = ref<Video>({ currentTime: 0, volume: 1 })
+const videoInfo = ref<VideoInfo>({})
+const video = ref<Video>({ currentTime: 0, volume: 1, ratio: 16 / 9 })
 const crop = ref<VideoCropOptions>({ top: 0, left: 0 })
 const trim = ref<VideoTrimOptions>({ start: 0 })
+
 const loaded = ref(false)
+const cropEnabled = ref(false)
 
 const onDataLoaded = () => {
   const element = toValue(videoElement)
@@ -36,6 +41,8 @@ const onDataLoaded = () => {
 
   video.value.height = element.videoHeight
   video.value.width = element.videoWidth
+  video.value.ratio = element.videoWidth / element.videoHeight
+
   loaded.value = true
 }
 
@@ -94,11 +101,13 @@ const duration = computed(() => {
 provideVideoRootContext({
   videoElement,
   crop,
+  cropEnabled,
   trim,
   video,
   onDataLoaded,
   duration,
   loaded,
+  videoInfo,
 })
 </script>
 

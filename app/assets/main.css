@@ -8,7 +8,7 @@
   --spacing-dock-inset: calc(var(--spacing) * 4);
   --spacing-dock-gap-for-content: calc(50px + var(--spacing-dock-inset) * 2);
 
-  --animate-fade-in: fade-in 1s var(--ease-in-out) both;
+  --animate-fade-in: fade-in 500ms var(--ease-in-out) both;
 
   @keyframes fade-in {
     from { opacity: 0; }

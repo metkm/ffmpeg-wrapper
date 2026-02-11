@@ -1,166 +1,156 @@
 <script setup lang="ts">
-import type { VideoCropOptions } from '~/types/video'
+import { injectVideoRootContext } from './VideoRoot.vue'
 
 const props = defineProps<{
-  width?: number
-  height?: number
+  ratio?: number
 }>()
-
-const modelValueCrop = defineModel<VideoCropOptions>({
-  default: {
-    top: 0,
-    left: 0,
-  },
-})
-
-const MIN_HEIGHT = 20
-const MIN_WIDTH = 20
 
 type Side = 'w' | 'n' | 'e' | 's' | 'move'
 
+const MINIMUM_SIZE = 0.1
+
+const videoRootContext = injectVideoRootContext()
+
 const containerElement = useTemplateRef('containerElement')
+const { width: containerElementWidth, height: containerElementHeight } = useElementSize(containerElement)
 
 const resizingSide = ref<Side | undefined>()
 
-const mouseEventDown = ref<MouseEvent>()
-const mouseEventDownContainer = reactive({
-  offsetX: 0,
-  offsetY: 0,
-  width: 100,
-  height: 100,
-})
+const startMouse = reactive({ x: 0, y: 0 })
 
-const container = reactive({
-  offsetX: 0,
-  offsetY: 0,
-  width: 100,
-  height: 100,
+const startCrop = reactive({ x: 0, y: 0, width: 0, height: 0 })
+const crop = reactive({
+  x: 0,
+  y: 0,
+  width: 1,
+  height: 1,
 })
 
 const containerStyle = computed(() => {
+  if (!containerElement.value)
+    return {}
+
+  const w = containerElementWidth.value
+  const h = containerElementHeight.value
+
   return {
-    width: `${container.width}px`,
-    height: `${container.height}px`,
-    transform: `translate(${container.offsetX}px, ${container.offsetY}px)`,
+    width: `${crop.width * w}px`,
+    height: `${crop.height * h}px`,
+    transform: `translate(${crop.x * w}px, ${crop.y * h}px)`,
   }
 })
 
-const handleMouseUp = () => {
-  mouseEventDownContainer.offsetX = container.offsetX
-  mouseEventDownContainer.offsetY = container.offsetY
-  mouseEventDownContainer.width = container.width
-  mouseEventDownContainer.height = container.height
+const handlePointerMove = (e: PointerEvent) => {
+  e.preventDefault()
 
-  window.removeEventListener('mousemove', handleMouseMove)
-  window.removeEventListener('mouseup', handleMouseUp)
-}
+  const dx = (e.clientX - startMouse.x) / containerElementWidth.value
+  const dy = (e.clientY - startMouse.y) / containerElementHeight.value
 
-const handleMouseMove = (event: MouseEvent) => {
-  event.preventDefault()
-  if (!mouseEventDown.value || !containerElement.value) return
+  const ratio = videoRootContext.video.value.ratio / (props.ratio ?? videoRootContext.video.value.ratio)
 
-  const offsetXDiff = -(mouseEventDown.value.clientX - event.clientX)
-  const offsetYDiff = -(mouseEventDown.value.clientY - event.clientY)
+  if (resizingSide.value === 'n') {
+    const bottomEdgeAnchor = startCrop.y + startCrop.height
 
-  const offsetXNew = offsetXDiff + mouseEventDownContainer.offsetX
-  const offsetYNew = offsetYDiff + mouseEventDownContainer.offsetY
+    crop.y = clamp(startCrop.y + dy, 0, bottomEdgeAnchor - MINIMUM_SIZE)
+    crop.height = startCrop.height - (crop.y - startCrop.y)
 
-  if (resizingSide.value === 'move') {
-    container.offsetX = clamp(
-      offsetXNew,
-      0,
-      containerElement.value.clientWidth - mouseEventDownContainer.width,
-    )
-    container.offsetY = clamp(
-      offsetYNew,
-      0,
-      containerElement.value.clientHeight - mouseEventDownContainer.height,
-    )
-  } else if (resizingSide.value === 'w') {
-    const newWidth = mouseEventDownContainer.width - offsetXDiff
+    if (props.ratio) {
+      crop.width = crop.height / ratio
 
-    const rightSideOfCropWidth = containerElement.value.clientWidth - offsetXNew - newWidth
-    const leftSideOfCropWidth = containerElement.value.clientWidth - rightSideOfCropWidth
-
-    container.offsetX = clamp(
-      offsetXNew,
-      0,
-      leftSideOfCropWidth - 20,
-    )
-
-    if (container.offsetX <= 0) {
-      return
+      if (crop.width + crop.x > 1) {
+        crop.width = 1 - crop.x
+        crop.height = crop.width * ratio
+        crop.y = bottomEdgeAnchor - crop.height
+      }
     }
-
-    container.width = clamp(newWidth, 20, containerElement.value.clientWidth)
   } else if (resizingSide.value === 'e') {
-    container.width = clamp(
-      mouseEventDownContainer.width + offsetXDiff,
-      MIN_WIDTH,
-      containerElement.value.clientWidth - container.offsetX,
-    )
-  } else if (resizingSide.value === 'n') {
-    const newHeight = mouseEventDownContainer.height - offsetYDiff
+    crop.width = clamp(startCrop.width + dx, MINIMUM_SIZE, 1 - crop.x)
 
-    const bottomSideOfCropWidth = containerElement.value.clientHeight - offsetYNew - newHeight
-    const topSideOfCropWidth = containerElement.value.clientHeight - bottomSideOfCropWidth
+    if (props.ratio) {
+      crop.height = crop.width * ratio
 
-    container.offsetY = clamp(
-      offsetYNew,
-      0,
-      topSideOfCropWidth - 20,
-    )
-
-    if (container.offsetY <= 0) {
-      return
+      if (crop.height + crop.y > 1) {
+        crop.height = 1 - crop.y
+        crop.width = crop.height / ratio
+      }
     }
-
-    container.height = clamp(newHeight, 20, containerElement.value.clientHeight)
   } else if (resizingSide.value === 's') {
-    container.height = clamp(
-      mouseEventDownContainer.height + offsetYDiff,
-      MIN_HEIGHT,
-      containerElement.value.clientHeight - container.offsetY,
-    )
+    crop.height = clamp(startCrop.height + dy, MINIMUM_SIZE, 1 - crop.y)
+
+    if (props.ratio) {
+      crop.width = crop.height / ratio
+
+      if (crop.width + crop.x > 1) {
+        crop.width = 1 - crop.x
+        crop.height = crop.width * ratio
+      }
+    }
+  } else if (resizingSide.value === 'w') {
+    const rightEdgeAnchor = startCrop.x + startCrop.width
+
+    crop.x = clamp(startCrop.x + dx, 0, rightEdgeAnchor - MINIMUM_SIZE)
+    crop.width = startCrop.width - (crop.x - startCrop.x)
+
+    if (props.ratio) {
+      crop.height = crop.width * ratio
+
+      if (crop.height + crop.y > 1) {
+        crop.height = 1 - crop.y
+        crop.width = crop.height / ratio
+        crop.x = rightEdgeAnchor - crop.width
+      }
+    }
+  } else if (resizingSide.value === 'move') {
+    crop.x = clamp(startCrop.x + dx, 0, 1 - crop.width)
+    crop.y = clamp(startCrop.y + dy, 0, 1 - crop.height)
+  }
+
+  const videoHeight = videoRootContext.video.value.height
+  const videoWidth = videoRootContext.video.value.width
+
+  if (videoHeight) {
+    videoRootContext.crop.value.top = Math.floor(crop.y * videoHeight)
+    videoRootContext.crop.value.height = Math.floor(crop.height * videoHeight)
+  }
+
+  if (videoWidth) {
+    videoRootContext.crop.value.left = Math.floor(crop.x * videoWidth)
+    videoRootContext.crop.value.width = Math.floor(crop.width * videoWidth)
   }
 }
 
-const handleMouseDown = (event: MouseEvent, side: Side) => {
-  event.preventDefault()
+const handlePointerUp = () => {
+  window.removeEventListener('pointermove', handlePointerMove)
+  window.removeEventListener('pointerup', handlePointerUp)
+}
+
+const handlePointerDown = (e: PointerEvent, side: Side) => {
+  e.preventDefault()
+
+  const element = e.currentTarget as HTMLElement
+  element.setPointerCapture(e.pointerId)
+
   resizingSide.value = side
-  mouseEventDown.value = event
+  startMouse.x = e.clientX
+  startMouse.y = e.clientY
 
-  mouseEventDownContainer.offsetX = container.offsetX
-  mouseEventDownContainer.offsetY = container.offsetY
-  mouseEventDownContainer.width = container.width
-  mouseEventDownContainer.height = container.height
+  Object.assign(startCrop, crop)
 
-  window.addEventListener('mousemove', handleMouseMove)
-  window.addEventListener('mouseup', handleMouseUp)
+  addEventListener('pointermove', handlePointerMove)
+  addEventListener('pointerup', handlePointerUp)
 }
 
-onMounted(() => {
-  if (!containerElement.value) return
+watch(() => props.ratio, (_ratio) => {
+  if (!_ratio)
+    return
 
-  container.height = containerElement.value.clientHeight
-  container.width = containerElement.value.clientWidth
-})
+  const ratio = videoRootContext.video.value.ratio / _ratio
+  crop.width = crop.height / ratio
 
-watch(container, () => {
-  if (!containerElement.value) return
-
-  if (props.height) {
-    modelValueCrop.value.top = Math.floor(range(0, containerElement.value.clientHeight, 0, props.height, container.offsetY))
-    modelValueCrop.value.height = Math.floor(range(0, containerElement.value.clientHeight, 0, props.height, container.height))
+  if (crop.x + crop.width > 1) {
+    crop.x = 1 - crop.width
   }
-
-  if (props.width) {
-    modelValueCrop.value.left = Math.floor(range(0, containerElement.value.clientWidth, 0, props.width, container.offsetX))
-    modelValueCrop.value.width = Math.floor(range(0, containerElement.value.clientWidth, 0, props.width, container.width))
-  }
-}, {
-  immediate: true,
-})
+}, { immediate: true })
 </script>
 
 <template>
@@ -173,29 +163,29 @@ watch(container, () => {
     >
       <div
         ref="containerInnerElement"
-        class="absolute bg-elevated/50 *:absolute hover:cursor-move border-2 border-dashed border-muted"
+        class="absolute bg-elevated/50 *:absolute hover:cursor-move rounded-md border-2 border-dashed border-muted"
         :style="containerStyle"
       >
         <div
           class="absolute inset-1.5"
-          @mousedown="(event) => handleMouseDown(event, 'move')"
+          @pointerdown="(event) => handlePointerDown(event, 'move')"
         />
 
         <div
           class="left-0 h-full w-1 px-1.5 cursor-w-resize -translate-x-1/2"
-          @mousedown="(event) => handleMouseDown(event, 'w')"
+          @pointerdown="(event) => handlePointerDown(event, 'w')"
         />
         <div
           class="top-0 w-full h-1 py-1.5 cursor-n-resize -translate-y-1/2"
-          @mousedown="(event) => handleMouseDown(event, 'n')"
+          @pointerdown="(event) => handlePointerDown(event, 'n')"
         />
         <div
           class="top-full w-full h-1 py-1.5 cursor-s-resize -translate-y-1/2"
-          @mousedown="(event) => handleMouseDown(event, 's')"
+          @pointerdown="(event) => handlePointerDown(event, 's')"
         />
         <div
           class="left-full h-full w-1 px-1.5 cursor-e-resize -translate-x-1/2"
-          @mousedown="(event) => handleMouseDown(event, 'e')"
+          @pointerdown="(event) => handlePointerDown(event, 'e')"
         />
       </div>
     </div>
