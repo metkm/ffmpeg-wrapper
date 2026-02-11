@@ -7,6 +7,8 @@ const props = defineProps<{
 
 type Side = 'w' | 'n' | 'e' | 's' | 'move'
 
+const MINIMUM_SIZE = 0.1
+
 const videoRootContext = injectVideoRootContext()
 
 const containerElement = useTemplateRef('containerElement')
@@ -49,7 +51,7 @@ const handlePointerMove = (e: PointerEvent) => {
   if (resizingSide.value === 'n') {
     const bottomEdgeAnchor = startCrop.y + startCrop.height
 
-    crop.y = clamp(startCrop.y + dy, 0, 1)
+    crop.y = clamp(startCrop.y + dy, 0, bottomEdgeAnchor - MINIMUM_SIZE)
     crop.height = startCrop.height - (crop.y - startCrop.y)
 
     if (props.ratio) {
@@ -62,7 +64,7 @@ const handlePointerMove = (e: PointerEvent) => {
       }
     }
   } else if (resizingSide.value === 'e') {
-    crop.width = clamp(startCrop.width + dx, 0, 1 - crop.x)
+    crop.width = clamp(startCrop.width + dx, MINIMUM_SIZE, 1 - crop.x)
 
     if (props.ratio) {
       crop.height = crop.width * ratio
@@ -73,7 +75,7 @@ const handlePointerMove = (e: PointerEvent) => {
       }
     }
   } else if (resizingSide.value === 's') {
-    crop.height = clamp(startCrop.height + dy, 0, 1 - crop.y)
+    crop.height = clamp(startCrop.height + dy, MINIMUM_SIZE, 1 - crop.y)
 
     if (props.ratio) {
       crop.width = crop.height / ratio
@@ -86,7 +88,7 @@ const handlePointerMove = (e: PointerEvent) => {
   } else if (resizingSide.value === 'w') {
     const rightEdgeAnchor = startCrop.x + startCrop.width
 
-    crop.x = clamp(startCrop.x + dx, 0, 1)
+    crop.x = clamp(startCrop.x + dx, 0, rightEdgeAnchor - MINIMUM_SIZE)
     crop.width = startCrop.width - (crop.x - startCrop.x)
 
     if (props.ratio) {
