@@ -62,7 +62,7 @@ defineShortcuts({
     <LayoutGroup>
       <motion.div
         layout
-        class="min-h-0 flex flex-col items-start gap-2"
+        class="min-h-0 flex flex-col justify-center gap-2 grow"
       >
         <motion.div
           layout
@@ -73,7 +73,7 @@ defineShortcuts({
 
         <motion.div
           layout
-          class="relative h-full aspect-ratio mx-auto max-w-full min-h-0"
+          class="relative h-full aspect-ratio max-h-max mx-auto min-h-0 grow"
         >
           <Transition
             enter-active-class="transition-all"
