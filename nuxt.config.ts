@@ -53,6 +53,7 @@ export default defineNuxtConfig({
         'lucide:circle-stop',
         'lucide:home',
         'lucide:loader-circle',
+        'lucide:crop',
         'heroicons:pause-solid',
         'heroicons:play-solid',
         'fluent:dismiss-16-regular',

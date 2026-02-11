@@ -59,37 +59,48 @@ defineShortcuts({
 
 <template>
   <div class="flex flex-col gap-4 flex-1 ">
-    <div class="relative min-h-0 min-w-0 max-h-full max-w-full shrink mx-auto flex-1">
-      <Transition
-        enter-active-class="transition-all"
-        leave-active-class="transition-all"
-        enter-from-class="opacity-0 scale-80"
-        leave-to-class="opacity-0 scale-80"
-        @after-enter="onAfterEnter"
+    <!-- <div class="relative min-h-0 min-w-0 max-h-full max-w-full shrink mx-auto flex-1"> -->
+    <div class="min-h-0 flex flex-col items-start">
+      <UButton
+        :variant="showCrop ? 'solid' : 'soft'"
+        icon="i-lucide-crop"
+        class="mb-2"
+        @click="showCrop = !showCrop"
       >
-        <div
-          v-show="showVideoState"
-          class="flex items-center justify-center absolute inset-0 z-50 pointer-events-none will-change-transform"
-        >
-          <div class="size-24 p-4 rounded-full bg-default/80">
-            <UIcon
-              :name="`i-heroicons-${playing ? 'play' : 'pause'}-solid`"
-              class="h-full w-full"
-            />
-          </div>
-        </div>
-      </Transition>
+        Crop
+      </UButton>
 
-      <div class="flex items-center justify-center aspect-video h-full max-w-full">
+      <div class="relative h-full aspect-ratio mx-auto max-w-full min-h-0">
+        <Transition
+          enter-active-class="transition-all"
+          leave-active-class="transition-all"
+          enter-from-class="opacity-0 scale-80"
+          leave-to-class="opacity-0 scale-80"
+          @after-enter="onAfterEnter"
+        >
+          <div
+            v-show="showVideoState"
+            class="flex items-center justify-center absolute inset-0 z-50 pointer-events-none will-change-transform"
+          >
+            <div class="size-24 p-4 rounded-full bg-default/80">
+              <UIcon
+                :name="`i-heroicons-${playing ? 'play' : 'pause'}-solid`"
+                class="h-full w-full"
+              />
+            </div>
+          </div>
+        </Transition>
+
         <VideoAmbientEffect />
 
         <video
           ref="videoElement"
-          class="rounded-md w-full aspect-video mx-auto shadow shadow-black transition-opacity"
+          class="rounded-md w-full h-full shadow mx-auto shadow-black transition-opacity"
           :class="videoRootContext.loaded ? 'animate-fade-in': 'opacity-0'"
           crossorigin="anonymous"
           :src="assetUrl"
           @ended="togglePlay"
+          @click="togglePlay"
         />
 
         <VideoCropOverlay
@@ -100,11 +111,6 @@ defineShortcuts({
           class="z-10"
         />
       </div>
-
-      <div
-        class="absolute inset-0"
-        @click="togglePlay"
-      />
     </div>
 
     <div class="grid grid-cols-[1fr_10fr_1fr] grid-rows-[auto_1fr] items-center gap-2 w-full">

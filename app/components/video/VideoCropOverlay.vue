@@ -173,7 +173,7 @@ watch(container, () => {
     >
       <div
         ref="containerInnerElement"
-        class="absolute bg-elevated/50 *:absolute hover:cursor-move border-2 border-dashed border-muted"
+        class="absolute bg-elevated/50 *:absolute hover:cursor-move rounded-md border-2 border-dashed border-muted"
         :style="containerStyle"
       >
         <div
