@@ -5,7 +5,7 @@ interface EncoderOptions {
   noAudio: boolean
   fileSizeMb: number
   encoder: string
-  fps: number
+  fps?: number
   speed: number
   outputName: string
   outputExtension: typeof fileExtensions[number]['name']
@@ -17,7 +17,7 @@ export const useOptionsStore = defineStore('options', () => {
     fileSizeMb: 10,
     encoder: 'h264_nvenc',
     noAudio: false,
-    fps: 60,
+    // fps: 60,
     speed: 1,
     outputName: 'output',
     outputExtension: 'mp4',

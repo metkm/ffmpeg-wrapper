@@ -189,15 +189,27 @@ const bitrateArgParsed = computed(() => {
       <UFormField
         label="FPS"
         description="Frames per second"
-        :help="videoRootContext.videoInfo.value.fps && encoderOptions.fps > videoRootContext.videoInfo.value.fps ? `${encoderOptions.fps} fps exceeds the source ${videoRootContext.videoInfo.value.fps} fps; output size may be unpredictable.` : undefined"
+        :help="videoRootContext.videoInfo.value.fps && encoderOptions.fps && encoderOptions.fps > videoRootContext.videoInfo.value.fps ? `${encoderOptions.fps} fps exceeds the source ${videoRootContext.videoInfo.value.fps} fps; output size may be unpredictable.` : undefined"
       >
-        <USelect
-          v-model="encoderOptions.fps"
-          :items="[10, 20, 24, 30, 60, 90, 120, 144, 180, 240]"
-          color="neutral"
-          variant="soft"
-          :disabled="exportType === 'image'"
-        />
+        <div class="flex items-center gap-2">
+          <USelect
+            v-model="encoderOptions.fps"
+            :items="[10, 20, 24, 30, 60, 90, 120, 144, 180, 240]"
+            color="neutral"
+            variant="soft"
+            :disabled="exportType === 'image'"
+            :placeholder="videoRootContext.videoInfo.value.fps?.toString()"
+          />
+
+          <UButton
+            v-if="encoderOptions.fps"
+            icon="i-lucide-x"
+            variant="soft"
+            square
+            :ui="{ base: 'rounded' }"
+            @click="encoderOptions.fps = undefined"
+          />
+        </div>
       </UFormField>
 
       <UFormField label="Resolution">
@@ -207,7 +219,7 @@ const bitrateArgParsed = computed(() => {
             :items="resolutions"
             color="neutral"
             variant="soft"
-            placeholder="default"
+            :placeholder="videoRootContext.videoInfo.value.resolution"
           />
 
           <UButton
