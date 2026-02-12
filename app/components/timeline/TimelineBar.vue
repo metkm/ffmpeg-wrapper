@@ -28,7 +28,7 @@ const { width: containerWidth } = useElementBounding(containerElement)
 
 const { elementX: mouseX, isOutside } = useMouseInElement(containerElement)
 
-const mouseXNormalized = computed(() => mouseX.value / containerWidth.value)
+const mouseXNormalized = computed(() => clamp(mouseX.value / containerWidth.value, 0, 1))
 
 const segmentHoveredIndex = computed(
   () => segments.value.findIndex(
@@ -109,20 +109,27 @@ const toggleSegment = () => {
 }
 
 const seekToTime = () => {
-  modelValueCurrentTime.value = mouseX.value / containerWidth.value * props.duration
+  modelValueCurrentTime.value = mouseXNormalized.value * props.duration
 }
 
 useEventListener(containerElement, 'click', seekToTime)
+
+useEventListener(containerElement, 'pointerdown', (event) => {
+  const el = event.target as HTMLElement
+  el.setPointerCapture(event.pointerId)
+})
+
 useEventListener(containerElement, 'pointermove', (event) => {
   if (event.buttons === 0)
     return
 
   event.preventDefault()
-
-  const el = event.target as HTMLElement
-  el.setPointerCapture(event.pointerId)
-
   seekToTime()
+})
+
+useEventListener(containerElement, 'pointerup', (event) => {
+  const el = event.target as HTMLElement
+  el.releasePointerCapture(event.pointerId)
 })
 
 const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props.duration) * containerWidth.value)
