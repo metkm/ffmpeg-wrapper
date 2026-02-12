@@ -5,11 +5,6 @@ export interface VideoCropOptions {
   height?: number
 }
 
-export interface VideoTrimOptions {
-  start: number
-  end?: number
-}
-
 export interface Video {
   currentTime: number
   volume: number

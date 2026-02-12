@@ -26,7 +26,7 @@ onMounted(() => {
   if (!ctx)
     return
 
-  ctx.fillStyle = getComputedStyle(canvas.value).getPropertyValue('--ui-bg-accented')
+  ctx.fillStyle = getComputedStyle(canvas.value).getPropertyValue('--ui-bg-elevated')
 
   for (let x = 0; x < width; x++) {
     let max = 0

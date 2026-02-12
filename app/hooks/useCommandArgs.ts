@@ -1,4 +1,4 @@
-type PossibleKeyValues = MaybeRefOrGetter<string | boolean | number | undefined>
+type PossibleKeyValues = MaybeRefOrGetter<string | boolean | number | string[] | undefined>
 type Arguments = Record<string, PossibleKeyValues>
 
 export const useCommandArgs = (
@@ -41,6 +41,10 @@ export const useCommandArgs = (
 
           if (typeof v === 'boolean' && v) {
             return [key]
+          }
+
+          if (Array.isArray(v)) {
+            return [key, ...v.flat()]
           }
 
           return [key, v?.toString()]

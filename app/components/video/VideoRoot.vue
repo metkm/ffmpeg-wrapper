@@ -1,15 +1,15 @@
 <script lang="ts">
 import { createContext } from 'motion-v'
 import type { ShallowRef } from 'vue'
-import type { VideoCropOptions, VideoTrimOptions, Video, VideoInfo } from '~/types/video'
+import type { VideoCropOptions, Video, VideoInfo } from '~/types/video'
 
 export interface VideoRootContext {
   videoElement: ShallowRef<HTMLVideoElement | null>
   crop: Ref<VideoCropOptions>
   cropEnabled: Ref<boolean>
-  trim: Ref<VideoTrimOptions>
+  trim: Ref<number[][]>
   video: Ref<Video>
-  duration: ComputedRef<number>
+  durationAfterCut: ComputedRef<number>
   loaded: Ref<boolean>
   videoInfo: Ref<VideoInfo>
   onDataLoaded: () => void
@@ -26,7 +26,7 @@ const optionsStore = useOptionsStore()
 const videoInfo = ref<VideoInfo>({})
 const video = ref<Video>({ currentTime: 0, volume: 1, ratio: 16 / 9 })
 const crop = ref<VideoCropOptions>({ top: 0, left: 0 })
-const trim = ref<VideoTrimOptions>({ start: 0 })
+const trim = ref<number[][]>([])
 
 const loaded = ref(false)
 const cropEnabled = ref(false)
@@ -42,6 +42,8 @@ const onDataLoaded = () => {
   video.value.height = element.videoHeight
   video.value.width = element.videoWidth
   video.value.ratio = element.videoWidth / element.videoHeight
+
+  trim.value[0]! = [0, element.duration]
 
   loaded.value = true
 }
@@ -91,11 +93,21 @@ watch(videoElement, () => {
   }
 })
 
-const duration = computed(() => {
-  const e = trim.value.end ?? video.value.duration ?? 0
-  const s = trim.value.start ?? 0
+const durationAfterCut = computed(() => {
+  if (!video.value.duration)
+    return 1
 
-  return (e - s) / optionsStore.encoderOptions.speed
+  if (trim.value.length < 1)
+    return video.value.duration / optionsStore.encoderOptions.speed
+
+  return trim.value.reduce((acc, curr) => {
+    return acc + ((curr[1] || 0) - (curr[0] || 0))
+  }, 0) / optionsStore.encoderOptions.speed
+
+  // const e = trim.value.end ?? video.value.duration ?? 0
+  // const s = trim.value.start ?? 0
+
+  // return (e - s) / optionsStore.encoderOptions.speed
 })
 
 provideVideoRootContext({
@@ -105,7 +117,7 @@ provideVideoRootContext({
   trim,
   video,
   onDataLoaded,
-  duration,
+  durationAfterCut,
   loaded,
   videoInfo,
 })

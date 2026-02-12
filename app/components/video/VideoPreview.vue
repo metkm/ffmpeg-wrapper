@@ -14,9 +14,6 @@ const cropRatio = ref()
 
 const videoElement = useTemplateRef('videoElement')
 
-const trimStartFormatted = computed(() => formatSeconds(videoRootContext.trim.value.start))
-const trimEndFormatted = computed(() => formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration || 0))
-
 const volumeIcon = computed(
   () => videoRootContext.video.value.volume === 0
     ? 'i-lucide-volume-x'
@@ -119,15 +116,9 @@ defineShortcuts({
         layout
         class="grid grid-cols-[1fr_10fr_1fr] grid-rows-[auto_1fr] items-center gap-2 w-full"
       >
-        <div class="flex items-center gap-4 justify-between col-start-2 text-sm">
-          <p class="text-primary font-medium">
-            {{ formatSeconds(videoRootContext.video.value.currentTime) }}
-          </p>
-
-          <p>
-            {{ trimStartFormatted }} - {{ trimEndFormatted }}
-          </p>
-        </div>
+        <p class="text-primary font-medium col-start-2 text-sm">
+          {{ formatSeconds(videoRootContext.video.value.currentTime) }}
+        </p>
 
         <UButton
           :icon="playing ? 'i-heroicons-pause-solid' : 'i-heroicons-play-solid'"
