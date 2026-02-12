@@ -103,11 +103,6 @@ const durationAfterCut = computed(() => {
   return trim.value.reduce((acc, curr) => {
     return acc + ((curr[1] || 0) - (curr[0] || 0))
   }, 0) / optionsStore.encoderOptions.speed
-
-  // const e = trim.value.end ?? video.value.duration ?? 0
-  // const s = trim.value.start ?? 0
-
-  // return (e - s) / optionsStore.encoderOptions.speed
 })
 
 provideVideoRootContext({

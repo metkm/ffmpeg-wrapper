@@ -47,8 +47,6 @@ const { argsValidFiltered, parsedArgs, parseArgsFromString, disabledArgs, toggle
   {
     'y': true,
     'an': computed(() => encoderOptions.value.noAudio),
-    // 'ss': computed(() => formatSeconds(videoRootContext.trim.value.start)),
-    // 'to': computed(() => formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!)),
     'i': computed(() => props.path),
     's': computed(() => encoderOptions.value.resolution),
     'vcodec': computed(() =>
@@ -62,8 +60,6 @@ const { argsValidFiltered, parsedArgs, parseArgsFromString, disabledArgs, toggle
     'quality': computed(() => encoderOptions.value.outputExtension === 'webp' && webpQuality.value),
     'compression_level': computed(() => encoderOptions.value.outputExtension === 'webp' && webpCompressionLevel.value),
     'frames:v': computed(() => exportType.value === 'image' && '1'),
-    // 'filter:v': computed(() => encoderOptions.value.encoder !== 'copy' && parsedArgsVideoFilter.value.join(',')),
-    // 'filter:a': computed(() => encoderOptions.value.encoder !== 'copy' && parsedArgsAudioFilter.value.join(',')),
     'filter_complex': computed(() => {
       if (
         videoRootContext.trim.value.length === 1
