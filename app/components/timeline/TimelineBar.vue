@@ -86,12 +86,12 @@ const deleteSegment = () => {
     } else if (rightSegment?.enabled) {
       segments.value[index + 1]!.start = segment.start
     }
-  }
-
-  if (leftSegment) {
-    segments.value[index - 1]!.end = segment.end
-  } else if (rightSegment) {
-    segments.value[index + 1]!.start = segment.start
+  } else {
+    if (leftSegment) {
+      segments.value[index - 1]!.end = segment.end
+    } else if (rightSegment) {
+      segments.value[index + 1]!.start = segment.start
+    }
   }
 
   segments.value.splice(index, 1)
