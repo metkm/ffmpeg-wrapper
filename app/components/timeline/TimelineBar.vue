@@ -159,7 +159,7 @@ defineShortcuts(extractShortcuts())
   <div>
     <div
       ref="container"
-      class="relative w-full h-24 rounded-md ring ring-default overflow-hidden"
+      class="relative w-full h-24 rounded-md ring ring-default overflow-hidden bg-default"
     >
       <div
         class="absolute h-full w-0.5 bg-primary shadow shadow-black z-50 pointer-events-none select-none -translate-x-1/2"
