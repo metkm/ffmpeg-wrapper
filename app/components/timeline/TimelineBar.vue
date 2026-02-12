@@ -36,6 +36,11 @@ const segmentHoveredIndex = computed(
   ),
 )
 
+const enabledSegmentCount = computed(() => segments.value.reduce(
+  (acc, curr) => acc + (curr.enabled ? 1 : 0),
+  0,
+))
+
 const cutSegment = () => {
   if (isOutside.value)
     return
@@ -69,34 +74,35 @@ const deleteSegment = () => {
     return
 
   const segment = segments.value[index]
-  if (!segment)
+  if (!segment || (enabledSegmentCount.value === 1 && segment.enabled))
     return
 
-  // there is a element to the right side.
-  if (segments.value[index + 1] !== undefined) {
-    segments.value[index + 1]!.start = segment.start
-  } else if (segments.value[index - 1] !== undefined) {
+  const leftSegment = segments.value[index - 1]
+  const rightSegment = segments.value[index + 1]
+
+  if (!segment.enabled) {
+    if (leftSegment?.enabled) {
+      segments.value[index - 1]!.end = segment.end
+    } else if (rightSegment?.enabled) {
+      segments.value[index + 1]!.start = segment.start
+    }
+  }
+
+  if (leftSegment) {
     segments.value[index - 1]!.end = segment.end
+  } else if (rightSegment) {
+    segments.value[index + 1]!.start = segment.start
   }
 
   segments.value.splice(index, 1)
-
-  if (segments.value.length === 1) {
-    segments.value[0]!.enabled = true
-  }
 }
 
 const toggleSegment = () => {
   if (segments.value.length <= 1 || segmentHoveredIndex.value === -1)
     return
 
-  const enabledSegmentCount = segments.value.reduce(
-    (acc, curr) => acc + (curr.enabled ? 1 : 0),
-    0,
-  )
-
   const willEnable = !segments.value[segmentHoveredIndex.value]!.enabled
-  if (!willEnable && enabledSegmentCount === 1)
+  if (!willEnable && enabledSegmentCount.value === 1)
     return
 
   segments.value[segmentHoveredIndex.value]!.enabled = willEnable
