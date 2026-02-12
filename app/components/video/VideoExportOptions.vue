@@ -84,7 +84,7 @@ const { argsValidFiltered, parsedArgs, parseArgsFromString, disabledArgs, toggle
           continue
 
         const v = `[0:v]trim=start=${trim[0]}:end=${trim[1]},setpts=PTS-STARTPTS,format=yuv420p${vArgs}[${index}v];`
-        const a = `[0:a]atrim=start=${trim[0]}:end=${trim[1]},asetpts=PTS-STARTPTS[${index}a]${aArgs};`
+        const a = `[0:a]atrim=start=${trim[0]}:end=${trim[1]},asetpts=PTS-STARTPTS${aArgs}[${index}a];`
 
         pairsText += `${v}${a}`
       }
