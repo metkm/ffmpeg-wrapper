@@ -53,7 +53,7 @@ useEventListener(videoRootContext.videoElement, 'loadeddata', async () => {
 </script>
 
 <template>
-  <div class="absolute inset-0 -z-10 opacity-35 scale-110 blur-3xl pointer-events-none">
+  <div class="absolute inset-0 -z-10 opacity-25 scale-110 blur-3xl pointer-events-none">
     <canvas
       ref="canvas"
       :width="WIDTH"

@@ -32,5 +32,11 @@ export default defineAppConfig({
         help: 'text-warning-500',
       },
     },
+    tooltip: {
+      slots: {
+        text: 'max-4-xl text-clip',
+        content: 'max-w-4xl h-auto',
+      },
+    },
   },
 })

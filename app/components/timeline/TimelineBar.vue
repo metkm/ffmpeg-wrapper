@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { useFrames } from '~/hooks/useFrames'
-import { useThumb } from '~/hooks/useThumb'
-import type { VideoTrimOptions } from '~/types/video'
+import type { ShortcutsConfig } from '@nuxt/ui/runtime/composables/defineShortcuts.js'
 
 const props = defineProps<{
   duration: number
@@ -9,129 +7,225 @@ const props = defineProps<{
   path: string
 }>()
 
-const emit = defineEmits<{
-  seek: []
-}>()
-
 const modelValueCurrentTime = defineModel<number>({ default: 0 })
-const modelValueTrim = defineModel<VideoTrimOptions>('trim', {
-  default: [0, 0],
+const modelValueTrim = defineModel<number[][]>('trim', {
+  default: [],
 })
 
-const leftThumb = useTemplateRef('leftThumb')
-const leftThumbElement = computed(() => leftThumb.value?.$el as HTMLElement)
-
-const rightThumb = useTemplateRef('rightThumb')
-const rightThumbElement = computed(() => rightThumb.value?.$el as HTMLElement)
+// start and end values are normalized. from 0 to 1
+const segments = ref([
+  {
+    id: crypto.randomUUID(),
+    start: 0,
+    end: 1,
+    enabled: true,
+  },
+])
 
 const containerElement = useTemplateRef('container')
-const innerContainerElement = useTemplateRef('innerContainer')
-const frameCanvasElement = useTemplateRef('frameCanvas')
 
-const { width: innerContainerWidth } = useElementBounding(innerContainerElement)
+const { width: containerWidth } = useElementBounding(containerElement)
 
-const { offsetX: leftThumbx } = useThumb(leftThumbElement, {
-  containerElement,
-  onMove: (x) => {
-    modelValueCurrentTime.value = x / innerContainerWidth.value * props.duration
-    emit('seek')
+const { elementX: mouseX, isOutside } = useMouseInElement(containerElement)
 
-    modelValueTrim.value.start = modelValueCurrentTime.value
+const mouseXNormalized = computed(() => clamp(mouseX.value / containerWidth.value, 0, 1))
 
-    const diff = rightThumbx.value - x - leftThumbElement.value.clientWidth
-    if (diff <= 0)
-      return false
-  },
-})
+const segmentHoveredIndex = computed(
+  () => segments.value.findIndex(
+    segment => mouseXNormalized.value > segment.start && mouseXNormalized.value < segment.end,
+  ),
+)
 
-const { offsetX: rightThumbx, width: rightThumbWidth } = useThumb(rightThumbElement, {
-  containerElement,
-  initialValue: { x: 1 },
-  onMove: (x) => {
-    modelValueCurrentTime.value = (x - rightThumbWidth.value) / innerContainerWidth.value * props.duration
-    emit('seek')
+const enabledSegmentCount = computed(() => segments.value.reduce(
+  (acc, curr) => acc + (curr.enabled ? 1 : 0),
+  0,
+))
 
-    modelValueTrim.value.end = modelValueCurrentTime.value
+const cutSegment = () => {
+  if (isOutside.value)
+    return
 
-    const diff = x - leftThumbx.value - rightThumbElement.value.clientWidth
-    if (diff <= 0)
-      return false
-  },
-})
+  if (segmentHoveredIndex.value === -1) {
+    console.log('segment to cut is not found')
+    return
+  }
 
-const { framesLoading } = useFrames(frameCanvasElement, () => props.path, () => props.duration)
+  const segment = segments.value[segmentHoveredIndex.value]
+  if (!segment)
+    return
 
-const seekToTime = (event: PointerEvent) => {
-  modelValueCurrentTime.value = clamp(event.offsetX / innerContainerWidth.value * props.duration, 0, props.duration)
-  emit('seek')
-
-  event.preventDefault()
-
-  const target = event.target as HTMLElement
-  target.setPointerCapture(event.pointerId)
+  segments.value.splice(segmentHoveredIndex.value, 1, {
+    id: segment.id,
+    start: segment.start,
+    end: mouseXNormalized.value,
+    enabled: segment.enabled,
+  }, {
+    id: crypto.randomUUID(),
+    start: mouseXNormalized.value,
+    end: segment.end,
+    enabled: true,
+  })
 }
 
-useEventListener(innerContainerElement, 'pointermove', (event) => {
+const deleteSegment = () => {
+  const index = segmentHoveredIndex.value
+
+  if (segments.value.length <= 1 || index === -1)
+    return
+
+  const segment = segments.value[index]
+  if (!segment || (enabledSegmentCount.value === 1 && segment.enabled))
+    return
+
+  const leftSegment = segments.value[index - 1]
+  const rightSegment = segments.value[index + 1]
+
+  if (!segment.enabled) {
+    if (leftSegment?.enabled) {
+      segments.value[index - 1]!.end = segment.end
+    } else if (rightSegment?.enabled) {
+      segments.value[index + 1]!.start = segment.start
+    }
+  } else {
+    if (leftSegment) {
+      segments.value[index - 1]!.end = segment.end
+    } else if (rightSegment) {
+      segments.value[index + 1]!.start = segment.start
+    }
+  }
+
+  segments.value.splice(index, 1)
+}
+
+const toggleSegment = () => {
+  if (segments.value.length <= 1 || segmentHoveredIndex.value === -1)
+    return
+
+  const willEnable = !segments.value[segmentHoveredIndex.value]!.enabled
+  if (!willEnable && enabledSegmentCount.value === 1)
+    return
+
+  segments.value[segmentHoveredIndex.value]!.enabled = willEnable
+}
+
+const seekToTime = () => {
+  modelValueCurrentTime.value = mouseXNormalized.value * props.duration
+}
+
+useEventListener(containerElement, 'click', seekToTime)
+
+useEventListener(containerElement, 'pointerdown', (event) => {
+  const el = event.target as HTMLElement
+  el.setPointerCapture(event.pointerId)
+})
+
+useEventListener(containerElement, 'pointermove', (event) => {
   if (event.buttons === 0)
     return
 
-  seekToTime(event)
+  event.preventDefault()
+  seekToTime()
 })
 
-useEventListener(innerContainerElement, 'click', seekToTime)
+useEventListener(containerElement, 'pointerup', (event) => {
+  const el = event.target as HTMLElement
+  el.releasePointerCapture(event.pointerId)
+})
 
-const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props.duration) * innerContainerWidth.value)
+const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props.duration) * containerWidth.value)
+
+watch(segments, () => {
+  modelValueTrim.value = segments.value
+    .filter(segment => segment.enabled)
+    .map(segment => [Math.round(segment.start * props.duration), Math.round(segment.end * props.duration)])
+}, { deep: true })
+
+const shortcuts = {
+  q: {
+    action: cutSegment,
+    label: 'Cut',
+  },
+  d: {
+    action: deleteSegment,
+    label: 'Delete',
+  },
+  t: {
+    action: toggleSegment,
+    label: 'Toggle',
+  },
+}
+
+const extractShortcuts = () => {
+  const result: ShortcutsConfig = {}
+
+  for (const [k, v] of Object.entries(shortcuts)) {
+    result[k] = v.action
+  }
+
+  return result
+}
+
+defineShortcuts(extractShortcuts())
 </script>
 
 <template>
-  <div
-    ref="container"
-    class="relative w-full h-24 px-5 rounded-md ring ring-default"
-  >
-    <TimelineThumb
-      ref="leftThumb"
-      class="absolute rounded-l-md z-10"
-      :style="{
-        left: `${leftThumbx}px`,
-      }"
-    />
-
-    <TimelineThumb
-      ref="rightThumb"
-      class="absolute rounded-r-md z-10"
-      :style="{
-        left: `${rightThumbx}px`,
-      }"
-    />
-
+  <div>
     <div
-      ref="innerContainer"
-      class="relative h-full w-full bg-elevated"
+      ref="container"
+      class="relative w-full h-24 rounded-md ring ring-default overflow-hidden bg-default"
     >
-      <div class="absolute w-full h-full pointer-events-none">
-        <canvas
-          ref="frameCanvas"
-          class="h-14 w-full bg-default"
-          :class="{ 'animate-pulse': framesLoading }"
-        />
-
-        <TimelineAudioGraph
-          :path="path"
-          class="h-10 w-full"
-        />
-      </div>
-
       <div
-        class="absolute inset-0 bg-black pointer-events-none"
-        :style="{
-          maskImage: `linear-gradient(to right, rgba(0, 0, 0, 0.7) calc(${leftThumbx}px - 8px), transparent calc(${leftThumbx}px - 8px), transparent calc(${rightThumbx}px - 8px), rgba(0, 0, 0, 0.7) calc(${rightThumbx}px - 8px))`,
-        }"
-      />
-
-      <div
-        class="absolute h-full w-0.5 bg-inverted shadow shadow-black z-50 pointer-events-none select-none -translate-x-1/2"
+        class="absolute h-full w-0.5 bg-primary shadow shadow-black z-50 pointer-events-none select-none -translate-x-1/2"
         :style="{ left: `${indicatorOffset}px` }"
       />
+
+      <ol class="flex absolute w-full h-full divide-x divide-default z-10">
+        <li
+          v-for="segment in segments"
+          :key="segment.id"
+          class="flex flex-col justify-between relative p-2 hover:bg-elevated/50 text-xs *:truncate select-none"
+          :style="{
+            width: `${(segment.end - segment.start) * containerWidth}px`,
+          }"
+          :class="{
+            'text-default/10': !segment.enabled,
+          }"
+          :data-enabled="segment.enabled"
+        >
+          <div
+            v-if="!segment.enabled"
+            class="z-50 absolute inset-0 text-default/10 bg-[repeating-linear-gradient(315deg,currentColor_0,currentColor_1px,transparent_0,transparent_50%)] bg-size-[8px_8px]"
+          />
+
+          <p>
+            {{ segment.enabled ? 'Enabled' : 'Disabled' }}
+          </p>
+
+          <p>
+            {{ Math.floor(segment.start * duration) }}s -  {{ Math.floor(segment.end * duration) }}s
+          </p>
+        </li>
+      </ol>
+
+      <TimelineAudioGraph
+        :path="path"
+        class="h-full w-full mt-auto opacity-55 -z-10 pointer-events-none"
+      />
     </div>
+
+    <ol class="flex items-center gap-2">
+      <li
+        v-for="[k, v] in Object.entries(shortcuts)"
+        :key="k"
+      >
+        <div class="flex items-center gap-1 mt-2">
+          <UKbd>{{ k }}</UKbd>
+
+          <p class="text-xs font-medium">
+            {{ v.label }}
+          </p>
+        </div>
+      </li>
+    </ol>
   </div>
 </template>

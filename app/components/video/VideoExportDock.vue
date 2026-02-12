@@ -25,7 +25,7 @@ const { updateScrollPosition } = useKeepScrollBottom({
 const optionsStore = useOptionsStore()
 const { encoderOptions, savePath, rememberSavePath } = storeToRefs(optionsStore)
 
-const { running, spawn, linesDebounced, kill, progress, etaAnimated, error } = useFFmpeg(videoRootContext.duration)
+const { running, spawn, linesDebounced, kill, progress, etaAnimated, error } = useFFmpeg(videoRootContext.durationAfterCut)
 
 const process = async () => {
   const path = rememberSavePath.value && savePath.value

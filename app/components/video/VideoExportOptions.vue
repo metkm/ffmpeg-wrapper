@@ -13,7 +13,7 @@ const optionsStore = useOptionsStore()
 const { encoderOptions, extraArguments, extraVideoArguments, extraAudioArguments, exportType, rememberSavePath, savePath } = storeToRefs(optionsStore)
 
 const targetBitrate = computed(() => {
-  const totalBitrate = (encoderOptions.value.fileSizeMb * 8192) / videoRootContext.duration.value
+  const totalBitrate = (encoderOptions.value.fileSizeMb * 8192) / videoRootContext.durationAfterCut.value
   return (totalBitrate - 196) * 0.95
 })
 
@@ -47,8 +47,6 @@ const { argsValidFiltered, parsedArgs, parseArgsFromString, disabledArgs, toggle
   {
     'y': true,
     'an': computed(() => encoderOptions.value.noAudio),
-    'ss': computed(() => formatSeconds(videoRootContext.trim.value.start)),
-    'to': computed(() => formatSeconds(videoRootContext.trim.value.end || videoRootContext.video.value.duration!)),
     'i': computed(() => props.path),
     's': computed(() => encoderOptions.value.resolution),
     'vcodec': computed(() =>
@@ -62,8 +60,38 @@ const { argsValidFiltered, parsedArgs, parseArgsFromString, disabledArgs, toggle
     'quality': computed(() => encoderOptions.value.outputExtension === 'webp' && webpQuality.value),
     'compression_level': computed(() => encoderOptions.value.outputExtension === 'webp' && webpCompressionLevel.value),
     'frames:v': computed(() => exportType.value === 'image' && '1'),
-    'filter:v': computed(() => encoderOptions.value.encoder !== 'copy' && parsedArgsVideoFilter.value.join(',')),
-    'filter:a': computed(() => encoderOptions.value.encoder !== 'copy' && parsedArgsAudioFilter.value.join(',')),
+    'filter_complex': computed(() => {
+      if (
+        videoRootContext.trim.value.length === 1
+        && videoRootContext.trim.value[0]![0] === 0
+        && videoRootContext.trim.value[0]![1] === videoRootContext.video.value.duration
+      )
+        return
+
+      // https://superuser.com/questions/681885/how-can-i-remove-multiple-segments-from-a-video-using-ffmpeg/1498811#1498811
+      let pairsText = ''
+
+      const vArgs = parsedArgsVideoFilter.value.length > 0 ? `,${parsedArgsVideoFilter.value.join(',')}` : ''
+      const aArgs = parsedArgsAudioFilter.value.length > 0 ? `,${parsedArgsAudioFilter.value.join(',')}` : ''
+
+      for (let index = 0; index < videoRootContext.trim.value.length; index++) {
+        const trim = videoRootContext.trim.value[index]
+        if (!trim)
+          continue
+
+        const v = `[0:v]trim=start=${trim[0]}:end=${trim[1]},setpts=PTS-STARTPTS,format=yuv420p${vArgs}[${index}v];`
+        const a = `[0:a]atrim=start=${trim[0]}:end=${trim[1]},asetpts=PTS-STARTPTS${aArgs}[${index}a];`
+
+        pairsText += `${v}${a}`
+      }
+
+      for (let index = 0; index < videoRootContext.trim.value.length; index++) {
+        pairsText += `[${index}v][${index}a]`
+      }
+
+      pairsText += `concat=n=${videoRootContext.trim.value.length}:v=1:a=1[outv][outa]`
+      return [pairsText, '-map', '[outv]', '-map', '[outa]']
+    }),
   },
   computed(() => parseArgsFromString(extraArguments.value)),
 )
@@ -120,10 +148,12 @@ const bitrateArgParsed = computed(() => {
               :key="key"
               class="flex items-center gap-4 justify-between *:truncate p-2"
             >
-              <p class="truncate">
-                <span class="text-dimmed">{{ key }}: </span>
-                {{ value }}
-              </p>
+              <UTooltip :text="value.toString()">
+                <p class="truncate">
+                  <span class="text-dimmed">{{ key }}: </span>
+                  {{ Array.isArray(value) ? value.join(' ') : value }}
+                </p>
+              </UTooltip>
 
               <UButton
                 class="shrink-0"
