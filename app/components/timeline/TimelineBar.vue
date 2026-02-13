@@ -117,6 +117,9 @@ useEventListener(containerElement, 'click', seekToTime)
 useEventListener(containerElement, 'pointerdown', (event) => {
   const el = event.target as HTMLElement
   el.setPointerCapture(event.pointerId)
+
+  console.log('down timeline bar')
+  // event.preventDefault()
 })
 
 useEventListener(containerElement, 'pointermove', (event) => {
@@ -130,6 +133,8 @@ useEventListener(containerElement, 'pointermove', (event) => {
 useEventListener(containerElement, 'pointerup', (event) => {
   const el = event.target as HTMLElement
   el.releasePointerCapture(event.pointerId)
+
+  // event.preventDefault()
 })
 
 const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props.duration) * containerWidth.value)
@@ -175,15 +180,15 @@ defineShortcuts(extractShortcuts())
       class="relative w-full h-24 rounded-md ring ring-default overflow-hidden bg-default"
     >
       <div
-        class="absolute h-full w-0.5 bg-primary shadow shadow-black z-50 pointer-events-none select-none -translate-x-1/2"
+        class="absolute h-full w-0.5 bg-primary shadow shadow-black pointer-events-none select-none -translate-x-1/2 z-50"
         :style="{ left: `${indicatorOffset}px` }"
       />
 
       <ol class="flex absolute w-full h-full divide-x divide-default z-10">
         <li
-          v-for="segment in segments"
+          v-for="(segment, index) in segments"
           :key="segment.id"
-          class="flex flex-col justify-between relative p-2 hover:bg-elevated/50 text-xs *:truncate select-none"
+          class="flex justify-between hover:bg-elevated/50 text-xs relative"
           :style="{
             width: `${(segment.end - segment.start) * containerWidth}px`,
           }"
@@ -192,18 +197,27 @@ defineShortcuts(extractShortcuts())
           }"
           :data-enabled="segment.enabled"
         >
-          <div
-            v-if="!segment.enabled"
-            class="z-50 absolute inset-0 text-default/10 bg-[repeating-linear-gradient(315deg,currentColor_0,currentColor_1px,transparent_0,transparent_50%)] bg-size-[8px_8px]"
+          <div class="flex flex-col justify-between p-2 select-none overflow-hidden">
+            <div
+              v-if="!segment.enabled"
+              class="absolute inset-0 text-default/10 bg-[repeating-linear-gradient(315deg,currentColor_0,currentColor_1px,transparent_0,transparent_50%)] bg-size-[8px_8px]"
+            />
+
+            <p class="truncate">
+              {{ segment.enabled ? 'Enabled' : 'Disabled' }}
+            </p>
+            <p class="overflow-hidden">
+              {{ Math.floor(segment.start * duration) }}s -  {{ Math.floor(segment.end * duration) }}s
+            </p>
+          </div>
+
+          <TimelineBarResizeHandle
+            v-if="index !== segments.length - 1"
+            v-model:start="segments[index + 1]!.start"
+            v-model:end="segments[index]!.end"
+            class="z-20 absolute right-0"
+            :normalize-by="containerWidth"
           />
-
-          <p>
-            {{ segment.enabled ? 'Enabled' : 'Disabled' }}
-          </p>
-
-          <p>
-            {{ Math.floor(segment.start * duration) }}s -  {{ Math.floor(segment.end * duration) }}s
-          </p>
         </li>
       </ol>
 
