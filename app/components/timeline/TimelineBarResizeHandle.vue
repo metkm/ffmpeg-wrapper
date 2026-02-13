@@ -15,6 +15,7 @@ const startMouseX = ref(0)
 const startBefore = ref({ ...modelValueBefore.value })
 const startAfter = ref({ ...modelValueAfter.value })
 
+// this breaks hover stuff so far. TODO: fix
 const handleMove = (event: PointerEvent) => {
   event.stopPropagation()
 
