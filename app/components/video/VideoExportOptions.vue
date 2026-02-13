@@ -46,7 +46,7 @@ const { argsValidFiltered, parsedArgs, parseArgsFromString, disabledArgs, toggle
   'arg',
   {
     'y': true,
-    'an': computed(() => encoderOptions.value.noAudio),
+    // 'an': computed(() => encoderOptions.value.noAudio),
     'i': computed(() => props.path),
     's': computed(() => encoderOptions.value.resolution),
     'vcodec': computed(() =>
@@ -80,17 +80,37 @@ const { argsValidFiltered, parsedArgs, parseArgsFromString, disabledArgs, toggle
           continue
 
         const v = `[0:v]trim=start=${trim[0]}:end=${trim[1]},setpts=PTS-STARTPTS,format=yuv420p${vArgs}[${index}v];`
-        const a = `[0:a]atrim=start=${trim[0]}:end=${trim[1]},asetpts=PTS-STARTPTS${aArgs}[${index}a];`
+        let text = `${v}`
 
-        pairsText += `${v}${a}`
+        if (!encoderOptions.value.noAudio) {
+          const a = `[0:a]atrim=start=${trim[0]}:end=${trim[1]},asetpts=PTS-STARTPTS${aArgs}[${index}a];`
+          text += a
+        }
+
+        pairsText += text
       }
 
       for (let index = 0; index < videoRootContext.trim.value.length; index++) {
-        pairsText += `[${index}v][${index}a]`
+        pairsText += `[${index}v]`
+
+        if (!encoderOptions.value.noAudio) {
+          pairsText += `[${index}a]`
+        }
       }
 
-      pairsText += `concat=n=${videoRootContext.trim.value.length}:v=1:a=1[outv][outa]`
-      return [pairsText, '-map', '[outv]', '-map', '[outa]']
+      pairsText += `concat=n=${videoRootContext.trim.value.length}:v=1:a=${encoderOptions.value.noAudio ? '0' : '1'}[outv]`
+
+      if (!encoderOptions.value.noAudio) {
+        pairsText += '[outa]'
+      }
+
+      const result = [pairsText, '-map', '[outv]']
+
+      if (!encoderOptions.value.noAudio) {
+        result.push('-map', '[outa]')
+      }
+
+      return result
     }),
   },
   computed(() => parseArgsFromString(extraArguments.value)),
