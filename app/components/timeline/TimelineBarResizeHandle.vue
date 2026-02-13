@@ -1,17 +1,19 @@
 <script setup lang="ts">
 const props = defineProps<{
   normalizeBy: number
+  minDuration: number
+  totalDuration: number
 }>()
 
-const modelValueStart = defineModel<number>('start', { default: 0 })
-const modelValueEnd = defineModel<number>('end', { default: 0 })
+const modelValueBefore = defineModel<{ start: number, end: number }>('before', { default: { start: 0, end: 0 } })
+const modelValueAfter = defineModel<{ start: number, end: number }>('after', { default: { start: 0, end: 0 } })
 
 const handle = useTemplateRef('handle')
 
 const startMouseX = ref(0)
 
-const startStart = ref(modelValueStart.value)
-const startEnd = ref(modelValueEnd.value)
+const startBefore = ref({ ...modelValueBefore.value })
+const startAfter = ref({ ...modelValueAfter.value })
 
 const handleMove = (event: PointerEvent) => {
   event.stopPropagation()
@@ -19,10 +21,25 @@ const handleMove = (event: PointerEvent) => {
   if (event.buttons === 0)
     return
 
+  // 0 to 1
   const dx = (event.clientX - startMouseX.value) / props.normalizeBy
 
-  modelValueEnd.value = startEnd.value + dx
-  modelValueStart.value = startStart.value + dx
+  modelValueBefore.value.end = startBefore.value.end + dx
+  modelValueAfter.value.start = startAfter.value.start + dx
+
+  if (dx > 0) {
+    const dur = (modelValueAfter.value.end - modelValueAfter.value.start) * props.totalDuration
+
+    if (dur < props.minDuration) {
+      modelValueAfter.value.start = ((modelValueAfter.value.end * props.totalDuration) - props.minDuration) / props.totalDuration
+    }
+  } else {
+    const dur = (modelValueBefore.value.end - modelValueBefore.value.start) * props.totalDuration
+
+    if (dur < props.minDuration) {
+      modelValueBefore.value.end = ((modelValueBefore.value.start * props.totalDuration) + props.minDuration) / props.totalDuration
+    }
+  }
 }
 
 useEventListener(handle, 'pointerdown', (event) => {
@@ -33,8 +50,8 @@ useEventListener(handle, 'pointerdown', (event) => {
 
   startMouseX.value = event.clientX
 
-  startStart.value = modelValueStart.value
-  startEnd.value = modelValueEnd.value
+  startBefore.value = { ...modelValueBefore.value }
+  startAfter.value = { ...modelValueAfter.value }
 
   handle.value?.addEventListener('pointermove', handleMove)
 })

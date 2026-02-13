@@ -213,10 +213,12 @@ defineShortcuts(extractShortcuts())
 
           <TimelineBarResizeHandle
             v-if="index !== segments.length - 1"
-            v-model:start="segments[index + 1]!.start"
-            v-model:end="segments[index]!.end"
+            v-model:after="segments[index + 1]"
+            v-model:before="segments[index]"
             class="z-20 absolute right-0"
             :normalize-by="containerWidth"
+            :min-duration="2"
+            :total-duration="duration"
           />
         </li>
       </ol>
