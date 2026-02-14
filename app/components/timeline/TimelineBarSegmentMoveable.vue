@@ -28,6 +28,8 @@ const segmentNextStartMin = computed(() => ((initialSegmentNext.value.end ?? 1) 
 
 const initialSegmentDuration = computed(() => initialSegment.value.end - initialSegment.value.start)
 
+const isSegmentMovable = computed(() => modelValueSegmentNext.value && modelValueSegmentPrev.value)
+
 const handleMove = (event: PointerEvent) => {
   event.stopPropagation()
 
@@ -40,7 +42,7 @@ const handleMove = (event: PointerEvent) => {
   const segmentEndNew = initialSegment.value.end + dx
 
   // drag instead
-  if (mode.value === 'moving' && modelValueSegmentNext.value && modelValueSegmentPrev.value) {
+  if (mode.value === 'moving' && isSegmentMovable.value) {
     modelValueSegment.value.start = clamp(
       segmentStartNew,
       segmentPrevEndMin.value,
@@ -53,8 +55,8 @@ const handleMove = (event: PointerEvent) => {
       segmentNextStartMin.value,
     )
 
-    modelValueSegmentPrev.value.end = modelValueSegment.value.start
-    modelValueSegmentNext.value.start = modelValueSegment.value.end
+    modelValueSegmentPrev.value!.end = modelValueSegment.value.start
+    modelValueSegmentNext.value!.start = modelValueSegment.value.end
   } else if (mode.value === 'resizing') {
     const min = (initialSegment.value.start * props.totalDuration + 2) / props.totalDuration
     const max = (initialSegmentNext.value.end! * props.totalDuration - 2) / props.totalDuration
@@ -82,7 +84,7 @@ const handlePointerDown = (event: PointerEvent) => {
   const element = event.target as HTMLElement
   if (
     (!ctrlState.value && mode.value === 'moving')
-    || (mode.value === 'moving' && (!modelValueSegmentNext.value || !modelValueSegmentPrev.value))
+    || (mode.value === 'moving' && !isSegmentMovable.value)
   ) {
     return
   }
@@ -121,7 +123,7 @@ useEventListener(handle, 'click', event => event.stopPropagation())
 <template>
   <div
     ref="container"
-    :class="{ 'cursor-move': ctrlState }"
+    :class="{ 'cursor-move': isSegmentMovable && ctrlState }"
     class="flex w-full h-full"
   >
     <slot />
