@@ -23,8 +23,8 @@ const initialSegment = ref({ ...modelValueSegment.value })
 const initialSegmentPrev = ref({ ...modelValueSegmentPrev.value })
 const initialSegmentNext = ref({ ...modelValueSegmentNext.value })
 
-const prevSegmentEndMin = computed(() => ((initialSegmentPrev.value.start ?? 1) * props.totalDuration + 2) / props.totalDuration)
-const nextSegmentStartMin = computed(() => ((initialSegmentNext.value.end ?? 1) * props.totalDuration - 2) / props.totalDuration)
+const segmentPrevEndMin = computed(() => ((initialSegmentPrev.value.start ?? 1) * props.totalDuration + 2) / props.totalDuration)
+const segmentNextStartMin = computed(() => ((initialSegmentNext.value.end ?? 1) * props.totalDuration - 2) / props.totalDuration)
 
 const initialSegmentDuration = computed(() => initialSegment.value.end - initialSegment.value.start)
 
@@ -36,46 +36,52 @@ const handleMove = (event: PointerEvent) => {
 
   const dx = (event.clientX - pointerDownX.value) / props.normalizeBy
 
-  const newSegmentStart = initialSegment.value.start + dx
-  const newSegmentEnd = initialSegment.value.end + dx
+  const segmentStartNew = initialSegment.value.start + dx
+  const segmentEndNew = initialSegment.value.end + dx
 
   // drag instead
   if (mode.value === 'moving' && modelValueSegmentNext.value && modelValueSegmentPrev.value) {
     modelValueSegment.value.start = clamp(
-      newSegmentStart,
-      prevSegmentEndMin.value,
-      nextSegmentStartMin.value - initialSegmentDuration.value,
+      segmentStartNew,
+      segmentPrevEndMin.value,
+      segmentNextStartMin.value - initialSegmentDuration.value,
     )
 
     modelValueSegment.value.end = clamp(
-      newSegmentEnd,
-      prevSegmentEndMin.value + initialSegmentDuration.value,
-      nextSegmentStartMin.value,
+      segmentEndNew,
+      segmentPrevEndMin.value + initialSegmentDuration.value,
+      segmentNextStartMin.value,
     )
 
     modelValueSegmentPrev.value.end = clamp(
-      initialSegmentPrev.value.end! + dx,
-      prevSegmentEndMin.value,
+      segmentStartNew,
+      segmentPrevEndMin.value,
       modelValueSegment.value.start,
     )
 
     modelValueSegmentNext.value.start = clamp(
-      initialSegmentNext.value.start! + dx,
+      segmentEndNew,
       modelValueSegment.value.start + initialSegmentDuration.value,
-      nextSegmentStartMin.value,
+      segmentNextStartMin.value,
     )
+
+    // modelValueSegmentNext.value.start = clamp(
+    //   segmentEndNew,
+    //   modelValueSegment.value.start + initialSegmentDuration.value,
+    //   segmentNextStartMin.value,
+    // )
   } else if (mode.value === 'resizing') {
     const min = (initialSegment.value.start * props.totalDuration + 2) / props.totalDuration
     const max = (initialSegmentNext.value.end! * props.totalDuration - 2) / props.totalDuration
 
     modelValueSegment.value.end = clamp(
-      newSegmentEnd,
+      segmentEndNew,
       min,
       max,
     )
 
     modelValueSegmentNext.value!.start = clamp(
-      newSegmentEnd,
+      segmentEndNew,
       min,
       max,
     )
