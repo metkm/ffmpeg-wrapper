@@ -18,7 +18,6 @@ const startAfter = ref({ ...modelValueAfter.value })
 const segmentBeforeMinimumEnd = computed(() => ((startBefore.value.start * props.totalDuration) + 2) / props.totalDuration)
 const segmentAfterMinimumStart = computed(() => ((startAfter.value.end * props.totalDuration) - 2) / props.totalDuration)
 
-// this breaks hover stuff so far. TODO: fix
 const handleMove = (event: PointerEvent) => {
   event.stopPropagation()
 
