@@ -184,15 +184,6 @@ defineShortcuts(extractShortcuts())
         :style="{ left: `${indicatorOffset}px` }"
       />
 
-      <ol class="fixed top-5 left-5 bg-default p-2">
-        <li
-          v-for="segment in segments"
-          :key="segment.id"
-        >
-          <p>{{ segment.start.toFixed(2) }} {{ segment.end.toFixed(2) }}</p>
-        </li>
-      </ol>
-
       <ol class="flex absolute w-full h-full divide-x divide-default z-10">
         <li
           v-for="(segment, index) in segments"
