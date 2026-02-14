@@ -21,6 +21,7 @@ const segments = ref([
     enabled: true,
   },
 ])
+const { commit: commitSegments, undo: undoSegments, redo: redoSegments } = useManualRefHistory(segments, { clone: true })
 
 const containerElement = useTemplateRef('container')
 
@@ -65,6 +66,8 @@ const cutSegment = () => {
     end: segment.end,
     enabled: true,
   })
+
+  commitSegments()
 }
 
 const deleteSegment = () => {
@@ -95,6 +98,7 @@ const deleteSegment = () => {
   }
 
   segments.value.splice(index, 1)
+  commitSegments()
 }
 
 const toggleSegment = () => {
@@ -106,6 +110,7 @@ const toggleSegment = () => {
     return
 
   segments.value[segmentHoveredIndex.value]!.enabled = willEnable
+  commitSegments()
 }
 
 const seekToTime = () => {
@@ -130,8 +135,6 @@ useEventListener(containerElement, 'pointermove', (event) => {
 useEventListener(containerElement, 'pointerup', (event) => {
   const el = event.target as HTMLElement
   el.releasePointerCapture(event.pointerId)
-
-  // event.preventDefault()
 })
 
 const indicatorOffset = computed(() => clamp(modelValueCurrentTime.value / props.duration) * containerWidth.value)
@@ -155,9 +158,17 @@ const shortcuts = {
     action: toggleSegment,
     label: 'Toggle',
   },
-  ctrl: {
+  meta: {
     label: 'Move (hold)',
     action: () => {},
+  },
+  meta_z: {
+    label: 'Undo',
+    action: undoSegments,
+  },
+  meta_shift_z: {
+    label: 'Redo',
+    action: redoSegments,
   },
 }
 
@@ -202,6 +213,7 @@ defineShortcuts(extractShortcuts())
             :total-duration="duration"
             :resizable="index !== segments.length - 1"
             class="w-full h-full"
+            @pointerup="commitSegments"
           >
             <div class="flex flex-col justify-between select-none p-1 overflow-hidden">
               <div
@@ -233,7 +245,7 @@ defineShortcuts(extractShortcuts())
         :key="k"
       >
         <div class="flex items-center gap-1 mt-2">
-          <UKbd>{{ k }}</UKbd>
+          <UKbd :value="k" />
 
           <p class="text-xs font-medium">
             {{ v.label }}

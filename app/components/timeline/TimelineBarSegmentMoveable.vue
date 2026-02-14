@@ -5,9 +5,11 @@ const props = defineProps<{
   resizable?: boolean
 }>()
 
-const modelValueSegment = defineModel<{ start: number, end: number }>({
-  default: { start: 0, end: 0 },
-})
+const emit = defineEmits<{
+  pointerup: []
+}>()
+
+const modelValueSegment = defineModel<{ start: number, end: number }>({ default: { start: 0, end: 0 } })
 const modelValueSegmentPrev = defineModel<{ start: number, end: number }>('prev')
 const modelValueSegmentNext = defineModel<{ start: number, end: number }>('next')
 
@@ -76,11 +78,15 @@ const handleMove = (event: PointerEvent) => {
 }
 
 const handlePointerUp = (event: PointerEvent) => {
+  event.stopPropagation()
+
   container.value?.releasePointerCapture(event.pointerId)
   handle.value?.releasePointerCapture(event.pointerId)
 
   container.value?.removeEventListener('pointermove', handleMove)
   handle.value?.removeEventListener('pointermove', handleMove)
+
+  emit('pointerup')
 }
 
 const handlePointerDown = (event: PointerEvent) => {
@@ -106,10 +112,10 @@ const handlePointerDown = (event: PointerEvent) => {
   element.addEventListener('pointermove', handleMove)
 }
 
-useEventListener(handle, 'pointerdown', event => [
-  mode.value = 'resizing',
-  handlePointerDown(event),
-])
+useEventListener(handle, 'pointerdown', (event) => {
+  mode.value = 'resizing'
+  handlePointerDown(event)
+})
 
 useEventListener(container, 'pointerdown', (event) => {
   mode.value = 'moving'
