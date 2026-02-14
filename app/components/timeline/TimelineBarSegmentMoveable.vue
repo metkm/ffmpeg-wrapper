@@ -53,23 +53,8 @@ const handleMove = (event: PointerEvent) => {
       segmentNextStartMin.value,
     )
 
-    modelValueSegmentPrev.value.end = clamp(
-      segmentStartNew,
-      segmentPrevEndMin.value,
-      modelValueSegment.value.start,
-    )
-
-    modelValueSegmentNext.value.start = clamp(
-      segmentEndNew,
-      modelValueSegment.value.start + initialSegmentDuration.value,
-      segmentNextStartMin.value,
-    )
-
-    // modelValueSegmentNext.value.start = clamp(
-    //   segmentEndNew,
-    //   modelValueSegment.value.start + initialSegmentDuration.value,
-    //   segmentNextStartMin.value,
-    // )
+    modelValueSegmentPrev.value.end = modelValueSegment.value.start
+    modelValueSegmentNext.value.start = modelValueSegment.value.end
   } else if (mode.value === 'resizing') {
     const min = (initialSegment.value.start * props.totalDuration + 2) / props.totalDuration
     const max = (initialSegmentNext.value.end! * props.totalDuration - 2) / props.totalDuration
