@@ -117,9 +117,6 @@ useEventListener(containerElement, 'click', seekToTime)
 useEventListener(containerElement, 'pointerdown', (event) => {
   const el = event.target as HTMLElement
   el.setPointerCapture(event.pointerId)
-
-  console.log('down timeline bar')
-  // event.preventDefault()
 })
 
 useEventListener(containerElement, 'pointermove', (event) => {
