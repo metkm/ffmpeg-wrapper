@@ -155,6 +155,10 @@ const shortcuts = {
     action: toggleSegment,
     label: 'Toggle',
   },
+  ctrl: {
+    label: 'Move (hold)',
+    action: () => {},
+  },
 }
 
 const extractShortcuts = () => {
@@ -185,13 +189,9 @@ defineShortcuts(extractShortcuts())
         <li
           v-for="(segment, index) in segments"
           :key="segment.id"
-          class="flex justify-between hover:bg-elevated/50 text-xs relative"
-          :style="{
-            width: `${(segment.end - segment.start) * containerWidth}px`,
-          }"
-          :class="{
-            'text-default/10': !segment.enabled,
-          }"
+          class="hover:bg-elevated/50 text-xs relative select-none"
+          :style="{ width: `${(segment.end - segment.start) * containerWidth}px` }"
+          :class="{ 'text-default/10': !segment.enabled }"
           :data-enabled="segment.enabled"
         >
           <TimelineBarSegmentMoveable
@@ -203,7 +203,7 @@ defineShortcuts(extractShortcuts())
             :resizable="index !== segments.length - 1"
             class="w-full h-full"
           >
-            <div class="flex flex-col justify-between select-none overflow-hidden">
+            <div class="flex flex-col justify-between select-none p-1 overflow-hidden">
               <div
                 v-if="!segment.enabled"
                 class="absolute inset-0 text-default/10 bg-[repeating-linear-gradient(315deg,currentColor_0,currentColor_1px,transparent_0,transparent_50%)] bg-size-[8px_8px]"
@@ -212,20 +212,11 @@ defineShortcuts(extractShortcuts())
               <p class="truncate">
                 {{ segment.enabled ? 'Enabled' : 'Disabled' }}
               </p>
-              <p class="overflow-hidden">
-                {{ Math.floor(segment.start * duration) }}s -  {{ Math.floor(segment.end * duration) }}s
+
+              <p>
+                {{ Math.floor(segment.start * duration) }} - {{ Math.floor(segment.end * duration) }}
               </p>
             </div>
-
-            <!-- <TimelineBarSegmentResizeHandle
-              v-if="index !== segments.length - 1"
-              v-model:after="segments[index + 1]"
-              v-model:before="segments[index]"
-              class="z-20 absolute right-0 inset-y-0"
-              :normalize-by="containerWidth"
-              :min-duration="2"
-              :total-duration="duration"
-            /> -->
           </TimelineBarSegmentMoveable>
         </li>
       </ol>

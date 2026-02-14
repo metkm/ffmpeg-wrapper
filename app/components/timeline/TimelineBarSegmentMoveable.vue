@@ -77,11 +77,14 @@ const handleMove = (event: PointerEvent) => {
 
 const handlePointerUp = (event: PointerEvent) => {
   container.value?.releasePointerCapture(event.pointerId)
+  handle.value?.releasePointerCapture(event.pointerId)
+
   container.value?.removeEventListener('pointermove', handleMove)
+  handle.value?.removeEventListener('pointermove', handleMove)
 }
 
 const handlePointerDown = (event: PointerEvent) => {
-  const element = event.target as HTMLElement
+  const element = event.currentTarget as HTMLElement
   if (
     (!ctrlState.value && mode.value === 'moving')
     || (mode.value === 'moving' && !isSegmentMovable.value)
