@@ -192,7 +192,7 @@ defineShortcuts(extractShortcuts())
       class="relative w-full h-24 rounded-md ring ring-default overflow-hidden bg-default"
     >
       <div
-        class="absolute h-full w-0.5 bg-primary shadow shadow-black pointer-events-none select-none -translate-x-1/2 z-50"
+        class="absolute h-full w-0.5 bg-primary pointer-events-none select-none -translate-x-1/2 z-50"
         :style="{ left: `${indicatorOffset}px` }"
       />
 
@@ -200,7 +200,7 @@ defineShortcuts(extractShortcuts())
         <li
           v-for="(segment, index) in segments"
           :key="segment.id"
-          class="hover:bg-elevated/50 text-xs relative select-none"
+          class="hover:bg-elevated/25 text-xs relative select-none"
           :style="{ width: `${(segment.end - segment.start) * containerWidth}px` }"
           :class="{ 'text-default/10': !segment.enabled }"
           :data-enabled="segment.enabled"
@@ -235,7 +235,7 @@ defineShortcuts(extractShortcuts())
 
       <TimelineAudioGraph
         :path="path"
-        class="h-full w-full mt-auto opacity-55 -z-10 pointer-events-none"
+        class="h-full w-full mt-auto opacity-25 -z-10 pointer-events-none"
       />
     </div>
 
