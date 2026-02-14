@@ -15,6 +15,9 @@ const startMouseX = ref(0)
 const startBefore = ref({ ...modelValueBefore.value })
 const startAfter = ref({ ...modelValueAfter.value })
 
+const segmentBeforeMinimumEnd = computed(() => ((startBefore.value.start * props.totalDuration) + 2) / props.totalDuration)
+const segmentAfterMinimumStart = computed(() => ((startAfter.value.end * props.totalDuration) - 2) / props.totalDuration)
+
 // this breaks hover stuff so far. TODO: fix
 const handleMove = (event: PointerEvent) => {
   event.stopPropagation()
@@ -25,22 +28,17 @@ const handleMove = (event: PointerEvent) => {
   // 0 to 1
   const dx = (event.clientX - startMouseX.value) / props.normalizeBy
 
-  modelValueBefore.value.end = startBefore.value.end + dx
-  modelValueAfter.value.start = startAfter.value.start + dx
+  modelValueBefore.value.end = clamp(
+    startBefore.value.end + dx,
+    segmentBeforeMinimumEnd.value,
+    segmentAfterMinimumStart.value,
+  )
 
-  if (dx > 0) {
-    const dur = (modelValueAfter.value.end - modelValueAfter.value.start) * props.totalDuration
-
-    if (dur < props.minDuration) {
-      modelValueAfter.value.start = ((modelValueAfter.value.end * props.totalDuration) - props.minDuration) / props.totalDuration
-    }
-  } else {
-    const dur = (modelValueBefore.value.end - modelValueBefore.value.start) * props.totalDuration
-
-    if (dur < props.minDuration) {
-      modelValueBefore.value.end = ((modelValueBefore.value.start * props.totalDuration) + props.minDuration) / props.totalDuration
-    }
-  }
+  modelValueAfter.value.start = clamp(
+    startAfter.value.start + dx,
+    segmentBeforeMinimumEnd.value,
+    segmentAfterMinimumStart.value,
+  )
 }
 
 useEventListener(handle, 'pointerdown', (event) => {
