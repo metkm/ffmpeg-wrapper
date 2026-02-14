@@ -46,7 +46,7 @@ const { argsValidFiltered, parsedArgs, parseArgsFromString, disabledArgs, toggle
   'arg',
   {
     'y': true,
-    'an': computed(() => encoderOptions.value.noAudio),
+    // 'an': computed(() => encoderOptions.value.noAudio),
     'i': computed(() => props.path),
     's': computed(() => encoderOptions.value.resolution),
     'vcodec': computed(() =>
@@ -61,36 +61,52 @@ const { argsValidFiltered, parsedArgs, parseArgsFromString, disabledArgs, toggle
     'compression_level': computed(() => encoderOptions.value.outputExtension === 'webp' && webpCompressionLevel.value),
     'frames:v': computed(() => exportType.value === 'image' && '1'),
     'filter_complex': computed(() => {
+      const trims = videoRootContext.trim.value
+
       if (
-        videoRootContext.trim.value.length === 1
-        && videoRootContext.trim.value[0]![0] === 0
-        && videoRootContext.trim.value[0]![1] === videoRootContext.video.value.duration
+        trims.length === 1
+        && trims[0]![0] === 0
+        && trims[0]![1] === videoRootContext.video.value.duration
       )
         return
 
       // https://superuser.com/questions/681885/how-can-i-remove-multiple-segments-from-a-video-using-ffmpeg/1498811#1498811
-      let pairsText = ''
 
-      const vArgs = parsedArgsVideoFilter.value.length > 0 ? `,${parsedArgsVideoFilter.value.join(',')}` : ''
-      const aArgs = parsedArgsAudioFilter.value.length > 0 ? `,${parsedArgsAudioFilter.value.join(',')}` : ''
+      const noAudio = encoderOptions.value.noAudio
+      const trimCount = trims.length
 
-      for (let index = 0; index < videoRootContext.trim.value.length; index++) {
-        const trim = videoRootContext.trim.value[index]
-        if (!trim)
-          continue
+      const vArgs = parsedArgsVideoFilter.value.length
+        ? `,${parsedArgsVideoFilter.value.join(',')}`
+        : ''
 
-        const v = `[0:v]trim=start=${trim[0]}:end=${trim[1]},setpts=PTS-STARTPTS,format=yuv420p${vArgs}[${index}v];`
-        const a = `[0:a]atrim=start=${trim[0]}:end=${trim[1]},asetpts=PTS-STARTPTS${aArgs}[${index}a];`
+      const aArgs = parsedArgsAudioFilter.value.length
+        ? `,${parsedArgsAudioFilter.value.join(',')}`
+        : ''
 
-        pairsText += `${v}${a}`
+      let segments = ''
+      let concatInputs = ''
+
+      trims.forEach((trim, index) => {
+        const [start, end] = trim
+
+        segments += `[0:v]trim=start=${start}:end=${end},setpts=PTS-STARTPTS,format=yuv420p${vArgs}[${index}v];`
+        concatInputs += `[${index}v]`
+
+        if (!noAudio) {
+          segments += `[0:a]atrim=start=${start}:end=${end},asetpts=PTS-STARTPTS${aArgs}[${index}a];`
+          concatInputs += `[${index}a]`
+        }
+      })
+
+      segments += `${concatInputs}concat=n=${trimCount}:v=1:a=${noAudio ? 0 : 1}[outv]${noAudio ? '' : '[outa]'}`
+
+      const r = [segments, '-map', '[outv]']
+
+      if (!noAudio) {
+        r.push('-map', '[outa]')
       }
 
-      for (let index = 0; index < videoRootContext.trim.value.length; index++) {
-        pairsText += `[${index}v][${index}a]`
-      }
-
-      pairsText += `concat=n=${videoRootContext.trim.value.length}:v=1:a=1[outv][outa]`
-      return [pairsText, '-map', '[outv]', '-map', '[outa]']
+      return r
     }),
   },
   computed(() => parseArgsFromString(extraArguments.value)),

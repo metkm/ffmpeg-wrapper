@@ -21,6 +21,7 @@ const segments = ref([
     enabled: true,
   },
 ])
+const { commit: commitSegments, undo: undoSegments, redo: redoSegments } = useManualRefHistory(segments, { clone: true })
 
 const containerElement = useTemplateRef('container')
 
@@ -65,6 +66,8 @@ const cutSegment = () => {
     end: segment.end,
     enabled: true,
   })
+
+  commitSegments()
 }
 
 const deleteSegment = () => {
@@ -95,6 +98,7 @@ const deleteSegment = () => {
   }
 
   segments.value.splice(index, 1)
+  commitSegments()
 }
 
 const toggleSegment = () => {
@@ -106,6 +110,7 @@ const toggleSegment = () => {
     return
 
   segments.value[segmentHoveredIndex.value]!.enabled = willEnable
+  commitSegments()
 }
 
 const seekToTime = () => {
@@ -153,6 +158,18 @@ const shortcuts = {
     action: toggleSegment,
     label: 'Toggle',
   },
+  meta: {
+    label: 'Move (hold)',
+    action: () => {},
+  },
+  meta_z: {
+    label: 'Undo',
+    action: undoSegments,
+  },
+  meta_shift_z: {
+    label: 'Redo',
+    action: redoSegments,
+  },
 }
 
 const extractShortcuts = () => {
@@ -175,51 +192,66 @@ defineShortcuts(extractShortcuts())
       class="relative w-full h-24 rounded-md ring ring-default overflow-hidden bg-default"
     >
       <div
-        class="absolute h-full w-0.5 bg-primary shadow shadow-black z-50 pointer-events-none select-none -translate-x-1/2"
+        class="absolute h-full w-0.5 bg-primary pointer-events-none select-none -translate-x-1/2 z-50"
         :style="{ left: `${indicatorOffset}px` }"
       />
 
       <ol class="flex absolute w-full h-full divide-x divide-default z-10">
         <li
-          v-for="segment in segments"
+          v-for="(segment, index) in segments"
           :key="segment.id"
-          class="flex flex-col justify-between relative p-2 hover:bg-elevated/50 text-xs *:truncate select-none"
-          :style="{
-            width: `${(segment.end - segment.start) * containerWidth}px`,
-          }"
-          :class="{
-            'text-default/10': !segment.enabled,
-          }"
+          class="hover:bg-elevated/25 text-xs relative select-none"
+          :style="{ width: `${(segment.end - segment.start) * containerWidth}px` }"
+          :class="{ 'text-default/10': !segment.enabled }"
           :data-enabled="segment.enabled"
         >
-          <div
-            v-if="!segment.enabled"
-            class="z-50 absolute inset-0 text-default/10 bg-[repeating-linear-gradient(315deg,currentColor_0,currentColor_1px,transparent_0,transparent_50%)] bg-size-[8px_8px]"
-          />
+          <TimelineBarSegmentMoveable
+            v-model="segments[index]"
+            v-model:next="segments[index + 1]"
+            v-model:prev="segments[index - 1]"
+            :normalize-by="containerWidth"
+            :total-duration="duration"
+            :resizable="index !== segments.length - 1"
+            class="w-full h-full"
+            @pointerup="commitSegments"
+          >
+            <div class="flex flex-col justify-between select-none p-1 overflow-hidden">
+              <div
+                v-if="!segment.enabled"
+                class="absolute inset-0 text-default/10 bg-[repeating-linear-gradient(315deg,currentColor_0,currentColor_1px,transparent_0,transparent_50%)] bg-size-[8px_8px]"
+              />
 
-          <p>
-            {{ segment.enabled ? 'Enabled' : 'Disabled' }}
-          </p>
+              <p class="truncate">
+                {{ segment.enabled ? 'Enabled' : 'Disabled' }}
+              </p>
 
-          <p>
-            {{ Math.floor(segment.start * duration) }}s -  {{ Math.floor(segment.end * duration) }}s
-          </p>
+              <p>
+                {{ Math.floor(segment.start * duration) }} - {{ Math.floor(segment.end * duration) }}
+              </p>
+            </div>
+          </TimelineBarSegmentMoveable>
         </li>
       </ol>
 
       <TimelineAudioGraph
         :path="path"
-        class="h-full w-full mt-auto opacity-55 -z-10 pointer-events-none"
+        class="h-full w-full mt-auto opacity-25 -z-10 pointer-events-none"
       />
     </div>
 
-    <ol class="flex items-center gap-2">
+    <ol class="flex items-center gap-4">
       <li
         v-for="[k, v] in Object.entries(shortcuts)"
         :key="k"
       >
         <div class="flex items-center gap-1 mt-2">
-          <UKbd>{{ k }}</UKbd>
+          <div class="flex items-center gap-1">
+            <UKbd
+              v-for="_k in k.split('_')"
+              :key="_k"
+              :value="_k"
+            />
+          </div>
 
           <p class="text-xs font-medium">
             {{ v.label }}
