@@ -8,12 +8,8 @@ const props = defineProps<{
 const modelValueSegment = defineModel<{ start: number, end: number }>({
   default: { start: 0, end: 0 },
 })
-const modelValueSegmentPrev = defineModel<{ start: number, end: number }>('prev', {
-  default: { start: 0, end: 2 },
-})
-const modelValueSegmentNext = defineModel<{ start: number, end: number }>('next', {
-  default: { start: 2, end: 0 },
-})
+const modelValueSegmentPrev = defineModel<{ start: number, end: number }>('prev')
+const modelValueSegmentNext = defineModel<{ start: number, end: number }>('next')
 
 const ctrlState = useKeyModifier('Control')
 
@@ -27,8 +23,8 @@ const initialSegment = ref({ ...modelValueSegment.value })
 const initialSegmentPrev = ref({ ...modelValueSegmentPrev.value })
 const initialSegmentNext = ref({ ...modelValueSegmentNext.value })
 
-const prevSegmentEndMin = computed(() => (initialSegmentPrev.value.start * props.totalDuration + 2) / props.totalDuration)
-const nextSegmentStartMin = computed(() => (initialSegmentNext.value.end * props.totalDuration - 2) / props.totalDuration)
+const prevSegmentEndMin = computed(() => ((initialSegmentPrev.value.start ?? 1) * props.totalDuration + 2) / props.totalDuration)
+const nextSegmentStartMin = computed(() => ((initialSegmentNext.value.end ?? 1) * props.totalDuration - 2) / props.totalDuration)
 
 const initialSegmentDuration = computed(() => initialSegment.value.end - initialSegment.value.start)
 
@@ -44,7 +40,7 @@ const handleMove = (event: PointerEvent) => {
   const newSegmentEnd = initialSegment.value.end + dx
 
   // drag instead
-  if (mode.value === 'moving') {
+  if (mode.value === 'moving' && modelValueSegmentNext.value && modelValueSegmentPrev.value) {
     modelValueSegment.value.start = clamp(
       newSegmentStart,
       prevSegmentEndMin.value,
@@ -58,19 +54,19 @@ const handleMove = (event: PointerEvent) => {
     )
 
     modelValueSegmentPrev.value.end = clamp(
-      initialSegmentPrev.value.end + dx,
+      initialSegmentPrev.value.end! + dx,
       prevSegmentEndMin.value,
       modelValueSegment.value.start,
     )
 
     modelValueSegmentNext.value.start = clamp(
-      initialSegmentNext.value.start + dx,
+      initialSegmentNext.value.start! + dx,
       modelValueSegment.value.start + initialSegmentDuration.value,
       nextSegmentStartMin.value,
     )
   } else if (mode.value === 'resizing') {
     const min = (initialSegment.value.start * props.totalDuration + 2) / props.totalDuration
-    const max = (initialSegmentNext.value.end * props.totalDuration - 2) / props.totalDuration
+    const max = (initialSegmentNext.value.end! * props.totalDuration - 2) / props.totalDuration
 
     modelValueSegment.value.end = clamp(
       newSegmentEnd,
@@ -78,7 +74,7 @@ const handleMove = (event: PointerEvent) => {
       max,
     )
 
-    modelValueSegmentNext.value.start = clamp(
+    modelValueSegmentNext.value!.start = clamp(
       newSegmentEnd,
       min,
       max,
@@ -93,8 +89,10 @@ const handlePointerUp = (event: PointerEvent) => {
 
 const handlePointerDown = (event: PointerEvent) => {
   const element = event.target as HTMLElement
-
-  if (!ctrlState.value && mode.value === 'moving') {
+  if (
+    (!ctrlState.value && mode.value === 'moving')
+    || (mode.value === 'moving' && (!modelValueSegmentNext.value || !modelValueSegmentPrev.value))
+  ) {
     return
   }
 
