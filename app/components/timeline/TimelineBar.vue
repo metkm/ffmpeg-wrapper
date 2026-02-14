@@ -200,6 +200,7 @@ defineShortcuts(extractShortcuts())
             v-model:prev="segments[index - 1]"
             :normalize-by="containerWidth"
             :total-duration="duration"
+            :resizable="index !== segments.length - 1"
             class="w-full h-full"
           >
             <div class="flex flex-col justify-between select-none overflow-hidden">
