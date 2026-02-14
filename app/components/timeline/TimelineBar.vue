@@ -239,13 +239,19 @@ defineShortcuts(extractShortcuts())
       />
     </div>
 
-    <ol class="flex items-center gap-2">
+    <ol class="flex items-center gap-4">
       <li
         v-for="[k, v] in Object.entries(shortcuts)"
         :key="k"
       >
         <div class="flex items-center gap-1 mt-2">
-          <UKbd :value="k" />
+          <div class="flex items-center gap-1">
+            <UKbd
+              v-for="_k in k.split('_')"
+              :key="_k"
+              :value="_k"
+            />
+          </div>
 
           <p class="text-xs font-medium">
             {{ v.label }}
