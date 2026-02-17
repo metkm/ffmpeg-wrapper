@@ -21,4 +21,5 @@ export interface VideoInfo {
   fps?: number
   bitrate?: string
   ratio?: number
+  name?: string
 }

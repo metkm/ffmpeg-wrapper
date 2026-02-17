@@ -28,7 +28,7 @@ const { encoderOptions, savePath, rememberSavePath } = storeToRefs(optionsStore)
 const { running, spawn, linesDebounced, kill, progress, etaAnimated, error } = useFFmpeg(videoRootContext.durationAfterCut)
 
 const process = async () => {
-  const path = rememberSavePath.value && savePath.value
+  let path = rememberSavePath.value && savePath.value
     ? savePath.value
     : await save({
         defaultPath: `${encoderOptions.value.outputName || 'output'}.${encoderOptions.value.outputExtension}`,
@@ -45,7 +45,18 @@ const process = async () => {
   }
 
   savePath.value = path
+
+  path = path.replace('{encoder}', encoderOptions.value.encoder)
+  path = path.replace('{fps}', encoderOptions.value.fps?.toString() || videoRootContext.videoInfo.value.fps?.toString() || 'unknown')
+  path = path.replace('{resolution}', encoderOptions.value.resolution || videoRootContext.videoInfo.value.resolution || 'unknown')
+  path = path.replace('{exportCount}', optionsStore.exportCount.toString())
+
+  if (videoRootContext.videoInfo.value.name) {
+    path = path.replace('{name}', videoRootContext.videoInfo.value.name)
+  }
+
   await spawn('binaries/ffmpeg', [...props.args, path])
+  optionsStore.exportCount += 1
 }
 
 defineShortcuts({
@@ -180,7 +191,7 @@ const itemVariants: MotionProps['variants'] = {
                   class="-ml-0.5"
                   @click="openPath(dirName)"
                 >
-                  {{ dirName }}
+                  {{ dirName }} {{ optionsStore.exportCount }}
                 </UButton>
               </Motion>
 
@@ -190,7 +201,7 @@ const itemVariants: MotionProps['variants'] = {
                     v-model="encoderOptions.outputName"
                     placeholder="output"
                     variant="soft"
-                    class="w-26"
+                    class="max-w-48"
                   />
 
                   <USelectMenu

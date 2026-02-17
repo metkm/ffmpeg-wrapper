@@ -23,6 +23,7 @@ export const useOptionsStore = defineStore('options', () => {
     outputExtension: 'mp4',
   })
 
+  const exportCount = ref(0)
   const savePath = ref('')
   const rememberSavePath = ref(false)
 
@@ -51,6 +52,7 @@ export const useOptionsStore = defineStore('options', () => {
     exportType,
     savePath,
     rememberSavePath,
+    exportCount,
   }
 }, {
   persist: {

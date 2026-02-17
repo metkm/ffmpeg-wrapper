@@ -37,7 +37,7 @@ const { spawn } = useCommand({
 })
 
 spawn('binaries/ffmpeg', ['-i', props.path])
-const name = await basename(props.path)
+videoRootContext.videoInfo.value.name = await basename(props.path)
 </script>
 
 <template>
@@ -52,7 +52,7 @@ const name = await basename(props.path)
       variant="soft"
       class="text-left rounded-md"
     >
-      {{ name }}
+      {{ videoRootContext.videoInfo.value.name }}
     </UButton>
 
     <template #content>
