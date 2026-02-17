@@ -191,7 +191,7 @@ const itemVariants: MotionProps['variants'] = {
                   class="-ml-0.5"
                   @click="openPath(dirName)"
                 >
-                  {{ dirName }} {{ optionsStore.exportCount }}
+                  {{ dirName }}
                 </UButton>
               </Motion>
 
@@ -201,7 +201,7 @@ const itemVariants: MotionProps['variants'] = {
                     v-model="encoderOptions.outputName"
                     placeholder="output"
                     variant="soft"
-                    class="max-w-48"
+                    class="max-w-44"
                   />
 
                   <USelectMenu
