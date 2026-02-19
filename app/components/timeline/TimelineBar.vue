@@ -117,11 +117,11 @@ const seekToTime = () => {
   modelValueCurrentTime.value = mouseXNormalized.value * props.duration
 }
 
-useEventListener(containerElement, 'click', seekToTime)
-
 useEventListener(containerElement, 'pointerdown', (event) => {
   const el = event.target as HTMLElement
   el.setPointerCapture(event.pointerId)
+
+  seekToTime()
 })
 
 useEventListener(containerElement, 'pointermove', (event) => {
