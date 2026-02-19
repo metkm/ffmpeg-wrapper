@@ -55,23 +55,23 @@ defineShortcuts({
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 flex-1 ">
+  <div class="flex flex-col gap-2 flex-1">
     <LayoutGroup>
       <motion.div
         layout
-        class="min-h-0 flex flex-col justify-center gap-2 grow"
+        class="flex items-center"
+      >
+        <VideoOptionCrop v-model:ratio="cropRatio" />
+      </motion.div>
+
+      <motion.div
+        layout
+        class="min-h-0"
         :class="videoRootContext.loaded ? 'animate-fade-in': 'opacity-0'"
       >
         <motion.div
           layout
-          class="flex items-center"
-        >
-          <VideoOptionCrop v-model:ratio="cropRatio" />
-        </motion.div>
-
-        <motion.div
-          layout
-          class="relative h-full max-h-max aspect-ratio mx-auto min-h-0 grow"
+          class="relative aspect-video max-h-full mx-auto bg-elevated/25 rounded-md"
         >
           <Transition
             enter-active-class="transition-all"
