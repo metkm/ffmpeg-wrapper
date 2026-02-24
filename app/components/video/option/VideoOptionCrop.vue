@@ -39,7 +39,7 @@ const selectRatio = (ratio: typeof aspectRatios[number]) => {
     <AnimatePresence>
       <motion.ul
         v-if="videoRootContext.cropEnabled.value"
-        class="flex items-center gap-2"
+        class="flex items-center gap-1"
         layout
         :initial="{ opacity: 0 }"
         :animate="{ opacity: 1 }"
