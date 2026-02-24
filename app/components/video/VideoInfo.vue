@@ -50,7 +50,7 @@ videoRootContext.videoInfo.value.name = await basename(props.path)
       block
       size="sm"
       variant="soft"
-      class="text-left rounded-md"
+      class="text-left"
     >
       {{ videoRootContext.videoInfo.value.name }}
     </UButton>

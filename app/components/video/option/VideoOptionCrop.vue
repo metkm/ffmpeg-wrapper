@@ -29,7 +29,6 @@ const selectRatio = (ratio: typeof aspectRatios[number]) => {
       <UButton
         :variant="videoRootContext.cropEnabled.value ? 'solid' : 'soft'"
         icon="i-lucide-crop"
-        class="rounded-md"
         size="sm"
         @click="videoRootContext.cropEnabled.value = !videoRootContext.cropEnabled.value"
       >
@@ -52,7 +51,7 @@ const selectRatio = (ratio: typeof aspectRatios[number]) => {
         >
           <UButton
             :variant="ratio.label === aspectRatio?.label ? 'subtle' : 'ghost'"
-            class="rounded-md min-w-14"
+            class="min-w-14"
             size="sm"
             block
             @click="selectRatio(ratio)"

@@ -25,7 +25,6 @@ watch(() => props.encoder, showEncoderHelp, { immediate: true })
     <UButton
       icon="i-lucide-terminal"
       size="sm"
-      class="rounded-md"
       block
     >
       Terminal

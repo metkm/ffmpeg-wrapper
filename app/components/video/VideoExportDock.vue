@@ -149,7 +149,6 @@ const itemVariants: MotionProps['variants'] = {
                 >
                   <UEmpty
                     description="Logs will show up here."
-                    class="rounded-2xl"
                     variant="subtle"
                   />
                 </Motion>

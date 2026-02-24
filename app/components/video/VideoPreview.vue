@@ -71,7 +71,7 @@ defineShortcuts({
       >
         <motion.div
           layout
-          class="relative aspect-video max-h-full mx-auto bg-elevated/25 rounded-md"
+          class="relative aspect-video max-h-full mx-auto bg-elevated/25"
         >
           <Transition
             enter-active-class="transition-all"
